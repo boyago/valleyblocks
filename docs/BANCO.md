@@ -4,7 +4,7 @@ A plataforma usa MySQL (mysql2) em produção e SQLite em testes e desenvolvimen
 
 ## Criar
 
-1. Crie um banco e um usuário exclusivos no provedor (por exemplo `vale_dos_blocos`), com TLS se for remoto.
+1. Crie um banco e um usuário exclusivos no provedor (por exemplo `valleyblocks`), com TLS se for remoto.
 2. Preencha `LABS_MYSQL_HOST/PORT/DATABASE/USER/PASSWORD/TLS` e um `LABS_USAGE_SECRET` novo (não reutilize o do portal: ele assina cookies de jogador).
 3. Rode:
 

@@ -10,7 +10,7 @@ export function UsageDashboard() {
   useEffect(() => { void refresh(); }, []);
   const series = (report?.days || []).slice().reverse().map(r => ({ day: fmtDay(r.day_key), navegadores: Number(r.browsers), sessoes: Number(r.sessions), minutos: Math.floor(Number(r.active_ms) / 60000) }));
   return <>
-    <PageTitle title="Medição de jogadores" subtitle="Vale dos Blocos · somente navegadores que autorizaram métricas. Navegadores não representam pessoas únicas."><button className={btn.ghost} onClick={refresh} disabled={loading}>{loading ? 'Consultando…' : 'Atualizar'}</button></PageTitle>
+    <PageTitle title="Medição de jogadores" subtitle="ValleyBlocks · somente navegadores que autorizaram métricas. Navegadores não representam pessoas únicas."><button className={btn.ghost} onClick={refresh} disabled={loading}>{loading ? 'Consultando…' : 'Atualizar'}</button></PageTitle>
     <ErrorBox message={error} />
     {report && <>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -23,7 +23,7 @@ export function UsageDashboard() {
         {series.length === 0 && <p className="text-sm text-zinc-400">Ainda não há sessões medidas neste período.</p>}
       </Panel>
       <Panel title="Atividade diária autorizada">
-        <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="text-xs uppercase tracking-wider text-zinc-400"><tr>{['Dia', 'Jogo', 'Navegadores', 'Sessões', 'Minutos'].map(t => <th key={t} className="py-2 pr-3">{t}</th>)}</tr></thead><tbody className="divide-y divide-white/10 text-zinc-300">{report.days.map(row => <tr key={`${row.day_key}:${row.game}`}><td className="py-2 pr-3">{row.day_key}</td><td className="py-2 pr-3">Vale dos Blocos</td><td className="py-2 pr-3 tabular-nums">{row.browsers}</td><td className="py-2 pr-3 tabular-nums">{row.sessions}</td><td className="py-2 tabular-nums">{Math.floor(Number(row.active_ms) / 60000)}</td></tr>)}</tbody></table></div>
+        <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="text-xs uppercase tracking-wider text-zinc-400"><tr>{['Dia', 'Jogo', 'Navegadores', 'Sessões', 'Minutos'].map(t => <th key={t} className="py-2 pr-3">{t}</th>)}</tr></thead><tbody className="divide-y divide-white/10 text-zinc-300">{report.days.map(row => <tr key={`${row.day_key}:${row.game}`}><td className="py-2 pr-3">{row.day_key}</td><td className="py-2 pr-3">ValleyBlocks</td><td className="py-2 pr-3 tabular-nums">{row.browsers}</td><td className="py-2 pr-3 tabular-nums">{row.sessions}</td><td className="py-2 tabular-nums">{Math.floor(Number(row.active_ms) / 60000)}</td></tr>)}</tbody></table></div>
         <p className="mt-3 text-xs text-zinc-400">Atualizado em {new Date(report.generatedAt).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })} · dados por navegador retidos por 30 dias.</p>
       </Panel>
     </>}

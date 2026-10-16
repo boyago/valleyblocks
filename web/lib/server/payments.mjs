@@ -118,7 +118,7 @@ export function createPayments(db, { mp, origin, sendMail = null, now: clock = D
       if (!row?.email) return;
       const title = PRODUCTS[productCode]?.title || productCode;
       if (row.password_hash) {
-        await sendMail({ to: row.email, subject: 'Compra confirmada no Vale dos Blocos', text: `Olá!\n\nSua compra foi confirmada: ${title}.\nO benefício já está na conta "${row.username}". É só entrar e jogar:\n\n${origin}/jogos/vale-dos-blocos\n\nVale dos Blocos · https://labsgames.cloud` });
+        await sendMail({ to: row.email, subject: 'Compra confirmada no ValleyBlocks', text: `Olá!\n\nSua compra foi confirmada: ${title}.\nO benefício já está na conta "${row.username}". É só entrar e jogar:\n\n${origin}/jogos/valleyblocks\n\nValleyBlocks · https://labsgames.cloud` });
         return;
       }
       const token = randomBytes(32).toString('hex');
@@ -128,7 +128,7 @@ export function createPayments(db, { mp, origin, sendMail = null, now: clock = D
         await query('UPDATE labs_account_emails SET verified_at=COALESCE(verified_at,?) WHERE account_id=?', [now, accountId]);
         await audit(query, SYSTEM_ACTOR, accountId, 'purchase-invite-sent', now);
       });
-      await sendMail({ to: row.email, subject: 'Sua compra no Vale dos Blocos: crie sua senha', text: `Olá!\n\nSua compra foi confirmada: ${title}.\nCriamos a conta "${row.username}" para você. Para escolher sua senha e começar a jogar, abra o link abaixo em até 7 dias:\n\n${origin}/conta/ativar#token=${token}\n\nSe você não fez esta compra, ignore esta mensagem.\n\nVale dos Blocos · https://labsgames.cloud` });
+      await sendMail({ to: row.email, subject: 'Sua compra no ValleyBlocks: crie sua senha', text: `Olá!\n\nSua compra foi confirmada: ${title}.\nCriamos a conta "${row.username}" para você. Para escolher sua senha e começar a jogar, abra o link abaixo em até 7 dias:\n\n${origin}/conta/ativar#token=${token}\n\nSe você não fez esta compra, ignore esta mensagem.\n\nValleyBlocks · https://labsgames.cloud` });
     } catch (error) { console.error('[labs] purchase mail failed:', error?.code || error?.name || 'UNKNOWN'); }
   };
   return {

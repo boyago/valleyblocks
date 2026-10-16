@@ -1,6 +1,6 @@
 {
-  "appId": "cloud.labsgames.valedosblocos",
-  "appName": "Vale dos Blocos",
+  "appId": "cloud.labsgames.valleyblocks",
+  "appName": "ValleyBlocks",
   "webDir": "../game/dist",
   "server": { "androidScheme": "https" },
   "android": { "allowMixedContent": false },

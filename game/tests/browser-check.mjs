@@ -49,17 +49,17 @@ try {
   await page.mouse.down({button:'right'});await page.mouse.up({button:'right'});
   check('right click places a grid block and debits inventory',(await state()).inventory.counts[12]===beforePlace-1&&(await state()).goals.build);
 
-  await setPlayer(-2,9,12);
+  await setPlayer(-2,9,12,0,-.42);
   await page.evaluate(()=>{const p=window.__valeGame.entities.pets[0];p.position.set(-2,9,10);p.mode='stay';p.path=[];});
-  await page.keyboard.press('e');
+  await page.keyboard.press('r');
   await page.locator('[data-action="pet-action"][data-kind="tame"]').click();
   await page.locator('#pet-name').fill('Canela');await page.locator('[data-action="rename-pet"]').click();
   check('adoption consumes one treat and names the pet',(await state()).inventory.counts.food===31&&(await state()).entities.pets[0].name==='Canela'&&(await state()).entities.pets[0].tamed);
   await page.screenshot({path:'test-results/04-pet.png'});
   await closeMenu();
-  await setPlayer(-.2,9,7);
+  await setPlayer(-.2,9,7,0,-.54);
   await page.evaluate(()=>{const p=window.__valeGame.entities.pets[0];p.position.set(-.2,9,5.5);p.path=[];p.mode='stay';});
-  await page.keyboard.press('e');await page.locator('[data-action="pet-action"][data-kind="board"]').click();
+  await page.keyboard.press('r');await page.locator('[data-action="pet-action"][data-kind="board"]').click();
   check('pet boards an available stopped car',(await state()).entities.pets[0].vehicleId==='vehicle-1');
   await closeMenu();
   await setPlayer(3.5,9,8.5,0,0);

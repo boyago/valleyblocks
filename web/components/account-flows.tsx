@@ -74,7 +74,7 @@ export function AccountFlow({ mode }: { mode: Mode }) {
     {!token && <p className="text-sm text-zinc-400">Abra o link completo recebido por e-mail. Ele vale por 1 hora.</p>}
   </form>}</Shell>;
 
-  return <Shell title="Criar conta" subtitle="Com uma conta você joga até 60 minutos por dia no Vale dos Blocos e pode comprar a versão completa.">{done ? <><Alert kind="ok">{done}</Alert><Link className={`${btn.ghost} w-full`} href="/conta/entrar">Ir para o login</Link></> : <form method="post" onSubmit={submit} className="space-y-5">
+  return <Shell title="Criar conta" subtitle="Com uma conta você joga até 60 minutos por dia no ValleyBlocks e pode comprar a versão completa.">{done ? <><Alert kind="ok">{done}</Alert><Link className={`${btn.ghost} w-full`} href="/conta/entrar">Ir para o login</Link></> : <form method="post" onSubmit={submit} className="space-y-5">
     <label className="block text-sm font-bold text-zinc-200">Nome de usuário<input className={input} name="username" autoComplete="username" required pattern="[A-Za-z0-9_]{3,32}" maxLength={32} title="3 a 32 letras, números ou sublinhado" /><span className="mt-1 block text-xs font-normal text-zinc-400">Aparece no jogo. Não use seu nome completo.</span></label>
     <label className="block text-sm font-bold text-zinc-200">E-mail<input className={input} name="email" type="email" autoComplete="email" required maxLength={254} /></label>
     <label className="block text-sm font-bold text-zinc-200">Data de nascimento<input className={input} name="birthDate" type="date" required onChange={e => onBirth(e.target.value)} /><span className="mt-1 block text-xs font-normal text-zinc-400">Usada só para saber se você é menor de idade. A data não fica guardada.</span></label>

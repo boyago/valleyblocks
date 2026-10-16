@@ -6,7 +6,7 @@ O jogo é web (Three.js, WebGL 2, ES modules). Capacitor coloca exatamente esse 
 
 ## O que já está pronto
 
-- `mobile/capacitor.config.json`: `appId` **cloud.labsgames.valedosblocos** (confirmar antes da primeira publicação: não dá para mudar depois), `appName` Vale dos Blocos, `webDir ../game/dist`.
+- `mobile/capacitor.config.json`: `appId` **cloud.labsgames.valleyblocks** (confirmar antes da primeira publicação: não dá para mudar depois), `appName` ValleyBlocks, `webDir ../game/dist`. Pacote Android em `mobile/android/app/src/main/java/cloud/labsgames/valleyblocks/`.
 - Plataformas `android/` e `ios/` geradas (Capacitor 8), travadas em paisagem (`sensorLandscape` no AndroidManifest; só Landscape no Info.plist).
 - Plugins instalados: `@capacitor/app`, `@capacitor/screen-orientation`, `@capacitor/status-bar`.
 - `npm run sync` compila o jogo e copia para as duas plataformas. `npm run android` abre no Android Studio.
@@ -17,16 +17,42 @@ O jogo é web (Three.js, WebGL 2, ES modules). Capacitor coloca exatamente esse 
 - Android: Android Studio (SDK 35+). JDK 17 já está instalado neste PC (Microsoft build); o SDK Android ainda não. Instalar o Android Studio e abrir `mobile/android`.
 - iOS: macOS com Xcode. A pasta `ios/` já está gerada; build e envio à App Store só acontecem no Mac (ou em serviço de build na nuvem, como Codemagic).
 
-## O que falta no jogo para ser jogável no celular (fase 5)
+## Controles de toque (fase 5) — feito em 16/10/2026
 
-O jogo hoje é 100% teclado + mouse + Pointer Lock (`game/src/main.js` não tem nenhum handler de toque). Trabalho necessário, em ordem:
+Implementado em `game/src/touch.js` (classe `TouchControls`) e integrado em `main.js`, `ui.js` e `style.css`. Ativa quando o aparelho prefere toque (`pointer: coarse` com `maxTouchPoints > 0`), sempre no app Capacitor, e pode ser forçado no PC com `?touch=1` (ou desligado com `?touch=0`).
 
-1. **Entrada por toque**: joystick virtual esquerdo (andar), arrastar na metade direita (olhar), botões de pular/agachar/correr, ação primária (minerar/atacar) por toque longo e secundária (colocar) por toque curto, barra de atalhos tocável, botão de mochila/menu/câmera. Substituir `requestPointerLock` por esse esquema quando `navigator.maxTouchPoints > 0`.
-2. **UI responsiva**: menus, mochila, bancada e textos legíveis em 6 polegadas; safe areas (notch) via `env(safe-area-inset-*)`.
-3. **Desempenho**: distância de renderização e `devicePixelRatio` menores em GPU móvel; medir em um Android médio real. Já existe um teto de pixel ratio em `resize()`.
-4. **Áudio**: Web Audio só inicia após gesto do usuário; conferir o desbloqueio no primeiro toque.
-5. **Voltar do Android**: tratar o botão voltar (`@capacitor/app`, evento `backButton`) para abrir o menu de pausa, não fechar o app.
-6. **Catálogo**: marcar `"dispositivos": ["desktop","mobile"]` e preencher `controles.toque` só depois de validar em aparelho real.
+| Gesto / botão | O que faz | Equivalente no teclado |
+| --- | --- | --- |
+| Joystick flutuante na metade esquerda | Andar; na borda, corre. No carro e no barco acelera, dá ré e vira | W A S D (+ Shift) |
+| Arrastar na metade direita | Olhar | Mouse |
+| Toque longo (300 ms) à direita | Minerar, cortar, atacar, enquanto o dedo ficar | Botão esquerdo |
+| Toque curto à direita | Colocar bloco, usar item, comer; com estilingue/arco/espingarda, dispara | Botão direito |
+| Aviso de contexto ("Toque · Abrir porta") | Vira botão: portas, baú, bancada, churrasqueira, portais, carro, barco, animais | E / R |
+| Pular (segurar) | Pula; no carro é o freio de mão; voando, sobe | Espaço |
+| Agachar / Correr (alternam, exclusivos) | Agachar; mergulhar; descer voando / correr | Ctrl / Shift |
+| Voar (só no criativo) | Liga e desliga o voo | V |
+| Câmera | Primeira pessoa → costas → frente; no carro, câmera interna | C |
+| Mochila | Inventário; no carro parado, porta-malas | Tab |
+| Faróis / Buzina (só no carro) | | L / H |
+| Barra de atalhos | Toque no espaço para equipar | 1–9 |
+| Ⅱ no alto / Voltar do Android | Pausa. O Voltar fecha menus, pausa o jogo e só sai do app na tela inicial | Esc |
+
+Outras mudanças para o celular:
+
+- Sem Pointer Lock no modo toque; o mouse continua igual no PC. Eventos do mouse e teclas seguem funcionando num tablet com teclado.
+- Qualidade padrão `low` e sombras desligadas quando o aparelho prefere toque (só se o jogador nunca salvou configurações). `devicePixelRatio` travado em 1 no toque, em qualquer qualidade.
+- `index.html`: `viewport-fit=cover`, sem zoom, `mobile-web-app-capable`. CSS usa `env(safe-area-inset-*)` na barra de cima, status, atalhos e botões; status e coordenadas vão para o canto superior esquerdo; dicas de teclado somem; o toast aparece no alto para não cobrir os botões; painéis ocupam a tela com botões de 44 px.
+- Guia (menu Controles e guia) ganha a seção "No celular" quando está no modo toque.
+- Áudio: `audio.init()` roda no toque de "Entrar no meu mundo", que é um gesto do usuário; nada muda.
+
+Verificação: `npm run test:touch` em `game/` (com `npm run dev` rodando) simula um celular em paisagem com toques reais via CDP: joystick, olhar, toque longo minerando, toque curto colocando, botão Pular, aviso de contexto abrindo a bancada, Mochila, Câmera e Voar. Relatório em `game/docs/touch-report.json`; capturas em `game/test-results/touch-*.png`.
+
+## O que ainda falta no celular
+
+1. **Testar em aparelho real** (Android médio): desempenho com `low`/`medium`, tamanho dos botões, sensibilidade do olhar (`LOOK_GAIN` em `touch.js`) e a zona morta do joystick. Ajustar os números a partir disso.
+2. **Catálogo**: marcar `"dispositivos": ["desktop","mobile"]` e preencher `controles.toque` em `web/content/catalogo.json` depois da validação em aparelho.
+3. **Assoviar (Q)** não tem botão; o menu do pet (Embarcar/Desembarcar) cobre o caso principal.
+4. Ícone e splash do app (`@capacitor/assets`).
 
 ## Modelo de negócio no app (fase 6)
 

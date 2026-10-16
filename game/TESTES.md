@@ -1,4 +1,11 @@
-# Verificação — Vale dos Blocos
+# Verificação — ValleyBlocks
+
+## Controles de toque e marca ValleyBlocks 1.25.0 — 16/10/2026
+
+- Marca renomeada de "Vale dos Blocos" para "ValleyBlocks" em jogo, plataforma web, app e docs (slug `valleyblocks`, appId `cloud.labsgames.valleyblocks`, banco local `labs-valleyblocks`).
+- 160 testes Node passaram (novo `tests/touch.test.js`: zona morta, WASD, diagonais, corrida na borda, detecção de toque).
+- 12 verificações do cenário `test:touch` passaram num celular simulado (915×412, toques via CDP): tela inicial sem erros, início sem Pointer Lock com qualidade `low`, joystick, olhar, toque longo minerando, toque curto colocando, Pular, aviso de contexto abrindo a bancada, Mochila, Câmera e Voar. Relatório em docs/touch-report.json; capturas em test-results/touch-*.png.
+- `test:browser` (desktop): a etapa do pet pressionava E, mas o cuidado de animais está no R desde a versão anterior; o teste foi corrigido para R.
 
 ## Caça e Grutas de Brasa 1.5.0 — 09/10/2026
 
@@ -117,7 +124,7 @@ O roteiro de navegador usa cliques, mouse e teclado reais via Playwright para mi
 
 Foram verificados IndexedDB real, salvamento automático, **Salvar e sair**, reload e continuação, preservando inventário, alterações do terreno, porta aberta, baú, porta-malas, veículo e pet passageiro. Menus liberam Pointer Lock e interrompem a simulação.
 
-No portal local, o build de produção foi testado em `/jogos/vale-dos-blocos`: mensagens `ready`/`started`, carregamento do iframe, Pointer Lock, teclado, pausa, reinício e `destroy`. Esta verificação foi local; ela não constitui publicação no endereço público.
+No portal local, o build de produção foi testado em `/jogos/valleyblocks`: mensagens `ready`/`started`, carregamento do iframe, Pointer Lock, teclado, pausa, reinício e `destroy`. Esta verificação foi local; ela não constitui publicação no endereço público.
 
 ## Desempenho medido
 

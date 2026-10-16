@@ -1,4 +1,4 @@
-# Multiplayer cooperativo (Vale dos Blocos)
+# Multiplayer cooperativo (ValleyBlocks)
 
 - Incluído na versão completa (R$ 29,90): só contas com acesso ilimitado criam sala.
   Qualquer conta logada entra na sala de um amigo com o código de 6 caracteres.

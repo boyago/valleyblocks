@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "checks": [
+    "tela inicial abre no celular sem erros",
+    "jogo começa sem pointer lock, com camada de toque visível e qualidade leve",
+    "joystick esquerdo anda para frente (W) e solta ao levantar o dedo",
+    "arrastar à direita olha ao redor",
+    "toque longo minera o bloco mirado",
+    "toque curto coloca um bloco",
+    "botão Pular segura Espaço enquanto pressionado",
+    "aviso de contexto tocável abre a bancada",
+    "botão Mochila abre o inventário",
+    "botão Câmera alterna para câmera de costas",
+    "botão Voar liga o voo no criativo",
+    "nenhum erro de runtime durante a sessão"
+  ],
+  "errors": [],
+  "date": "2026-10-16T22:05:58.609Z"
+}

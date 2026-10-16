@@ -78,7 +78,7 @@ export function PrivacyRuntime() {
   if (!analyticsId && !ownUsageEnabled) return null;
   return <>
     {loaded && choice === null && <aside aria-label="Métricas opcionais" className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-xl rounded-2xl border border-white/10 bg-surface p-5 text-white shadow-xl">
-      <p className="font-bold">Você escolhe</p><p className="mt-2 text-sm">Podemos medir o uso dos jogos {analyticsId ? "com Google Analytics" : "no próprio Vale dos Blocos"}{analyticsId && ownUsageEnabled ? " e no próprio Vale dos Blocos" : ""}? Você pode jogar sem aceitar e alterar a escolha em <Link className="underline" href="/privacidade">Privacidade e cookies</Link>.</p>
+      <p className="font-bold">Você escolhe</p><p className="mt-2 text-sm">Podemos medir o uso dos jogos {analyticsId ? "com Google Analytics" : "no próprio ValleyBlocks"}{analyticsId && ownUsageEnabled ? " e no próprio ValleyBlocks" : ""}? Você pode jogar sem aceitar e alterar a escolha em <Link className="underline" href="/privacidade">Privacidade e cookies</Link>.</p>
       <div className="mt-4 flex flex-wrap gap-3">{(["rejected", "accepted"] as const).map(value => <button key={value} type="button" className="min-h-11 rounded-lg border border-purple-700 px-4 font-bold text-[#D86BFF]" onClick={() => saveChoice(value)}>{value === "accepted" ? "Permitir métricas" : "Recusar métricas"}</button>)}</div>
     </aside>}
     {analyticsId && choice === "accepted" && <Script id="labs-analytics" src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`} strategy="afterInteractive" onLoad={() => {

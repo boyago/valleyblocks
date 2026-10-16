@@ -1,4 +1,4 @@
-# Medição do Vale dos Blocos — fase 1
+# Medição do ValleyBlocks — fase 1
 
 Atualização 1.10.0: o acesso ao painel passou a usar a conta administrativa.
 As instruções atuais de login, convites e quotas estão em [ACCOUNTS.md](ACCOUNTS.md).
@@ -77,6 +77,6 @@ pagamentos, economia e campanhas não estão incluídos nesta entrega.
 
 ## Extensão do contrato iframe
 
-Vale dos Blocos 1.9.2 emite `{labs:1,type:'gameplay',active:boolean}` apenas após
+ValleyBlocks 1.9.2 emite `{labs:1,type:'gameplay',active:boolean}` apenas após
 início real e nas pausas/retomadas/descarte. O portal valida origem e janela do
 iframe. `started` continua como handshake e não representa mais tempo jogado.

@@ -6,7 +6,7 @@ import { categoryLabels, deviceLabel, games } from "@/lib/games";
 
 export const metadata: Metadata = {
   title: "Como jogar: guias de todos os jogos",
-  description: "Objetivo, controles no computador e no celular e dicas para começar cada jogo do Vale dos Blocos.",
+  description: "Objetivo, controles no computador e no celular e dicas para começar cada jogo do ValleyBlocks.",
   alternates: { canonical: "/guias" },
 };
 

@@ -12,8 +12,8 @@ type Product = { code: string; title: string; description: string; price: string
 type Me = { account: { id: string; username: string; unlimited: boolean; cloudSave: boolean; entitlements?: { outfits: string[] } } | null };
 type Order = { orderId: string; status: string; product: string; username?: string; needsPassword: boolean };
 type Result = { url: string; free?: boolean; guest?: boolean };
-const shortTitle = (t: string) => { const short = t.replace('Vale dos Blocos · ', ''); return short.charAt(0).toUpperCase() + short.slice(1); };
-const RETURN: Record<string, string> = { 'vale-completo': '/jogos/vale-dos-blocos', 'vale-aparencias-expedicao': '/jogos/vale-dos-blocos', 'vale-nuvem': '/jogos/vale-dos-blocos' };
+const shortTitle = (t: string) => { const short = t.replace('ValleyBlocks · ', ''); return short.charAt(0).toUpperCase() + short.slice(1); };
+const RETURN: Record<string, string> = { 'vale-completo': '/jogos/valleyblocks', 'vale-aparencias-expedicao': '/jogos/valleyblocks', 'vale-nuvem': '/jogos/valleyblocks' };
 const input = 'mt-2 block min-h-12 w-full rounded-lg border border-white/15 bg-[#0B0B10] px-3 text-base text-white placeholder:text-zinc-400 focus:border-[#C6FF00] focus:outline-none focus:ring-2 focus:ring-[#C6FF00]/30';
 const primary = 'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#C6FF00] px-5 text-base font-semibold text-[#0B0B10] transition-[transform,background-color] duration-200 hover:bg-[#d5ff4a] active:translate-y-px disabled:opacity-50';
 const link = 'font-semibold text-[#C6FF00] underline-offset-4 hover:underline';
@@ -77,7 +77,7 @@ export function CheckoutPage({ product }: { product: Product }) {
     <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-10 sm:px-8">
       {!paymentsEnabled ? <p className="text-zinc-300">Pagamentos ainda não estão disponíveis.</p> : <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-2xl bg-[#15151D] p-6" aria-label="Produto">
-          <p className="text-xs text-zinc-400">Vale dos Blocos</p>
+          <p className="text-xs text-zinc-400">ValleyBlocks</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">{shortTitle(product.title)}</h1>
           <p className="mt-3 text-sm leading-relaxed text-zinc-300">{product.description}</p>
           <p className="mt-6 text-3xl font-bold tabular-nums text-white">{product.price}</p>

@@ -1,13 +1,13 @@
-# Vale dos Blocos — LABSGames
+# ValleyBlocks — LABSGames
 
-Sandbox 3D de exploração, construção, carros e animais, feito em Three.js para computador com teclado e mouse. O jogo tem identidade, ilustrações, modelos cúbicos, texturas pixeladas e áudio originais. Integra o projeto [LABSGames](https://labs-games.alexandre-boyago.chatgpt.site/) como um build independente em `/games/vale-dos-blocos/`, pelo protocolo `iframe-labs-v1`.
+Sandbox 3D de exploração, construção, carros e animais, feito em Three.js para computador com teclado e mouse. O jogo tem identidade, ilustrações, modelos cúbicos, texturas pixeladas e áudio originais. Integra o projeto [LABSGames](https://labs-games.alexandre-boyago.chatgpt.site/) como um build independente em `/games/valleyblocks/`, pelo protocolo `iframe-labs-v1`.
 
 ## Executar e gerar o build
 
 Requer Node.js 20.19 ou superior, npm e navegador com WebGL 2, Pointer Lock e Web Audio. Use um servidor HTTP local; abrir `index.html` diretamente como arquivo não carrega os módulos.
 
 ```sh
-cd games/vale-dos-blocos
+cd games/valleyblocks
 npm ci
 npm test
 npm run dev
@@ -187,9 +187,9 @@ Em **Som e imagem**, ajuste qualidade baixa/média/alta, sombras, neblina, músi
 
 O jogo mantém um mundo salvo por origem do navegador, com salvamento automático a cada 30 segundos de simulação e uma tentativa adicional quando a aba fica oculta. O botão de continuar recupera seed, modo, alterações nos blocos, níveis e atualizações pendentes da água, jogador, inventário, baús, portas, horário, carros (inclusive velocidade vertical e inclinação), porta-malas, pets, nomes/comportamentos e configurações. Também restaura areia em queda, câmera e água da churrasqueira. Mundos antigos continuam compatíveis, usando o gerador original.
 
-O armazenamento principal é IndexedDB, banco `labs-vale-dos-blocos`, object store `snapshots`, chave `current`. O formato atual usa `version: 1`. Cada gravação é um snapshot completo em uma transação: os dados são copiados antes da operação assíncrona, validados e substituídos de uma vez. Restaurar a mochila não concede novamente o kit inicial. A restauração substitui as listas de entidades, sem anexar cópias.
+O armazenamento principal é IndexedDB, banco `labs-valleyblocks`, object store `snapshots`, chave `current`. O formato atual usa `version: 1`. Cada gravação é um snapshot completo em uma transação: os dados são copiados antes da operação assíncrona, validados e substituídos de uma vez. Restaurar a mochila não concede novamente o kit inicial. A restauração substitui as listas de entidades, sem anexar cópias.
 
-Quando a API IndexedDB não existe no navegador, há fallback para localStorage na chave `labs-vale-dos-blocos:save:v1`. As preferências também são mantidas na chave `vale-settings`. Não existe conta, sincronização remota ou gravação em servidor. Limpar os dados do navegador remove a partida. Saves de `localhost` e do site publicado pertencem a origens diferentes. Erros de quota ou acesso ao armazenamento são reportados ao jogador; não significam que o mundo foi salvo.
+Quando a API IndexedDB não existe no navegador, há fallback para localStorage na chave `labs-valleyblocks:save:v1`. As preferências também são mantidas na chave `vale-settings`. Não existe conta, sincronização remota ou gravação em servidor. Limpar os dados do navegador remove a partida. Saves de `localhost` e do site publicado pertencem a origens diferentes. Erros de quota ou acesso ao armazenamento são reportados ao jogador; não significam que o mundo foi salvo.
 
 Use **Salvar e sair** antes de encerrar a sessão; fechar o processo do navegador não garante a conclusão de uma transação pendente. Criar outro mundo substitui o save anterior quando o novo mundo é salvo.
 
@@ -217,9 +217,9 @@ Use **Salvar e sair** antes de encerrar a sessão; fechar o processo do navegado
 
 ## Integração com LABSGames
 
-O registro fica em `games/catalogo.json`, slug `vale-dos-blocos`, categoria `aventura`, somente `desktop`. O portal deve disponibilizar `dist/` em `/games/vale-dos-blocos/` e incorporar o `index.html` pelo contrato de `games/CONTRATO.md`. O jogo não importa código do site. O build inclui os SVGs da capa e miniatura automaticamente.
+O registro fica em `games/catalogo.json`, slug `valleyblocks`, categoria `aventura`, somente `desktop`. O portal deve disponibilizar `dist/` em `/games/valleyblocks/` e incorporar o `index.html` pelo contrato de `games/CONTRATO.md`. O jogo não importa código do site. O build inclui os SVGs da capa e miniatura automaticamente.
 
-O build e o catálogo foram sincronizados para o portal local com `node site/scripts/sync-games.mjs` (a partir da raiz do projeto). A página local é `http://localhost:5174/jogos/vale-dos-blocos`. Para publicar a atualização no endereço público, use o fluxo de publicação do projeto LABSGames.
+O build e o catálogo foram sincronizados para o portal local com `node site/scripts/sync-games.mjs` (a partir da raiz do projeto). A página local é `http://localhost:5174/jogos/valleyblocks`. Para publicar a atualização no endereço público, use o fluxo de publicação do projeto LABSGames.
 
 Para funcionar em iframe, o contexto deve permitir teclado, tela cheia, WebGL, áudio após gesto e Pointer Lock. Se o portal usar `sandbox`, é necessário permitir explicitamente Pointer Lock e as demais capacidades utilizadas. Em standalone, o jogo usa sua própria tela inicial.
 

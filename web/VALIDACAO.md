@@ -3,7 +3,7 @@
 - Build de produção Next.js e checagem TypeScript concluídos.
 - ESLint sem erros; quatro avisos existentes de imagens HTML em vez de next/image. As capas mantêm proporção reservada.
 - Builds dos cinco jogos publicados concluídos. Circuito avisa sobre o tamanho do chunk Three.js; o carregamento continua sob demanda.
-- Testes de lógica: O Robô e as Peças 18, Encaixe 10, Circuito 58, Vale dos Blocos 58. SDK: 3 testes de origem, comandos e descarte. Total: 147.
+- Testes de lógica: O Robô e as Peças 18, Encaixe 10, Circuito 58, ValleyBlocks 58. SDK: 3 testes de origem, comandos e descarte. Total: 147.
 - 56 verificações HTTP locais aprovadas: páginas, CSS/JS, imagens, builds, cabeçalhos noindex dos jogos, sitemap/robots/llms e 404 do protótipo PAC-MAN retirado.
 - Navegador: busca e filtro Puzzle, busca vazia de resultados, navegação para Encaixe, carregamento e fullscreen, movimento/pausa/reinício de O Robô e as Peças, carregamento 3D do Circuito e troca Rota → Vale sem carregar iframe antes de Jogar. Um único iframe durante a sessão.
 - Página de privacidade mostra o e-mail informado; configuração padrão não insere scripts Google.

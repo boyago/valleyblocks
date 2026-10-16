@@ -31,12 +31,12 @@ test('per-game play history: time and players per game survive the 3-day quota c
   const t = await setup();
   try {
     const store = createPlayStore(t.db), now = Date.parse('2026-10-10T15:00:00Z'), s1 = randomUUID(), s2 = randomUUID();
-    await store.record('user:a', { game: 'vale-dos-blocos', session: s1, active: true }, { account: true }, now);
-    for (let i = 1; i <= 8; i++) await store.record('user:a', { game: 'vale-dos-blocos', session: s1, active: true }, { account: true }, now + i * 15000);
+    await store.record('user:a', { game: 'valleyblocks', session: s1, active: true }, { account: true }, now);
+    for (let i = 1; i <= 8; i++) await store.record('user:a', { game: 'valleyblocks', session: s1, active: true }, { account: true }, now + i * 15000);
     await store.record('guest:b', { game: 'canyon-strike', session: s2, active: true }, {}, now);
     await store.record('guest:b', { game: 'canyon-strike', session: s2, active: true }, {}, now + 15000);
     const rows = await t.db.query('SELECT game, COUNT(DISTINCT owner_id) AS players, SUM(used_ms) AS ms, SUM(starts) AS starts FROM labs_play_stats GROUP BY game ORDER BY game');
-    assert.deepEqual(rows.map(r => [r.game, Number(r.players), Number(r.ms), Number(r.starts)]), [['canyon-strike', 1, 15000, 1], ['vale-dos-blocos', 1, 120000, 1]]);
+    assert.deepEqual(rows.map(r => [r.game, Number(r.players), Number(r.ms), Number(r.starts)]), [['canyon-strike', 1, 15000, 1], ['valleyblocks', 1, 120000, 1]]);
     await store.cleanup(now + 10 * 86400000);
     assert.equal((await t.db.query('SELECT COUNT(*) AS n FROM labs_play_daily'))[0].n, 0, 'quota rows still expire');
     assert.equal((await t.db.query('SELECT COUNT(*) AS n FROM labs_play_stats'))[0].n, 2, 'history kept');
@@ -85,7 +85,7 @@ test('ban, edit and delete: admin only, never on admins or yourself, sessions di
     await assert.rejects(t.accounts.updateProfile(t.admin, other, { username: 'other_one', email: 'kid@example.com', minor: false }), /outra conta/);
     // Delete: everything keyed to the player goes, the audit stays.
     await t.db.query("INSERT INTO labs_worlds (owner_id,revision,saved_at) VALUES (?,0,0)", ['user:' + kid]);
-    await t.db.query("INSERT INTO labs_play_stats (day_key,game,owner_id,used_ms,starts) VALUES ('2026-10-10','vale-dos-blocos',?,1,1)", ['user:' + kid]);
+    await t.db.query("INSERT INTO labs_play_stats (day_key,game,owner_id,used_ms,starts) VALUES ('2026-10-10','valleyblocks',?,1,1)", ['user:' + kid]);
     await t.accounts.remove(t.admin, kid);
     for (const [table, col, val] of [['labs_accounts', 'id', kid], ['labs_account_emails', 'account_id', kid], ['labs_auth_sessions', 'account_id', kid], ['labs_worlds', 'owner_id', 'user:' + kid], ['labs_play_stats', 'owner_id', 'user:' + kid]])
       assert.equal((await t.db.query(`SELECT COUNT(*) AS n FROM ${table} WHERE ${col}=?`, [val]))[0].n, 0, table);

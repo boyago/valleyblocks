@@ -1,10 +1,11 @@
 {
-  "name": "labsgames-vale-dos-blocos",
-  "version": "1.24.0",
+  "name": "labsgames-valleyblocks",
+  "version": "1.25.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5186",
+    "dev:lan": "vite --host 0.0.0.0 --port 5186",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 5186",
     "test": "node --test tests/*.test.js",
@@ -20,7 +21,8 @@
     "test:tools": "node tests/browser-tools.mjs",
     "test:night": "node tests/browser-night.mjs",
     "test:home": "node tests/browser-home.mjs",
-    "test:pests": "node tests/browser-pests.mjs"
+    "test:pests": "node tests/browser-pests.mjs",
+    "test:touch": "node tests/browser-touch.mjs"
   },
   "dependencies": {
     "three": "0.170.0"

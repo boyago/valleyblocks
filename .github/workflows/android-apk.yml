@@ -1,0 +1,63 @@
+# Gera o APK Android do ValleyBlocks (Capacitor) e publica como artefato do workflow.
+# Dispara a cada push na main que toque em game/ ou mobile/, ou manualmente (Actions > Android APK > Run workflow).
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    paths: ['game/**', 'mobile/**', '.github/workflows/android-apk.yml']
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            game/package-lock.json
+            mobile/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Instalar dependências
+        run: |
+          npm ci --prefix game
+          npm ci --prefix mobile
+
+      - name: Construir o jogo (Vite)
+        run: npm run build --prefix game
+
+      - name: Copiar o build para o app (cap sync)
+        working-directory: mobile
+        run: npx cap sync android
+
+      - name: Compilar APK de depuração
+        working-directory: mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Renomear APK
+        run: |
+          VERSION=$(node -p "require('./game/package.json').version")
+          cp mobile/android/app/build/outputs/apk/debug/app-debug.apk "ValleyBlocks-${VERSION}-debug.apk"
+          echo "APK_NAME=ValleyBlocks-${VERSION}-debug.apk" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_NAME }}
+          path: ${{ env.APK_NAME }}
+          retention-days: 30

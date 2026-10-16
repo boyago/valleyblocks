@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {mkdir} from 'node:fs/promises';
-const require=createRequire(new URL('../../games/vale-dos-blocos/package.json',import.meta.url));
+const require=createRequire(new URL('../../games/valleyblocks/package.json',import.meta.url));
 const {chromium}=require('playwright');
 const origin=process.env.USAGE_PREVIEW_URL||'http://127.0.0.1:5194';
 assert.ok(['127.0.0.1','localhost'].includes(new URL(origin).hostname),'This test only targets local preview');
@@ -17,10 +17,10 @@ try{
   let response=await context.request.get(origin+'/api/admin/game-usage');assert.equal(response.status(),401);
   response=await context.request.post(origin+'/api/game-usage',{data:{},headers:{Origin:'https://example.com'}});assert.equal(response.status(),403);
   response=await context.request.post(origin+'/api/game-usage',{data:{game:'bad'},headers:{Origin:origin}});assert.equal(response.status(),400);
-  await page.goto(origin+'/jogos/vale-dos-blocos');
+  await page.goto(origin+'/jogos/valleyblocks');
   await page.getByRole('button',{name:'Permitir métricas',exact:true}).click();
   await page.getByRole('button',{name:'Jogar agora',exact:true}).click();
-  const frame=page.frameLocator('iframe[title="Vale dos Blocos"]');
+  const frame=page.frameLocator('iframe[title="ValleyBlocks"]');
   await frame.locator('[data-action="new-game"]').waitFor({timeout:45000});
   assert.equal(events.length,0,'Landing must not count as playing');
   const started=page.waitForResponse(r=>r.url().endsWith('/api/game-usage')&&r.request().postDataJSON().active);

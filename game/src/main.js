@@ -29,11 +29,17 @@ import { useBucket, heatMaterial } from './interactions.js';
 import { rampFacingFromYaw } from './ramps.js';
 import { Wildlife, SPECIES } from './wildlife.js';
 import { FOODS, eatFood, updateNeeds } from './survival.js';
+import { TouchControls, touchPreferred } from './touch.js';
 import './style.css';
 
-const bridge=createLabsBridge({slug:'vale-dos-blocos',version:'1.11.0'});
+const bridge=createLabsBridge({slug:'valleyblocks',version:'1.25.0'});
 const canvas=document.querySelector('#world');
+/** App Android/iOS (Capacitor injeta window.Capacitor antes de qualquer script). */
+const NATIVE_APP=typeof window.Capacitor?.isNativePlatform==='function'&&window.Capacitor.isNativePlatform();
+const TOUCH=touchPreferred({native:NATIVE_APP});
 const DEFAULT_SETTINGS={quality:'medium',shadows:true,fog:true,music:.3,effects:.65,sensitivity:1,showFps:false,outfit:'explorer'};
+// Celular: começa leve (3 × 3 regiões, sem sombras). O jogador pode subir em Som e imagem.
+const TOUCH_DEFAULTS={quality:'low',shadows:false};
 /** Packs the portal confirmed for this account (cosmetic only; the server is the source). */
 const REALM_TINTS=Object.fromEntries(Object.entries(REALMS).map(([k,r])=>[k,{sky:r.sky?new THREE.Color(r.sky):null,haze:r.haze?new THREE.Color(r.haze):null,tint:r.tint??.4,fx:r.fx}]));
 // Tela inicial: cada carregamento sorteia uma vista do vale ou de uma das terras.
@@ -74,7 +80,7 @@ class Game {
     this.saved=saved;this.started=false;this.running=false;this.disposed=false;
     this.cloudSaves=saves.cloud;this.saveInfo=saves.info();this.saveFailure='';
     let storedSettings={};try{storedSettings=JSON.parse(localStorage.getItem('vale-settings')||'{}');}catch{}
-    this.settings={...DEFAULT_SETTINGS,...saved?.settings,...storedSettings};
+    this.settings={...DEFAULT_SETTINGS,...(TOUCH?TOUCH_DEFAULTS:{}),...saved?.settings,...storedSettings};
     if(!['low','medium','high'].includes(this.settings.quality))this.settings.quality='medium';
     this.seed='';this.newSeed='';this.mode='creative';this.newMode='creative';
     this.scene=new THREE.Scene();this.camera=new THREE.PerspectiveCamera(65,1,.05,310);
@@ -86,7 +92,8 @@ class Game {
     this.ownedPacks=ownedPacks;this.fullOffer=!bridge.standalone&&!fullAccess?FULL_VERSION:null;this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);
     this.selection=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.012,1.012,1.012)),new THREE.LineBasicMaterial({color:0xfff4c7,transparent:true,opacity:.9}));
     this.selection.visible=false;this.scene.add(this.selection);
-    this.ui=new UI(document.querySelector('#app'),(action,data,button)=>this.action(action,data,button));
+    this.ui=new UI(document.querySelector('#app'),(action,data,button)=>this.action(action,data,button),{touch:TOUCH});
+    this.touch=TOUCH?new TouchControls(this,document.querySelector('#app')):null;
     this.coopAvailable=coopAvailable&&!bridge.standalone;this.coop=new Coop(this);
     this.landingBoot=true;this.createWorld(null);this.landingBoot=false;this.coop.bindWorld(this.world);
     this.bindInput();this.resize();this.ui.setMenu('landing',this);
@@ -146,11 +153,43 @@ class Game {
   resize() {
     const w=window.innerWidth,h=window.innerHeight;
     const cap=this.settings.quality==='high'?1.5:this.settings.quality==='low'?.75:1;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,cap));renderer.setSize(w,h,false);
+    // Telas de celular têm DPR 2–3 em GPU modesta: nunca renderizar acima de 1×.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,cap,TOUCH?1:Infinity));renderer.setSize(w,h,false);
     renderer.shadowMap.enabled=!!this.settings.shadows;
     this.camera.aspect=w/h;this.camera.updateProjectionMatrix();
   }
-  resetInput(){this.keys.clear();this.mining=false;this.miningProgress=0;this.miningKey='';this.mouseDragging=false;}
+  resetInput(){this.keys.clear();this.mining=false;this.miningProgress=0;this.miningKey='';this.mouseDragging=false;this.touch?.reset();}
+  isRanged(item){return !!RANGED[item];}
+  /** Botão esquerdo / toque longo: minerar, atacar ou disparar com o item equipado. */
+  primaryDown(){
+    if(!this.running||this.activeVehicle)return;
+    const item=this.inventory.selectedItem;
+    const hit=this.world.raycast(this.player.eye,this.player.direction,6);
+    const prey=RANGED[item]?this.combat.raycast(this.player.eye,this.player.direction,RANGED[item].speed):null;
+    if(primaryAction(item,hit,prey)==='shoot'){
+      const result=this.slingshot.fire(this.player,this.inventory,item);
+      if(result.message)this.ui.toast(result.message);
+      if(result.ok){this.audio.play('hunt-hit');this.wearTool(item);}
+    }else this.mining=true;
+  }
+  primaryUp(){this.mining=false;this.miningProgress=0;}
+  openInventory(){
+    if(!this.started)return;
+    if(this.ui.menu==='inventory'||this.ui.menu==='storage'){this.resume();return;}
+    if(this.activeVehicle){if(this.activeVehicle.grounded===false||Math.abs(this.activeVehicle.verticalVelocity||0)>.5){this.ui.toast('Aguarde o carro tocar o chão antes de abrir o porta-malas.');return;}if(Math.abs(this.activeVehicle.speed)>.25){this.ui.toast('Pare o carro antes de abrir o porta-malas.');return;}this.focusStorage={vehicle:true,items:this.activeVehicle.trunk};this.menu('storage');}
+    else{this.audio.play('inventory');this.menu('inventory');}
+  }
+  toggleFly(){
+    if(this.mode!=='creative'||this.activeVehicle||!this.running)return;
+    this.player.flying=!this.player.flying;this.player.velocity.y=0;
+    this.ui.toast(this.player.flying?(TOUCH?'Voo livre. Pular sobe, Agachar desce.':'Voo livre. Espaço sobe, Ctrl desce.'):'De volta ao chão.');
+  }
+  cycleCamera(){
+    if(!this.running)return;
+    if(this.activeVehicle)this.internalCamera=!this.internalCamera;
+    else{const modes=['first','back','front'];this.cameraMode=modes[(modes.indexOf(this.cameraMode)+1)%3];this.ui.toast({first:'Primeira pessoa',back:'Câmera de costas',front:'Câmera de frente'}[this.cameraMode]);}
+    this.updateCamera(1);
+  }
   menu(name) {
     bridge.gameplay(false);
     this.running=false;this.resetInput();this.selection.visible=false;this.audio.setPaused(true);
@@ -163,8 +202,10 @@ class Game {
     await this.audio.init();
     this.resetInput();this.ui.setMenu(null,this);this.running=true;this.audio.setPaused(false);bridge.started();bridge.gameplay(true);
     canvas.focus();
+    if(TOUCH){this.touch?.update();return true;}
     try {await canvas.requestPointerLock();}
     catch {this.ui.toast('Mouse livre: segure Alt e arraste para olhar. Clique no cenário para capturar o cursor.');}
+    return true;
   }
   start(save=null){this.createWorld(save);this.coop?.bindWorld(this.world);this.started=true;
     const realm=!save&&!this.fullOffer&&REALMS[this.startRealmChoice];this.startRealmChoice='';
@@ -177,7 +218,7 @@ class Game {
         this.ui.arrival(key);this.updateCamera(1);this.resume();this.ui.toast(`Sua casa no ${realm.name} está pronta! O portal ao lado leva ao vale.`);return;
       }
     }
-    this.updateCamera(1);this.resume();this.ui.toast(save?'Seu mundo está de volta. Boa aventura!':'Bem-vindo ao vale! Tab abre a mochila; E interage com portas, bancada e veículos; R cuida dos animais.');}
+    this.updateCamera(1);this.resume();this.ui.toast(save?'Seu mundo está de volta. Boa aventura!':TOUCH?'Bem-vindo ao vale! Joystick à esquerda anda, arraste à direita para olhar. Toque longo minera; toque curto coloca. Toque no aviso para abrir portas, bancada e carros.':'Bem-vindo ao vale! Tab abre a mochila; E interage com portas, bancada e veículos; R cuida dos animais.');}
   /** Guest of a co-op room: plays the host's copy of the world; nothing is saved locally. */
   startCoopGuest(data){this.coopReturnMenu=true;this.start(data);}
   endCoopGuest(){this.started=false;this.running=false;this.activeVehicle=null;this.menu('landing');this.landingKey='vale';this.landingCamera(0);}
@@ -200,7 +241,7 @@ class Game {
           const snapshot=this.started?this.snapshot():await saves.backupSnapshot?.();
           if(!snapshot){this.ui.toast('Não há cópia local para baixar.');break;}
           const url=URL.createObjectURL(new Blob([JSON.stringify(snapshot)],{type:'application/json'}));
-          const link=document.createElement('a');link.href=url;link.download='vale-dos-blocos-recuperacao.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);break;
+          const link=document.createElement('a');link.href=url;link.download='valleyblocks-recuperacao.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);break;
         }
         case 'resume':this.resume();break;
         case 'coop-menu':this.menu('coop');break;
@@ -220,6 +261,11 @@ class Game {
         case 'coop-leave':this.coop.leave();if(this.started)this.menu('pause');break;
         case 'coop-copy':navigator.clipboard?.writeText(this.coop.code).then(()=>this.ui.toast('Código copiado.')).catch(()=>{});break;
         case 'close':if(this.started)this.resume();else this.menu('landing');break;
+        // Ações dos controles de toque (o aviso de contexto vira botão; a mochila, a câmera e o voo têm botões próprios).
+        case 'context':if(!this.running)break;if(data.key==='R')this.interactPet();else this.interact();break;
+        case 'inventory':this.openInventory();break;
+        case 'camera':this.cycleCamera();break;
+        case 'fly':this.toggleFly();break;
         case 'landing':this.started=false;this.menu('landing');break;
         case 'pause':if(this.started)this.menu('pause');break;
         case 'settings':case 'help':this.menu(action);break;
@@ -291,11 +337,7 @@ class Game {
       if(e.code==='Escape'){
         if(this.running)this.menu('pause');else if(this.started&&this.ui.menu!=='pause')this.menu('pause');return;
       }
-      if(e.code==='Tab'&&this.started&&!e.repeat){
-        if(this.ui.menu==='inventory'||this.ui.menu==='storage'){this.resume();return;}
-        if(this.activeVehicle){if(this.activeVehicle.grounded===false||Math.abs(this.activeVehicle.verticalVelocity||0)>.5){this.ui.toast('Aguarde o carro tocar o chão antes de abrir o porta-malas.');return;}if(Math.abs(this.activeVehicle.speed)>.25){this.ui.toast('Pare o carro antes de abrir o porta-malas.');return;}this.focusStorage={vehicle:true,items:this.activeVehicle.trunk};this.menu('storage');}
-        else{this.audio.play('inventory');this.menu('inventory');}return;
-      }
+      if(e.code==='Tab'&&this.started&&!e.repeat){this.openInventory();return;}
       if(this.ui.menu==='inventory'&&/^Digit[1-9]$/.test(e.code)){this.inventory.select(Number(e.code.slice(-1))-1);this.ui.setMenu('inventory',this);return;}
       if(!this.running)return;
       if(/^(Key[WASDEVCHLF]|Space|ShiftLeft|ShiftRight|ControlLeft|ControlRight|Digit[1-9])$/.test(e.code))e.preventDefault();
@@ -303,12 +345,8 @@ class Game {
       if(/^Digit[1-9]$/.test(e.code))this.inventory.select(Number(e.code.slice(-1))-1);
       if(e.code==='KeyE')this.interact();
       if(e.code==='KeyR'&&!this.activeVehicle&&!this.activeBoat)this.interactPet();
-      if(e.code==='KeyV'&&this.mode==='creative'&&!this.activeVehicle){this.player.flying=!this.player.flying;this.player.velocity.y=0;this.ui.toast(this.player.flying?'Voo livre. Espaço sobe, Ctrl desce.':'De volta ao chão.');}
-      if(e.code==='KeyC'){
-        if(this.activeVehicle)this.internalCamera=!this.internalCamera;
-        else{const modes=['first','back','front'];this.cameraMode=modes[(modes.indexOf(this.cameraMode)+1)%3];this.ui.toast({first:'Primeira pessoa',back:'Câmera de costas',front:'Câmera de frente'}[this.cameraMode]);}
-        this.updateCamera(1);
-      }
+      if(e.code==='KeyV')this.toggleFly();
+      if(e.code==='KeyC')this.cycleCamera();
       if(e.code==='KeyQ'){this.whistle();return;}
       if(e.code==='KeyL'&&this.activeVehicle)this.entities.toggleLights(this.activeVehicle);
       if(e.code==='KeyH'&&this.activeVehicle)this.audio.play('horn',this.activeVehicle.position);
@@ -317,26 +355,17 @@ class Game {
     window.addEventListener('keyup',e=>this.keys.delete(e.code),options);
     window.addEventListener('blur',()=>{if(this.running)this.menu('pause');},options);
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&this.started){if(this.running)this.menu('pause');this.save(false);}},options);
-    document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement!==canvas&&this.running)this.menu('pause');},options);
+    document.addEventListener('pointerlockchange',()=>{if(!TOUCH&&document.pointerLockElement!==canvas&&this.running)this.menu('pause');},options);
     document.addEventListener('mousemove',e=>{if(this.running&&!this.activeVehicle&&(document.pointerLockElement===canvas||this.mouseDragging))this.player.look(e.movementX,e.movementY,this.settings.sensitivity);},options);
     canvas.addEventListener('mousedown',e=>{
-      if(!this.running)return;
+      if(!this.running||TOUCH)return;
       if(e.altKey){this.mouseDragging=true;return;}
       if(document.pointerLockElement!==canvas){canvas.requestPointerLock()?.catch(()=>{});return;}
       if(this.activeVehicle)return;
-      if(e.button===0){
-        const item=this.inventory.selectedItem;
-        const hit=this.world.raycast(this.player.eye,this.player.direction,6);
-        const prey=RANGED[item]?this.combat.raycast(this.player.eye,this.player.direction,RANGED[item].speed):null;
-        if(primaryAction(item,hit,prey)==='shoot'){
-          const result=this.slingshot.fire(this.player,this.inventory,item);
-          if(result.message)this.ui.toast(result.message);
-          if(result.ok){this.audio.play('hunt-hit');this.wearTool(item);}
-        }else this.mining=true;
-      }
+      if(e.button===0)this.primaryDown();
       if(e.button===2)this.place();
     },options);
-    window.addEventListener('mouseup',e=>{if(e.button===0){this.mining=false;this.miningProgress=0;}this.mouseDragging=false;},options);
+    window.addEventListener('mouseup',e=>{if(e.button===0&&!TOUCH)this.primaryUp();this.mouseDragging=false;},options);
     canvas.addEventListener('contextmenu',e=>e.preventDefault(),options);
     window.addEventListener('wheel',e=>{if(this.running&&!this.activeVehicle){e.preventDefault();this.inventory.select(this.inventory.selected+Math.sign(e.deltaY));}}, {...options,passive:false});
   }
@@ -614,16 +643,29 @@ class Game {
     renderer.render(this.scene,this.camera);
     this.frameCounter++;this.perfElapsed+=raw;
     if(this.perfElapsed>=.5){this.fps=Math.round(this.frameCounter/this.perfElapsed);this.frameTimes.push({fps:this.fps,ms:this.perfElapsed*1000/this.frameCounter});if(this.frameTimes.length>120)this.frameTimes.shift();this.frameCounter=0;this.perfElapsed=0;}
-    if(!this.lastUi||now-this.lastUi>100){this.ui.update(this,{fps:this.fps,width:canvas.width,height:canvas.height,calls:renderer.info.render.calls});this.lastUi=now;}
+    if(!this.lastUi||now-this.lastUi>100){this.ui.update(this,{fps:this.fps,width:canvas.width,height:canvas.height,calls:renderer.info.render.calls});if(this.running)this.touch?.update();this.lastUi=now;}
     this.raf=requestAnimationFrame(this.frame);
   }
   debug(){return {ready:true,started:this.started,running:this.running,menu:this.ui.menu,mode:this.mode,seed:this.seed,player:this.player.serialize(),inventory:this.inventory.serialize(),entities:this.entities.serialize(),activeVehicle:this.activeVehicle?.id||null,time:this.time,edits:this.world.serialize().length,chunks:this.world.chunks.size,renderer:{fps:this.fps,width:canvas.width,height:canvas.height,calls:renderer.info.render.calls,triangles:renderer.info.render.triangles,geometries:renderer.info.memory.geometries},performance:this.frameTimes.slice(-30),goals:this.goals};}
-  dispose(){this.disposed=true;cancelAnimationFrame(this.raf);this.events.abort();this.avatar.dispose();this.slingshot.dispose();this.pests.dispose();this.enemies.dispose();this.wildlife.dispose();this.audio.dispose();this.world.dispose();this.entities.dispose();this.sky.dispose();this.particles.dispose();this.selection.geometry.dispose();this.selection.material.dispose();renderer.dispose();bridge.dispose();}
+  dispose(){this.disposed=true;cancelAnimationFrame(this.raf);this.events.abort();this.touch?.dispose();this.avatar.dispose();this.slingshot.dispose();this.pests.dispose();this.enemies.dispose();this.wildlife.dispose();this.audio.dispose();this.world.dispose();this.entities.dispose();this.sky.dispose();this.particles.dispose();this.selection.geometry.dispose();this.selection.material.dispose();renderer.dispose();bridge.dispose();}
+}
+
+/** Botão Voltar do Android: pausa, fecha menus ou sai do app na tela inicial (nunca fecha no meio do jogo). */
+function bindNativeBack(getGame){
+  const App=window.Capacitor?.Plugins?.App;if(!App?.addListener)return;
+  App.addListener('backButton',()=>{
+    const game=getGame();
+    if(!game){App.exitApp?.();return;}
+    if(game.running){game.menu('pause');return;}
+    if(game.started){if(game.ui.menu==='pause')game.resume();else game.menu('pause');return;}
+    if(game.ui.menu&&game.ui.menu!=='landing'){game.menu('landing');return;}
+    App.exitApp?.();
+  });
 }
 
 async function boot() {
-  const nativeApp=typeof window.Capacitor?.isNativePlatform==='function'&&window.Capacitor.isNativePlatform();
-  if(!import.meta.env.DEV&&bridge.standalone&&!nativeApp){location.replace('/jogos/vale-dos-blocos');return;}
+  const nativeApp=NATIVE_APP;
+  if(!import.meta.env.DEV&&bridge.standalone&&!nativeApp){location.replace('/jogos/valleyblocks');return;}
   if(!renderer)return;
   const huntingDemo=import.meta.env.DEV&&new URLSearchParams(location.search).get('demo')==='caca';
   let game,initializing=false,destroyed=false;
@@ -647,6 +689,7 @@ async function boot() {
   bridge.on('pause',()=>{if(game?.started){game.menu('pause');void game.save(false);}});
   bridge.on('resume',()=>{if(game?.started)game.resume();});
   bridge.on('destroy',()=>{destroyed=true;game?.dispose();});
+  if(nativeApp)bindNativeBack(()=>game);
   if(bridge.standalone)await initialize();
   bridge.ready();
 }

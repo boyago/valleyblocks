@@ -43,7 +43,7 @@ export function createSignup(db, { sendMail, origin }) {
   const audit = (query, actor, id, action, now) => query('INSERT INTO labs_account_audit (id,actor_id,account_id,action,created_at) VALUES (?,?,?,?,?)', [randomUUID(), actor, id, action, now]);
   const issue = async (query, accountId, purpose, ttl, now) => { const value = token(); await query('INSERT INTO labs_email_tokens (token_hash,account_id,purpose,expires_at,used_at) VALUES (?,?,?,?,NULL)', [tokenHash(value), accountId, purpose, now + ttl]); return value; };
   const link = (path, value) => `${origin}/conta/${path}#token=${value}`;
-  const mailVerify = (to, name, value) => sendMail({ to, subject: 'Confirme sua conta no Vale dos Blocos', text: `Olá!\n\nA conta "${name}" foi criada no Vale dos Blocos com este e-mail. Para confirmar, abra o link abaixo em até 24 horas:\n\n${link('verificar', value)}\n\nSe você não criou esta conta, ignore esta mensagem; nada será ativado.\n\nVale dos Blocos · https://labsgames.cloud` });
+  const mailVerify = (to, name, value) => sendMail({ to, subject: 'Confirme sua conta no ValleyBlocks', text: `Olá!\n\nA conta "${name}" foi criada no ValleyBlocks com este e-mail. Para confirmar, abra o link abaixo em até 24 horas:\n\n${link('verificar', value)}\n\nSe você não criou esta conta, ignore esta mensagem; nada será ativado.\n\nValleyBlocks · https://labsgames.cloud` });
   return {
     /** Creates an unverified account and sends the confirmation link. */
     async register({ name, password, email: rawEmail, birthDate, guardianEmail }, now = Date.now()) {
@@ -100,7 +100,7 @@ export function createSignup(db, { sendMail, origin }) {
         await query("UPDATE labs_email_tokens SET used_at=? WHERE account_id=? AND purpose='reset' AND used_at IS NULL", [now, row.account_id]);
         value = await issue(query, row.account_id, 'reset', RESET_TTL_MS, now);
       });
-      await sendMail({ to: address, subject: 'Redefinir sua senha no Vale dos Blocos', text: `Olá!\n\nRecebemos um pedido para redefinir a senha da conta "${row.username}". Abra o link abaixo em até 1 hora:\n\n${link('redefinir', value)}\n\nSe não foi você, ignore esta mensagem; sua senha continua a mesma.\n\nVale dos Blocos · https://labsgames.cloud` });
+      await sendMail({ to: address, subject: 'Redefinir sua senha no ValleyBlocks', text: `Olá!\n\nRecebemos um pedido para redefinir a senha da conta "${row.username}". Abra o link abaixo em até 1 hora:\n\n${link('redefinir', value)}\n\nSe não foi você, ignore esta mensagem; sua senha continua a mesma.\n\nValleyBlocks · https://labsgames.cloud` });
     },
     async reset(value, password, now = Date.now()) {
       if (!/^[a-f0-9]{64}$/.test(value || '')) throw new AccountError('Link inválido ou expirado.');
@@ -117,7 +117,7 @@ export function createSignup(db, { sendMail, origin }) {
     /** For login: self-registered accounts must confirm their e-mail first. */
     async requireVerified(accountId) {
       const [row] = await db.query('SELECT verified_at FROM labs_account_emails WHERE account_id=?', [accountId]);
-      if (row && row.verified_at == null) throw new AccountError('Confirme seu e-mail antes de entrar. Procure a mensagem do Vale dos Blocos ou peça um novo link.', 403);
+      if (row && row.verified_at == null) throw new AccountError('Confirme seu e-mail antes de entrar. Procure a mensagem do ValleyBlocks ou peça um novo link.', 403);
     },
     async profile(accountId) {
       const [row] = await db.query('SELECT email,minor,verified_at FROM labs_account_emails WHERE account_id=?', [accountId]);

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BookOpen, Monitor, Play, Smartphone } from "lucide-react";
 import { categoryLabels, deviceLabel, type Game } from "@/lib/games";
 
-const PAID = new Set(["vale-dos-blocos"]);
+const PAID = new Set(["valleyblocks"]);
 
 export function GameCard({ game, priority = false }: { game: Game; priority?: boolean }) {
   const ready = game.status === "disponivel";

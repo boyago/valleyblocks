@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
-  <title id="title">Vale dos Blocos — LABSGames</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">ValleyBlocks — LABSGames</title>
   <desc id="desc">Ilustração original de um pequeno mundo de blocos com casa de telhado laranja, árvores, estrada, carro, cachorro e gato.</desc>
   <defs>
     <linearGradient id="paper" x2="1" y2="1"><stop stop-color="#f7f4e8"/><stop offset="1" stop-color="#e9eddf"/></linearGradient>

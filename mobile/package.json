@@ -1,8 +1,8 @@
 {
-  "name": "vale-dos-blocos-mobile",
+  "name": "valleyblocks-mobile",
   "version": "0.1.0",
   "private": true,
-  "description": "Aplicativo Android/iOS do Vale dos Blocos (Capacitor embrulhando o build web de ../game).",
+  "description": "Aplicativo Android/iOS do ValleyBlocks (Capacitor embrulhando o build web de ../game).",
   "scripts": {
     "build:game": "npm --prefix ../game run build",
     "sync": "npm run build:game && npx cap sync",

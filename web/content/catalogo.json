@@ -3,8 +3,8 @@
   "atualizadoEm": "2026-10-16",
   "jogos": [
     {
-      "slug": "vale-dos-blocos",
-      "nome": "Vale dos Blocos",
+      "slug": "valleyblocks",
+      "nome": "ValleyBlocks",
       "resumo": "Construa seu lar, adote um pet e viaje por portais para o Rio, Nova York, China, Japão e mais.",
       "descricao": "Sandbox 3D em Three.js para computador: mundo procedural por seed, mineração, construção, inventário e receitas nos modos Criativo e Sobrevivência. Comece com casa, garagem e estrada, dirija um carro com carretinha, navegue de barco, pesque do lambari ao pirarucu e use ferramentas e armas que se desgastam com o uso. Portais de blocos levam a nove terras: Sertão, Minas Gerais, China, Japão, Grand Canyon, Tríplice Fronteira, Submundo, Rio de Janeiro e Nova York, cada uma com paisagem, bichos e inimigo próprios. Ciclo de dia e noite, multiplayer com amigos na versão completa e salvamento na nuvem.",
       "categoria": "aventura",
@@ -12,9 +12,9 @@
       "demonstracao": false,
       "destaque": true,
       "publicadoEm": "2026-09-26",
-      "capa": "/games/vale-dos-blocos/capa.svg",
-      "miniatura": "/games/vale-dos-blocos/miniatura.svg",
-      "entrada": "/games/vale-dos-blocos/",
+      "capa": "/games/valleyblocks/capa.svg",
+      "miniatura": "/games/valleyblocks/miniatura.svg",
+      "entrada": "/games/valleyblocks/",
       "integracao": "iframe-labs-v1",
       "proporcao": "16:9",
       "dispositivos": [

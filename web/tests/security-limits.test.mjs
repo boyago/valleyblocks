@@ -24,7 +24,7 @@ test('guest quota: dropping the cookie does not reset time charged to the IP own
     for (const sql of PLAY_SCHEMA) await db.query(sql); const store = createPlayStore(db);
     const ip = ipGuestOwner('203.0.113.9', 'x'.repeat(32)); assert.match(ip, /^ipguest:[0-9a-f]{64}$/); assert.ok(ip.length <= 80);
     assert.notEqual(ip, ipGuestOwner('203.0.113.10', 'x'.repeat(32)));
-    const input = { game: 'vale-dos-blocos', session: randomUUID(), active: true };
+    const input = { game: 'valleyblocks', session: randomUUID(), active: true };
     let data; for (let i = 0; i <= 60; i++) data = await store.record('guest:a', input, { ipOwner: ip }, start + i * 15000);
     assert.equal(data.allowed, false);
     // New cookie (fresh guest id), same IP: still denied.

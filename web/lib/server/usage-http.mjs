@@ -8,7 +8,7 @@ export function knownGames() {
   try {
     const catalog = JSON.parse(readFileSync(join(process.cwd(), 'content', 'catalogo.json'), 'utf8'));
     gameSlugs = new Set(catalog.jogos.filter(g => g.status === 'disponivel' && /^[a-z0-9-]{1,64}$/.test(g.slug)).map(g => g.slug));
-  } catch { gameSlugs = new Set(['vale-dos-blocos']); }
+  } catch { gameSlugs = new Set(['valleyblocks']); }
   return gameSlugs;
 }
 const COOKIE = 'labs_usage';

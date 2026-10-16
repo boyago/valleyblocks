@@ -12,7 +12,7 @@ const ICONS: Record<string, React.ReactNode> = {
   'vale-aparencias-expedicao': <Shirt className="size-6" aria-hidden="true" />,
   'vale-nuvem': <Cloud className="size-6" aria-hidden="true" />,
 };
-const title = (t: string) => { const short = t.replace('Vale dos Blocos · ', ''); return short.charAt(0).toUpperCase() + short.slice(1); };
+const title = (t: string) => { const short = t.replace('ValleyBlocks · ', ''); return short.charAt(0).toUpperCase() + short.slice(1); };
 const DETAILS: Record<string, string[]> = {
   'vale-completo': ['Jogue o tempo que quiser, todos os dias', 'Multiplayer: crie salas para até 4 jogadores', 'Mundo salvo na nuvem, até 4 MB', 'Continue em outro computador'],
   'vale-aparencias-expedicao': ['Acessórios modelados no Blender', 'Troque a aparência nas configurações do jogo', 'Vale em qualquer computador com a sua conta'],

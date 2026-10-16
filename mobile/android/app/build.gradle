@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "cloud.labsgames.valedosblocos"
+    namespace = "cloud.labsgames.valleyblocks"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "cloud.labsgames.valedosblocos"
+        applicationId "cloud.labsgames.valleyblocks"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

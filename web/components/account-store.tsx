@@ -28,7 +28,7 @@ export function AccountStore({ unlimited, cloudSave }: { unlimited: boolean; clo
   if (!paymentsEnabled) return null;
   const owned = (p: Product) => p.grants.every(g => g === 'unlimited' ? unlimited : g === 'cloud' ? cloudSave : orders.some(o => o.product === p.code && o.status === 'approved'));
   return <section id="loja" className="scroll-mt-24 space-y-4 rounded-2xl border border-[#C6FF00]/30 bg-[#15151D] p-6">
-    <h2 className="flex items-center gap-2 text-lg font-bold text-white"><ShoppingBag className="size-5 text-[#C6FF00]" aria-hidden="true" />Loja · Vale dos Blocos</h2>
+    <h2 className="flex items-center gap-2 text-lg font-bold text-white"><ShoppingBag className="size-5 text-[#C6FF00]" aria-hidden="true" />Loja · ValleyBlocks</h2>
     <p className="text-sm text-zinc-400">Pagamento por Pix, cartão ou saldo no Mercado Pago. O benefício é liberado automaticamente assim que o pagamento é confirmado; Pix costuma levar segundos, boleto pode levar dias.</p>
     <div className="flex flex-wrap items-end gap-3"><label className="text-sm font-semibold text-zinc-200">Tem um cupom?<input value={coupon} onChange={e => setCoupon(e.target.value.toUpperCase())} maxLength={32} placeholder="CÓDIGO" autoCapitalize="characters" spellCheck={false} className="mt-1 block min-h-10 w-44 rounded-lg border border-white/15 bg-[#0B0B10] text-white px-3 font-mono text-sm uppercase placeholder:text-zinc-400 focus:border-[#C000FF] focus:outline-none" /></label><p className="text-xs text-zinc-400">O desconto é aplicado ao clicar em comprar.</p></div>
     <ErrorBox message={error} />

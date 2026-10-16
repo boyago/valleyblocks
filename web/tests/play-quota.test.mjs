@@ -10,7 +10,7 @@ test('visitor/account quotas, unlimited, revocation, guest carryover, duplicate 
   const path=join(tmpdir(),`labs-play-${randomUUID()}.sqlite`),db=await openDatabase({LABS_USAGE_SQLITE_PATH:path,NODE_ENV:'test'});
   try{
     for(const sql of PLAY_SCHEMA)await db.query(sql);const store=createPlayStore(db);
-    const now=Date.parse('2026-10-11T15:00:00Z'),input={game:'vale-dos-blocos',session:randomUUID(),active:true};
+    const now=Date.parse('2026-10-11T15:00:00Z'),input={game:'valleyblocks',session:randomUUID(),active:true};
     let data=await store.record('guest',input,{},now);assert.equal(data.remainingSeconds,900);
     for(let i=1;i<=60;i++)data=await store.record('guest',input,{},now+i*15000);
     assert.equal(data.allowed,false);assert.equal(data.remainingSeconds,0);
@@ -28,18 +28,18 @@ test('visitor/account quotas, unlimited, revocation, guest carryover, duplicate 
 test('only the catalog game is accepted and daily time is shared between sessions', async () => {
   const { parseUsageBody, knownGames } = await import('../lib/server/usage-http.mjs');
   const games = knownGames();
-  assert.ok(games.has('vale-dos-blocos') && games.size === 1);
+  assert.ok(games.has('valleyblocks') && games.size === 1);
   const session = randomUUID();
-  assert.equal(parseUsageBody({ game: 'vale-dos-blocos', session, active: true }).game, 'vale-dos-blocos');
+  assert.equal(parseUsageBody({ game: 'valleyblocks', session, active: true }).game, 'valleyblocks');
   for (const game of ['nao-existe', 'canyon-strike', '../etc/passwd', '', null, 42]) assert.throws(() => parseUsageBody({ game, session, active: true }));
   const path = join(tmpdir(), `labs-play-${randomUUID()}.sqlite`), db = await openDatabase({ LABS_USAGE_SQLITE_PATH: path, NODE_ENV: 'test' });
   try {
     for (const sql of PLAY_SCHEMA) await db.query(sql); const store = createPlayStore(db);
     const now = Date.parse('2026-10-11T15:00:00Z');
-    let data = await store.record('guest', { game: 'vale-dos-blocos', session, active: true }, {}, now);
-    for (let i = 1; i <= 20; i++) data = await store.record('guest', { game: 'vale-dos-blocos', session, active: true }, {}, now + i * 15000);
-    await store.record('guest', { game: 'vale-dos-blocos', session, active: false }, {}, now + 21 * 15000);
-    const other = await store.record('guest', { game: 'vale-dos-blocos', session: randomUUID(), active: true }, {}, now + 22 * 15000);
+    let data = await store.record('guest', { game: 'valleyblocks', session, active: true }, {}, now);
+    for (let i = 1; i <= 20; i++) data = await store.record('guest', { game: 'valleyblocks', session, active: true }, {}, now + i * 15000);
+    await store.record('guest', { game: 'valleyblocks', session, active: false }, {}, now + 21 * 15000);
+    const other = await store.record('guest', { game: 'valleyblocks', session: randomUUID(), active: true }, {}, now + 22 * 15000);
     assert.ok(other.remainingSeconds <= 900 - 290, 'time used in one session counts in the next: ' + other.remainingSeconds);
   } finally { await db.close(); await unlink(path); }
 });

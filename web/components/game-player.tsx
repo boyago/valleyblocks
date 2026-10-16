@@ -113,8 +113,8 @@ export function GamePlayer({ game }: { game: Game }) {
     const blocked = () => touch.matches && portrait.matches && wantsLandscape;
     const enforceAccess=process.env.NEXT_PUBLIC_LABS_PLAY_ENABLED==='true';
     // Só o Vale manda 'gameplay'/'access-request'; nos demais o portal liga e desliga o relógio.
-    const portalTimed=game.slug!=='vale-dos-blocos';
-    const cloudSaves=process.env.NEXT_PUBLIC_LABS_WORLDS_ENABLED==='true' && game.slug==='vale-dos-blocos';
+    const portalTimed=game.slug!=='valleyblocks';
+    const cloudSaves=process.env.NEXT_PUBLIC_LABS_WORLDS_ENABLED==='true' && game.slug==='valleyblocks';
     const post = (type: string, data:object={}) => target.postMessage({ labs: 1, type, ...data }, location.origin);
     const access=enforceAccess?createGameAccess({game:game.slug,send:post,onStatus:setAccessStatus}):null;
     const worlds=cloudSaves?createGameWorld({send:post}):null;
@@ -139,7 +139,7 @@ export function GamePlayer({ game }: { game: Game }) {
       if (data.type === "started" && startSent) {
         clearTimeout(timeout); started = true; setPhase("playing"); updateOrientation();
         if (!blocked()) frame.current?.focus();
-        if (game.slug !== "vale-dos-blocos" && !measuredStart) { metric("started"); measuredStart = true; }
+        if (game.slug !== "valleyblocks" && !measuredStart) { metric("started"); measuredStart = true; }
         if (portalTimed) { access?.state(!blocked()); usage.state(!blocked()); }
       }
       if(data.type==='access-request'&&access&&typeof data.requestId==='string'&&data.requestId.length<=64) void access.request(data.requestId);
@@ -258,7 +258,7 @@ export function GamePlayer({ game }: { game: Game }) {
 
       {active && (
         <div className={`flex flex-wrap items-center gap-2 border-t border-white/10 px-3 ${immersive ? "min-h-11 justify-between py-1" : "justify-end py-3"}`}>
-          {immersive && <div className="flex items-center gap-2"><button type="button" onClick={stop} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-white/10 px-3 text-sm font-bold text-white"><X className="size-4" aria-hidden="true" /> Sair</button>{game.slug === 'vale-dos-blocos' && !accessStatus.unlimited && <Link href="/comprar/vale-completo" className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#C6FF00]/15 px-3 text-sm font-bold text-[#C6FF00]"><ShoppingBag className="size-4" aria-hidden="true" /> Versão completa {FULL_PRICE}</Link>}</div>}
+          {immersive && <div className="flex items-center gap-2"><button type="button" onClick={stop} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-white/10 px-3 text-sm font-bold text-white"><X className="size-4" aria-hidden="true" /> Sair</button>{game.slug === 'valleyblocks' && !accessStatus.unlimited && <Link href="/comprar/vale-completo" className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#C6FF00]/15 px-3 text-sm font-bold text-[#C6FF00]"><ShoppingBag className="size-4" aria-hidden="true" /> Versão completa {FULL_PRICE}</Link>}</div>}
           <div className="flex gap-2">
             <button type="button" disabled={phase !== "playing" || !game.reiniciar || showRotate} onClick={() => send("restart")} className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-white/10 px-3 text-sm font-bold text-white hover:bg-white/15"><RotateCcw className="size-4" aria-hidden="true" /> Reiniciar</button>
             {game.telaCheia && !immersive && <button type="button" onClick={() => void enterImmersive()} className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-white/10 px-3 text-sm font-bold text-white hover:bg-white/15"><Expand className="size-4" aria-hidden="true" /> Tela cheia</button>}

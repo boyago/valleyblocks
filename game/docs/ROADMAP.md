@@ -1,4 +1,4 @@
-# Planejamento — Vale dos Blocos
+# Planejamento — ValleyBlocks
 
 ## Decisão registrada em 29/09/2026: multiplayer pago, para uma etapa futura
 

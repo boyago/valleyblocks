@@ -9,22 +9,22 @@ const outfit = Outfit({ subsets: ["latin"], weight: ["600", "700", "800", "900"]
 import "./globals.css";
 import { PrivacyRuntime } from "@/components/privacy-controls";
 
-const description = "Jogue Vale dos Blocos, o jogo brasileiro de construir em blocos no navegador, e outros jogos de aventura, corrida e puzzle. Sem download, no computador, tablet ou celular. Comece grátis.";
+const description = "Jogue ValleyBlocks, o jogo brasileiro de construir em blocos no navegador, e outros jogos de aventura, corrida e puzzle. Sem download, no computador, tablet ou celular. Comece grátis.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "Vale dos Blocos: jogo de construir em blocos 3D no navegador", template: "%s | Vale dos Blocos" },
+  title: { default: "ValleyBlocks: jogo de construir em blocos 3D no navegador", template: "%s | ValleyBlocks" },
   description,
   verification: { google: process.env.GOOGLE_SITE_VERIFICATION || undefined },
   applicationName: SITE_NAME,
-  keywords: ["Vale dos Blocos", "jogo de construir blocos online", "jogo estilo Minecraft no navegador", "jogo de blocos brasileiro", "jogos grátis", "jogos online", "jogos no navegador", "jogos sem download", "jogos para celular", "jogos de puzzle", "jogos de ação", "jogos criados com IA"],
+  keywords: ["ValleyBlocks", "jogo de construir blocos online", "jogo estilo Minecraft no navegador", "jogo de blocos brasileiro", "jogos grátis", "jogos online", "jogos no navegador", "jogos sem download", "jogos para celular", "jogos de puzzle", "jogos de ação", "jogos criados com IA"],
   authors: [{ name: "Alexandre Boyago", url: "https://alexandreboyago.com.br" }],
   creator: "Alexandre Boyago",
   publisher: SITE_NAME,
   category: "games",
   alternates: { canonical: "/" },
-  openGraph: { type: "website", locale: "pt_BR", siteName: SITE_NAME, url: "/", title: "Vale dos Blocos: jogo de construir em blocos 3D no navegador", description, images: [{ url: "/og.png", width: 1200, height: 630, alt: "Vale dos Blocos: jogos no navegador" }] },
-  twitter: { card: "summary_large_image", title: "Vale dos Blocos: construa, explore e viaje por portais", description, images: ["/og.png"] },
+  openGraph: { type: "website", locale: "pt_BR", siteName: SITE_NAME, url: "/", title: "ValleyBlocks: jogo de construir em blocos 3D no navegador", description, images: [{ url: "/og.png", width: 1200, height: 630, alt: "ValleyBlocks: jogos no navegador" }] },
+  twitter: { card: "summary_large_image", title: "ValleyBlocks: construa, explore e viaje por portais", description, images: ["/og.png"] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };

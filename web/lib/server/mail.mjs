@@ -21,6 +21,6 @@ ${text}
     return {outbox:true};
   }
   const transporter=mailTransport(env);
-  try{return await transporter.sendMail({from:{name:'Vale dos Blocos',address:env.LABS_MAIL_FROM||env.LABS_SMTP_USER},to,subject,text,disableFileAccess:true,disableUrlAccess:true});}
+  try{return await transporter.sendMail({from:{name:'ValleyBlocks',address:env.LABS_MAIL_FROM||env.LABS_SMTP_USER},to,subject,text,disableFileAccess:true,disableUrlAccess:true});}
   finally{transporter.close();}
 }

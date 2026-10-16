@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BookOpen, Gamepad2, Menu, UserRound } from "lucide-react";
 
 export function Brand() {
-  return <Link href="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl font-black tracking-[-0.06em] text-white" aria-label="Vale dos Blocos, ir ao início"><span className="grid size-9 place-items-center rounded-xl bg-[#C6FF00] text-[#0B0B10] shadow-[0_4px_0_#547c00]"><Gamepad2 className="size-5" aria-hidden="true" /></span><span>LABS<span className="text-[#D86BFF]">Games</span></span></Link>;
+  return <Link href="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl font-black tracking-[-0.06em] text-white" aria-label="ValleyBlocks, ir ao início"><span className="grid size-9 place-items-center rounded-xl bg-[#C6FF00] text-[#0B0B10] shadow-[0_4px_0_#547c00]"><Gamepad2 className="size-5" aria-hidden="true" /></span><span>LABS<span className="text-[#D86BFF]">Games</span></span></Link>;
 }
 
 const LINKS = [
@@ -52,7 +52,7 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()} Vale dos Blocos.</p>
+        <p>© {new Date().getFullYear()} ValleyBlocks.</p>
         <p>Desenvolvido por <a href="https://alexandreboyago.com.br" target="_blank" rel="author noopener" className="font-bold text-zinc-300 underline-offset-4 hover:text-white hover:underline">Alexandre Boyago</a></p>
       </div>
     </div>

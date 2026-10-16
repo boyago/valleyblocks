@@ -1,4 +1,4 @@
-const DATABASE_NAME = 'labs-vale-dos-blocos';
+const DATABASE_NAME = 'labs-valleyblocks';
 const STORE_NAME = 'snapshots';
 const SAVE_KEY = 'current';
 const FALLBACK_KEY = `${DATABASE_NAME}:save:v1`;

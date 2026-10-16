@@ -19,10 +19,10 @@ const PERKS = [
 export function CatalogExperience({ games, initialCategory = "todos" }: { games: Game[]; initialCategory?: Filter }) {
   const [query, setQuery] = useState(""); const [filter, setFilter] = useState<Filter>(initialCategory);
   const available = games.filter(g => g.status === "disponivel");
-  const featured = available.find(g => g.slug === "vale-dos-blocos") || available.find(g => g.destaque) || available[0];
+  const featured = available.find(g => g.slug === "valleyblocks") || available.find(g => g.destaque) || available[0];
   const trending = available.filter(g => g.slug !== featured?.slug && g.destaque).concat(available.filter(g => g.slug !== featured?.slug && !g.destaque)).slice(0, 3);
-  const isVale = featured?.slug === "vale-dos-blocos";
-  const heroImage = isVale ? "/jogos/vale-dos-blocos/abertura.jpg" : featured?.capa;
+  const isVale = featured?.slug === "valleyblocks";
+  const heroImage = isVale ? "/jogos/valleyblocks/abertura.jpg" : featured?.capa;
   const normalized = fold(query);
   const results = useMemo(() => games.filter(g => (filter === "todos" || g.categoria === filter) && fold(`${g.nome} ${g.resumo} ${categoryLabels[g.categoria]}`).includes(normalized)), [filter, games, normalized]);
   const filtering = query.length > 0 || filter !== "todos"; const clear = () => { setQuery(""); setFilter("todos"); };
@@ -44,7 +44,7 @@ export function CatalogExperience({ games, initialCategory = "todos" }: { games:
         </div>
         <div className="rise grid gap-4 [animation-delay:120ms] lg:col-span-7">
           <Link href={`/jogos/${featured.slug}`} className="group relative block aspect-video overflow-hidden rounded-3xl border border-white/10 shadow-[0_40px_80px_-30px_rgb(192_0_255/.6)]">
-            <img src={heroImage} alt={isVale ? "Vale dos Blocos: casa, garagem, estrada e pets em um mundo de blocos 3D" : `Capa de ${featured.nome}`} width={1160} height={760} fetchPriority="high" className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
+            <img src={heroImage} alt={isVale ? "ValleyBlocks: casa, garagem, estrada e pets em um mundo de blocos 3D" : `Capa de ${featured.nome}`} width={1160} height={760} fetchPriority="high" className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
             <span className="absolute inset-0 grid place-items-center bg-[#0B0B10]/0 transition group-hover:bg-[#0B0B10]/30" aria-hidden="true"><span className="grid size-20 scale-90 place-items-center rounded-full bg-[#C6FF00] text-[#0B0B10] opacity-0 shadow-[0_12px_40px_rgb(198_255_0/.45)] transition group-hover:scale-100 group-hover:opacity-100"><Play className="ml-1 size-8 fill-current" /></span></span>
           </Link>
           {trending.length > 0 && <ul className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">{trending.map(g => <li key={g.slug} className="w-[70%] shrink-0 snap-start sm:w-auto"><Link href={`/jogos/${g.slug}`} className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-[#14131c]/80 p-2 pr-3 backdrop-blur transition hover:border-[#C000FF]/50"><img src={g.miniatura} alt="" aria-hidden="true" loading="lazy" className="aspect-video w-20 shrink-0 rounded-lg object-cover" /><span className="min-w-0"><span className="block truncate text-sm font-bold text-white">{g.nome}</span><span className="block text-xs text-zinc-400">{categoryLabels[g.categoria]}</span></span></Link></li>)}</ul>}

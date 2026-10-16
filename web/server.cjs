@@ -24,4 +24,4 @@ const server = createServer(async (request, response) => {
 });
 // Co-op WebSocket (/mp). Loaded lazily so a failure here never blocks the site.
 import("./lib/server/multiplayer-ws.mjs").then(m => m.attachMultiplayer(server)).catch(error => console.error("[labs] multiplayer disabled:", error?.code || error?.name || "UNKNOWN"));
-server.listen(port, () => console.log(`Vale dos Blocos disponível em ${port}`));
+server.listen(port, () => console.log(`ValleyBlocks disponível em ${port}`));

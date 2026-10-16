@@ -34,7 +34,7 @@ export function AccountForm({ activate = false }: { activate?: boolean }) {
       const response = await fetch(`/api/account/${activate ? 'activate' : 'login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(activate ? { token, password: submittedPassword } : { username: String(fields.get('username') || '').trim(), password: submittedPassword }) });
       const data = await response.json(); if (!response.ok) throw Error(data.error);
       setPassword(''); setConfirmation('');
-      if (activate) { setToken(''); router.push(safeNext || '/jogos/vale-dos-blocos'); } else router.push(safeNext || (data.account.role === 'admin' ? '/admin' : '/conta'));
+      if (activate) { setToken(''); router.push(safeNext || '/jogos/valleyblocks'); } else router.push(safeNext || (data.account.role === 'admin' ? '/admin' : '/conta'));
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Não foi possível continuar.'); }
     finally { setBusy(false); }
   }
@@ -43,7 +43,7 @@ export function AccountForm({ activate = false }: { activate?: boolean }) {
     <div aria-hidden="true" className="pointer-events-none absolute -left-32 top-0 size-96 rounded-full bg-[#C000FF]/20 blur-3xl" /><div aria-hidden="true" className="pointer-events-none absolute -right-32 bottom-0 size-96 rounded-full bg-[#C6FF00]/10 blur-3xl" />
     <div className="relative w-full max-w-md space-y-6 rounded-2xl border border-white/10 bg-[#15151D]/95 p-8 shadow-2xl">
       <Brand />
-      <div><h1 className="text-3xl font-black text-white">{activate ? 'Defina sua senha' : 'Entrar na conta'}</h1><p className="mt-2 text-sm text-zinc-400">{activate ? 'O convite pode ser usado uma vez. Escolha uma senha exclusiva com pelo menos 12 caracteres.' : 'Com uma conta você joga até 60 minutos por dia no Vale dos Blocos.'}</p></div>
+      <div><h1 className="text-3xl font-black text-white">{activate ? 'Defina sua senha' : 'Entrar na conta'}</h1><p className="mt-2 text-sm text-zinc-400">{activate ? 'O convite pode ser usado uma vez. Escolha uma senha exclusiva com pelo menos 12 caracteres.' : 'Com uma conta você joga até 60 minutos por dia no ValleyBlocks.'}</p></div>
       {done ? <><p className="rounded-lg border border-[#C6FF00]/30 bg-[#C6FF00]/10 p-4 text-sm">Conta ativada. Agora entre com seu usuário e a senha que acabou de definir.</p><Link className={`${btn.primary} w-full`} href="/conta/entrar">Ir para o login</Link></> :
       <form method="post" onSubmit={submit} className="space-y-5">
         {!activate && <label className="block text-sm font-bold text-zinc-200">Usuário<input className={input} name="username" value={name} onChange={e => setName(e.target.value)} autoComplete="username" required maxLength={32} /></label>}

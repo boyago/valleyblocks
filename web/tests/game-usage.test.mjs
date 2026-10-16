@@ -8,7 +8,7 @@ import { advanceSession, remainingSeconds, dayKey } from '../lib/usage-policy.mj
 import { openDatabase, SCHEMA, createUsageStore } from '../lib/server/usage-store.mjs';
 import { identifyVisitor, parseUsageBody, secureEqual } from '../lib/server/usage-http.mjs';
 import { createGameUsage } from '../lib/game-usage-client.mjs';
-const start=Date.parse('2026-10-11T15:00:00Z'),game='vale-dos-blocos';
+const start=Date.parse('2026-10-11T15:00:00Z'),game='valleyblocks';
 
 test('policy grants 15/60 minutes with previously used guest time subtracted',()=>{
   assert.equal(remainingSeconds('visitor',0),900);

@@ -23,7 +23,7 @@ function faqFor(game: Game) {
     { q: `Como jogar ${game.nome}?`, a: `${game.objetivo} Basta abrir a página e tocar em Jogar: o jogo roda no navegador, sem download e sem cadastro.` },
     { q: `Quais são os controles de ${game.nome}?`, a: controls || "Use o mouse ou o toque na tela." },
     { q: `${game.nome} funciona no celular?`, a: game.dispositivos.includes("mobile") ? `Sim. ${game.nome} oferece controles de toque no celular${game.orientacao === "paisagem" ? " e é jogado na horizontal, em tela cheia" : ""}. O desempenho depende do aparelho e do navegador.` : `${game.nome} é indicado para computador, com teclado.` },
-    { q: `${game.nome} é grátis?`, a: game.slug === "vale-dos-blocos" ? `Sim, para jogar no navegador: 15 minutos por dia como visitante e 60 minutos com conta gratuita. A versão completa, por ${formatPrice(PRODUCTS["vale-completo"].priceCents)} em pagamento único, remove o limite de tempo e salva o mundo na nuvem.` : `Sim. ${game.nome} é gratuito no navegador, dentro do tempo diário: 15 minutos como visitante e 60 minutos com conta.` },
+    { q: `${game.nome} é grátis?`, a: game.slug === "valleyblocks" ? `Sim, para jogar no navegador: 15 minutos por dia como visitante e 60 minutos com conta gratuita. A versão completa, por ${formatPrice(PRODUCTS["vale-completo"].priceCents)} em pagamento único, remove o limite de tempo e salva o mundo na nuvem.` : `Sim. ${game.nome} é gratuito no navegador, dentro do tempo diário: 15 minutos como visitante e 60 minutos com conta.` },
   ];
 }
 
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const game = games.find((item) => item.slug === slug);
   if (!game) return {};
-  const title = game.slug === "vale-dos-blocos" ? "Vale dos Blocos: jogo de construir em blocos online no navegador" : `${game.nome}: jogar grátis online`;
+  const title = game.slug === "valleyblocks" ? "ValleyBlocks: jogo de construir em blocos online no navegador" : `${game.nome}: jogar grátis online`;
   const description = `${game.resumo} Jogue ${game.nome} grátis no navegador, ${deviceLabel(game.dispositivos).toLowerCase()}, sem cadastro.`;
   const shareImage = game.capa.endsWith(".svg") ? "/og.png" : game.capa;
   return {
@@ -51,7 +51,7 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
   const others = games.filter((item) => item.slug !== game.slug && item.status === "disponivel");
   const related = [...others.filter((item) => item.categoria === game.categoria), ...others.filter((item) => item.categoria !== game.categoria)].slice(0, 3);
   const faq = faqFor(game);
-  const sales = game.slug === "vale-dos-blocos";
+  const sales = game.slug === "valleyblocks";
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -63,7 +63,7 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
           ? [{ "@type": "Offer", name: "Jogar grátis (15 a 60 min por dia)", price: "0", priceCurrency: "BRL", availability: "https://schema.org/InStock", url: absoluteUrl(`/jogos/${game.slug}`) },
              { "@type": "Offer", name: PRODUCTS["vale-completo"].title, price: (PRODUCTS["vale-completo"].priceCents / 100).toFixed(2), priceCurrency: "BRL", availability: "https://schema.org/InStock", url: absoluteUrl("/comprar/vale-completo") }]
           : { "@type": "Offer", price: "0", priceCurrency: "BRL", availability: game.status === "disponivel" ? "https://schema.org/InStock" : "https://schema.org/PreOrder" },
-        ...(sales ? { alternateName: ["Vale dos Blocos", "jogo de blocos brasileiro"], keywords: "jogo de construir, blocos, voxel, portais, Brasil, Rio de Janeiro, Nova York, pets, pescaria, navegador", gameItem: ["picareta", "espada", "espingarda", "pá", "foice", "barco", "carretinha"], gameLocation: ["Sertão", "Minas Gerais", "Rio de Janeiro", "Tríplice Fronteira", "Nova York", "Estados Unidos", "China", "Japão", "Submundo"], screenshot: [absoluteUrl("/jogos/vale-dos-blocos/abertura.jpg"), absoluteUrl("/jogos/vale-dos-blocos/terra-rio.jpg"), absoluteUrl("/jogos/vale-dos-blocos/terra-nyc.jpg")], howToPlay: absoluteUrl(`/jogos/${game.slug}/como-jogar`) } : {}),
+        ...(sales ? { alternateName: ["ValleyBlocks", "jogo de blocos brasileiro"], keywords: "jogo de construir, blocos, voxel, portais, Brasil, Rio de Janeiro, Nova York, pets, pescaria, navegador", gameItem: ["picareta", "espada", "espingarda", "pá", "foice", "barco", "carretinha"], gameLocation: ["Sertão", "Minas Gerais", "Rio de Janeiro", "Tríplice Fronteira", "Nova York", "Estados Unidos", "China", "Japão", "Submundo"], screenshot: [absoluteUrl("/jogos/valleyblocks/abertura.jpg"), absoluteUrl("/jogos/valleyblocks/terra-rio.jpg"), absoluteUrl("/jogos/valleyblocks/terra-nyc.jpg")], howToPlay: absoluteUrl(`/jogos/${game.slug}/como-jogar`) } : {}),
       },
       { "@type": "BreadcrumbList", itemListElement: [ { "@type": "ListItem", position: 1, name: "Jogos", item: absoluteUrl("/") }, { "@type": "ListItem", position: 2, name: categoryLabels[game.categoria], item: absoluteUrl(`/?categoria=${game.categoria}`) }, { "@type": "ListItem", position: 3, name: game.nome, item: absoluteUrl(`/jogos/${game.slug}`) } ] },
       { "@type": "FAQPage", mainEntity: faq.map((item) => ({ "@type": "Question", name: item.q, acceptedAnswer: { "@type": "Answer", text: item.a } })) },
@@ -85,7 +85,7 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
             </div>
           </div>
           <figure className="overflow-hidden rounded-3xl border border-white/10 bg-[#14131c] shadow-[0_40px_80px_-30px_rgba(192,0,255,.6)] md:col-span-7">
-            <img src={sales ? "/jogos/vale-dos-blocos/abertura.jpg" : game.capa} alt={sales ? "Tela de abertura do Vale dos Blocos: casa, garagem, estrada e pets em um mundo de blocos" : `Capa de ${game.nome}`} width={sales ? 1160 : 1280} height={sales ? 760 : 720} fetchPriority="high" className="aspect-[3/2] h-auto w-full object-cover" />
+            <img src={sales ? "/jogos/valleyblocks/abertura.jpg" : game.capa} alt={sales ? "Tela de abertura do ValleyBlocks: casa, garagem, estrada e pets em um mundo de blocos" : `Capa de ${game.nome}`} width={sales ? 1160 : 1280} height={sales ? 760 : 720} fetchPriority="high" className="aspect-[3/2] h-auto w-full object-cover" />
           </figure>
         </div>
       </div>

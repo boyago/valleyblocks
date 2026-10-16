@@ -1,6 +1,6 @@
 import { randomInt } from 'node:crypto';
 
-// Co-op rooms for Vale dos Blocos. In-memory (one Node process), host-authoritative:
+// Co-op rooms for ValleyBlocks. In-memory (one Node process), host-authoritative:
 // the host's game owns and saves the world; the server only authenticates, routes and
 // validates messages. Nothing here touches the database except through `authenticate`.
 export const MAX_PLAYERS = 4;

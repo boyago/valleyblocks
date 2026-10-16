@@ -7,6 +7,6 @@
   <url><loc>http://localhost:3000/contato</loc></url>
   <url><loc>http://localhost:3000/privacidade</loc></url>
   <url><loc>http://localhost:3000/termos</loc></url>
-  <url><loc>http://localhost:3000/jogos/vale-dos-blocos</loc><image:image><image:loc>http://localhost:3000/games/vale-dos-blocos/capa.svg</image:loc><image:title>Vale dos Blocos</image:title></image:image></url>
-  <url><loc>http://localhost:3000/jogos/vale-dos-blocos/como-jogar</loc></url>
+  <url><loc>http://localhost:3000/jogos/valleyblocks</loc><image:image><image:loc>http://localhost:3000/games/valleyblocks/capa.svg</image:loc><image:title>ValleyBlocks</image:title></image:image></url>
+  <url><loc>http://localhost:3000/jogos/valleyblocks/como-jogar</loc></url>
 </urlset>

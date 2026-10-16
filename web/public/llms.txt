@@ -1,9 +1,9 @@
-# Vale dos Blocos
+# ValleyBlocks
 
 > Jogo brasileiro de construir em blocos 3D (voxel), estilo sandbox, que roda direto no navegador, sem download. Portais levam a lugares do Brasil e do mundo.
 
-- Página: http://localhost:3000/jogos/vale-dos-blocos
-- Guia (objetivo e controles): http://localhost:3000/jogos/vale-dos-blocos/como-jogar
+- Página: http://localhost:3000/jogos/valleyblocks
+- Guia (objetivo e controles): http://localhost:3000/jogos/valleyblocks/como-jogar
 - Para quem: famílias e crianças que gostam de construir e explorar; também adultos fãs de jogos de blocos.
 - O que dá para fazer: construir casa, adotar pets, minerar, criar ferramentas na bancada (picareta, pá, espada, espingarda), pescar, usar barco e carretinha no carro.
 - Terras por portais: Sertão, Minas Gerais (com ET de Varginha, capivara e onça), Rio de Janeiro (Cristo Redentor), Tríplice Fronteira (Foz do Iguaçu, Ciudad del Este, Puerto Iguazú), Nova York (Estátua da Liberdade), Estados Unidos, China, Japão e Submundo.

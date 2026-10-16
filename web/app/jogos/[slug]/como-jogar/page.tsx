@@ -27,7 +27,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
     { icon: MousePointerClick, title: "Toque em Jogar", text: `Na página de ${game.nome}, toque em Jogar. Não precisa instalar nada.` },
     { icon: Maximize, title: "Tela inteira", text: "O jogo abre ocupando a tela toda. Para voltar ao site, use o botão Sair." },
     ...(mobile && game.orientacao === "paisagem" ? [{ icon: RotateCw, title: "Celular deitado", text: "No celular ou tablet, jogue com o aparelho na horizontal." }] : []),
-    { icon: Timer, title: "Seu tempo do dia", text: game.slug === "vale-dos-blocos" ? "15 minutos por dia como visitante, 60 com conta. A versão completa não tem limite." : "15 minutos por dia como visitante e 60 com conta gratuita." },
+    { icon: Timer, title: "Seu tempo do dia", text: game.slug === "valleyblocks" ? "15 minutos por dia como visitante, 60 com conta. A versão completa não tem limite." : "15 minutos por dia como visitante e 60 com conta gratuita." },
   ];
   return <div className="grain min-h-[100dvh] bg-[#0B0B10] text-zinc-100"><SiteHeader /><main>
     <section className="relative overflow-hidden">
@@ -60,7 +60,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
 
       <GameControls game={game} />
 
-      {game.slug === "vale-dos-blocos" && <ValeFeatures />}
+      {game.slug === "valleyblocks" && <ValeFeatures />}
 
       <section aria-labelledby="aparelhos" className="grid gap-4 md:grid-cols-2">
         <h2 id="aparelhos" className="sr-only">Aparelhos e requisitos</h2>

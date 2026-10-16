@@ -1,4 +1,4 @@
-package cloud.labsgames.valedosblocos;
+package cloud.labsgames.valleyblocks;
 
 import com.getcapacitor.BridgeActivity;
 
