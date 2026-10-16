@@ -1,0 +1,22 @@
+{
+  "name": "vale-dos-blocos-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplicativo Android/iOS do Vale dos Blocos (Capacitor embrulhando o build web de ../game).",
+  "scripts": {
+    "build:game": "npm --prefix ../game run build",
+    "sync": "npm run build:game && npx cap sync",
+    "android": "npm run sync && npx cap open android",
+    "ios": "npm run sync && npx cap open ios",
+    "run:android": "npm run sync && npx cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/screen-orientation": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4"
+  }
+}

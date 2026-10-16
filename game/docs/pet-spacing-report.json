@@ -1,0 +1,9 @@
+{
+  "checks": [
+    "Both companions follow and keep space at 49,35.002,40",
+    "Both companions follow and keep space at 49,35.002,49",
+    "Both companions follow and keep space at 39,35.002,49",
+    "No browser errors"
+  ],
+  "errors": []
+}

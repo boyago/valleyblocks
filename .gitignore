@@ -1,0 +1,25 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
+# builds gerados
+game/dist/
+game/test-results/
+game/playwright-report/
+web/.next/
+web/out/
+web/*.tsbuildinfo
+web/next-env.d.ts
+web/.local/
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/ios/App/Pods/
+mobile/ios/App/App/public/
+mobile/ios/App/App/capacitor.config.json
+mobile/android/app/src/main/assets/public/
+mobile/android/app/src/main/assets/capacitor.config.json
+mobile/android/app/src/main/assets/capacitor.plugins.json

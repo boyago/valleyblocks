@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url><loc>http://localhost:3000/</loc></url>
+  <url><loc>http://localhost:3000/guias</loc></url>
+  <url><loc>http://localhost:3000/sobre</loc></url>
+  <url><loc>http://localhost:3000/parceiros</loc></url>
+  <url><loc>http://localhost:3000/contato</loc></url>
+  <url><loc>http://localhost:3000/privacidade</loc></url>
+  <url><loc>http://localhost:3000/termos</loc></url>
+  <url><loc>http://localhost:3000/jogos/vale-dos-blocos</loc><image:image><image:loc>http://localhost:3000/games/vale-dos-blocos/capa.svg</image:loc><image:title>Vale dos Blocos</image:title></image:image></url>
+  <url><loc>http://localhost:3000/jogos/vale-dos-blocos/como-jogar</loc></url>
+</urlset>

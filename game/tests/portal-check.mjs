@@ -1,0 +1,46 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({headless:true,channel:process.env.BROWSER_CHANNEL||'msedge'});
+const page=await browser.newPage({viewport:{width:1440,height:1050}});
+const errors=[],messages=[],checks=[];
+page.on('pageerror',e=>errors.push(e.message));
+await mkdir('test-results',{recursive:true});
+const check=(name,value)=>{assert.ok(value,name);checks.push(name);console.log('PASS',name);};
+try {
+  await page.goto(process.env.PORTAL_URL||'http://localhost:5174/jogos/vale-dos-blocos',{waitUntil:'networkidle'});
+  check('game appears in the LABSGames portal',await page.getByRole('heading',{name:'Vale dos Blocos',exact:true}).first().isVisible());
+  await page.evaluate(()=>{window.__labsMessages=[];window.addEventListener('message',e=>{if(e.data?.labs===1)window.__labsMessages.push(e.data);});});
+  await page.getByRole('button',{name:/^Jogar(?: agora)?$/}).click();
+  const frame=page.frameLocator('iframe[title="Vale dos Blocos"]');
+  await frame.locator('[data-action="new-game"]').waitFor({timeout:25000});
+  await page.waitForTimeout(1500);
+  check('production iframe completes ready/started handshake for version 1.11.0',await page.evaluate(()=>window.__labsMessages.some(m=>m.type==='ready'&&m.version==='1.11.0')&&window.__labsMessages.some(m=>m.type==='started')));
+  await page.screenshot({path:'test-results/07-portal.png',fullPage:true});
+  await frame.locator('[data-action="new-game"]').click();
+  const gameFrame=page.frames().find(f=>f.url().includes('/games/vale-dos-blocos/'));
+  await gameFrame.waitForFunction(()=>window.__valeDebug?.().running);
+  check('production build has no development mutation hook',await gameFrame.evaluate(()=>!window.__valeGame&&window.__valeDebug().running));
+  check('portal new world starts with zero items and nine empty shortcuts',await gameFrame.evaluate(()=>{const i=window.__valeDebug().inventory;return Object.keys(i.counts).length===0&&i.hotbar.every(id=>id===null);}));
+  check('pointer lock works inside portal iframe',await gameFrame.evaluate(()=>document.pointerLockElement?.id==='world'));
+  await page.keyboard.down('w');await page.waitForTimeout(400);await page.keyboard.up('w');
+  const moved=await gameFrame.evaluate(()=>window.__valeDebug().player.position[2]);
+  check('keyboard movement works in embedded game',moved<11.5);
+  await page.evaluate(()=>document.querySelector('iframe').contentWindow.postMessage({labs:1,type:'pause'},location.origin));
+  await gameFrame.waitForFunction(()=>window.__valeDebug().menu==='pause');
+  check('portal pause releases pointer and stops game',await gameFrame.evaluate(()=>!window.__valeDebug().running&&document.pointerLockElement===null));
+  await frame.locator('[data-action="resume"]').click();
+  await gameFrame.waitForFunction(()=>window.__valeDebug().running);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button',{name:'Reiniciar',exact:true}).click();
+  await gameFrame.waitForFunction(()=>window.__valeDebug().started&&window.__valeDebug().player.position[2]===12);
+  check('portal restart creates a fresh playable session',await gameFrame.evaluate(()=>window.__valeDebug().edits===0));
+  await page.evaluate(()=>document.querySelector('iframe').contentWindow.postMessage({labs:1,type:'destroy'},location.origin));
+  const before=await gameFrame.evaluate(()=>window.__valeDebug().time);await page.waitForTimeout(150);
+  check('destroy stops simulation',await gameFrame.evaluate(t=>window.__valeDebug().time===t,before));
+  check('no portal or iframe runtime errors',errors.length===0);
+  const report={date:new Date().toISOString(),browser:browser.version(),checks,errors,messages:await page.evaluate(()=>window.__labsMessages)};
+  await writeFile('test-results/portal-report.json',JSON.stringify(report,null,2));
+  console.log(JSON.stringify(report,null,2));
+}catch(error){await page.screenshot({path:'test-results/portal-failure.png',fullPage:true}).catch(()=>{});console.error(errors);throw error;}
+finally{await browser.close();}

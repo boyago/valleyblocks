@@ -1,0 +1,16 @@
+/node_modules
+/.next/
+/out/
+/coverage
+/dist/
+.DS_Store
+*.pem
+npm-debug.log*
+.env*
+!.env.example
+next-env.d.ts
+*.tsbuildinfo
+/.local/
+/.sites-runtime/
+/work/
+/outputs/

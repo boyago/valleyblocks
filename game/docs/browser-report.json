@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-08T19:38:06.851Z",
+  "browser": "153.0.4234.48",
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0",
+    "hardwareConcurrency": 12,
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1650 (0x00001F82) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (NVIDIA)",
+    "viewport": [
+      1440,
+      900
+    ],
+    "devicePixelRatio": 1
+  },
+  "checks": [
+    "landing renders without runtime errors",
+    "survival starts with pointer lock and finite materials",
+    "inventory releases cursor and freezes simulation",
+    "recipe UI consumes inputs and gives output",
+    "workbench-only crafting is rejected away from the station",
+    "inventory displays piles of at most 64",
+    "mouse mining removes a block on a chunk edge and collects it",
+    "right click places a grid block and debits inventory",
+    "adoption consumes one treat and names the pet",
+    "pet boards an available stopped car",
+    "context action enters the starter vehicle",
+    "car crosses several chunk boundaries and stays supported",
+    "pet remains a passenger while travelling",
+    "exiting at speed is prevented",
+    "camera and headlight controls respond",
+    "stopped vehicle opens its trunk",
+    "trunk transfer conserves materials",
+    "stationary vehicle finds a safe exit",
+    "E opens the cottage door",
+    "chest is reachable through world interaction",
+    "chest withdrawal is atomic",
+    "nearby workbench enables vehicle-part recipe",
+    "saved world offers Continue",
+    "restore preserves seed, inventory, edits and entity count",
+    "restore preserves pet name, passenger, trunk, chest and open door",
+    "low quality changes resolution and shadows",
+    "automatic save completes without a menu",
+    "Save and exit returns to menu with a continuing save",
+    "no browser errors throughout complete session"
+  ],
+  "errors": [],
+  "drivingPerformance": [
+    {
+      "fps": 166,
+      "ms": 6.011904761904764
+    },
+    {
+      "fps": 200,
+      "ms": 5.000000000000003
+    },
+    {
+      "fps": 190,
+      "ms": 5.2593749999999995
+    },
+    {
+      "fps": 200,
+      "ms": 4.999009900990097
+    },
+    {
+      "fps": 200,
+      "ms": 5.000000000000003
+    },
+    {
+      "fps": 192,
+      "ms": 5.205154639175256
+    },
+    {
+      "fps": 200,
+      "ms": 5.000000000000001
+    },
+    {
+      "fps": 184,
+      "ms": 5.434782608695656
+    },
+    {
+      "fps": 198,
+      "ms": 5.0489999999999995
+    },
+    {
+      "fps": 190,
+      "ms": 5.260416666666669
+    },
+    {
+      "fps": 200,
+      "ms": 4.999009900990117
+    },
+    {
+      "fps": 196,
+      "ms": 5.101010101010105
+    }
+  ],
+  "drivingRenderer": {
+    "fps": 196,
+    "width": 1440,
+    "height": 900,
+    "calls": 114,
+    "triangles": 23960,
+    "geometries": 256
+  }
+}

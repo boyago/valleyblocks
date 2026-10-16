@@ -1,0 +1,9 @@
+{
+  "appId": "cloud.labsgames.valedosblocos",
+  "appName": "Vale dos Blocos",
+  "webDir": "../game/dist",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never" },
+  "plugins": { "StatusBar": { "overlaysWebView": true, "style": "DARK" } }
+}

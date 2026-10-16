@@ -1,0 +1,18 @@
+{
+  "checks": [
+    "home contains sofa, TV and grill",
+    "E switches TV on",
+    "E switches TV off",
+    "daytime sofa explains that rest is at night",
+    "rest advances to morning and restores energy",
+    "cancelled rest does not skip the night",
+    "Q plays a two-tone whistle through Web Audio",
+    "dog approaches and boards on the whistle",
+    "Q unloads dog while the player remains in the car",
+    "Q beside the car unloads dog without aiming",
+    "TV state and unloaded companion persist",
+    "reaper animates both legs and attached feet while walking",
+    "no browser runtime errors"
+  ],
+  "errors": []
+}

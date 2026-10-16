@@ -1,0 +1,61 @@
+{
+  "versao": 1,
+  "atualizadoEm": "2026-10-16",
+  "jogos": [
+    {
+      "slug": "vale-dos-blocos",
+      "nome": "Vale dos Blocos",
+      "resumo": "Construa seu lar, adote um pet e viaje por portais para o Rio, Nova York, China, Japão e mais.",
+      "descricao": "Sandbox 3D em Three.js para computador: mundo procedural por seed, mineração, construção, inventário e receitas nos modos Criativo e Sobrevivência. Comece com casa, garagem e estrada, dirija um carro com carretinha, navegue de barco, pesque do lambari ao pirarucu e use ferramentas e armas que se desgastam com o uso. Portais de blocos levam a nove terras: Sertão, Minas Gerais, China, Japão, Grand Canyon, Tríplice Fronteira, Submundo, Rio de Janeiro e Nova York, cada uma com paisagem, bichos e inimigo próprios. Ciclo de dia e noite, multiplayer com amigos na versão completa e salvamento na nuvem.",
+      "categoria": "aventura",
+      "status": "disponivel",
+      "demonstracao": false,
+      "destaque": true,
+      "publicadoEm": "2026-09-26",
+      "capa": "/games/vale-dos-blocos/capa.svg",
+      "miniatura": "/games/vale-dos-blocos/miniatura.svg",
+      "entrada": "/games/vale-dos-blocos/",
+      "integracao": "iframe-labs-v1",
+      "proporcao": "16:9",
+      "dispositivos": [
+        "desktop"
+      ],
+      "objetivo": "Construa sua casa, cuide dos seus animais e abra portais para conhecer nove terras, do Sertão à Estátua da Liberdade, no seu ritmo.",
+      "controles": {
+        "teclado": [
+          "WASD: andar",
+          "Mouse: olhar ao redor",
+          "Espaço: pular (na água, subir)",
+          "Shift: correr",
+          "Ctrl: agachar (na água, mergulhar)",
+          "Botão esquerdo: minerar, atacar ou atirar",
+          "Botão direito: colocar bloco ou usar item",
+          "1–9 / roda: escolher item",
+          "Tab: mochila",
+          "E: interagir (porta, bancada, baú, carro, barco, portal)",
+          "R: cuidar dos animais",
+          "C: trocar a câmera",
+          "V: voar no Criativo",
+          "Esc: pausar e menu",
+          "F: tela cheia",
+          "No carro WASD: dirigir",
+          "No carro Espaço: frear",
+          "H: buzina do carro",
+          "L: faróis do carro"
+        ],
+        "toque": []
+      },
+      "requisitos": [
+        "WebGL 2",
+        "Teclado e mouse",
+        "Pointer Lock",
+        "Web Audio",
+        "Armazenamento local"
+      ],
+      "telaCheia": true,
+      "reiniciar": true,
+      "orientacao": "paisagem",
+      "iniciarTelaCheia": true
+    }
+  ]
+}

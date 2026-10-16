@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "rat steals one food during real simulation",
+    "stolen food remains on the rat after reload",
+    "cat menu assigns a guard location",
+    "cat kills the rat and recovers the food",
+    "rat opens a one-block hole beneath the intact wall",
+    "rat enters through the hole and steals chest food",
+    "all four pest models are rendered",
+    "cat guard command persists across saves",
+    "no browser runtime errors"
+  ],
+  "errors": []
+}

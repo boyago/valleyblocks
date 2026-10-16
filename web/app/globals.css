@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../vendor/shadcn-tailwind-4.13.0.css";
+
+/* Tema único escuro de portal de games: base grafite azulada, limão (ação) + roxo (marca). */
+:root { color-scheme:dark; --background:#0b0b10; --foreground:#f4f4f6; --card:#14131c; --card-foreground:#f4f4f6; --popover:#14131c; --popover-foreground:#f4f4f6; --primary:#c6ff00; --primary-foreground:#0b0b10; --secondary:#1c1a27; --secondary-foreground:#f4f4f6; --muted:#1c1a27; --muted-foreground:#a1a1aa; --accent:#2a1240; --accent-foreground:#e9c8ff; --destructive:#f87171; --border:rgb(255 255 255 / .1); --input:rgb(255 255 255 / .15); --ring:#c6ff00; --radius:.875rem; --font-sans:var(--font-geist),Arial,Helvetica,sans-serif; --font-display:var(--font-outfit),var(--font-geist),sans-serif; --surface:#14131c; --surface-2:#1c1a27; --lime:#c6ff00; --violet:#c000ff; --violet-soft:#d86bff; }
+@theme inline { --color-background:var(--background); --color-foreground:var(--foreground); --color-card:var(--card); --color-card-foreground:var(--card-foreground); --color-popover:var(--popover); --color-popover-foreground:var(--popover-foreground); --color-primary:var(--primary); --color-primary-foreground:var(--primary-foreground); --color-secondary:var(--secondary); --color-secondary-foreground:var(--secondary-foreground); --color-muted:var(--muted); --color-muted-foreground:var(--muted-foreground); --color-accent:var(--accent); --color-accent-foreground:var(--accent-foreground); --color-destructive:var(--destructive); --color-border:var(--border); --color-input:var(--input); --color-ring:var(--ring); --font-sans:var(--font-sans); --font-display:var(--font-display); --color-surface:var(--surface); --color-surface-2:var(--surface-2); --color-lime:var(--lime); --color-violet:var(--violet); --color-violet-soft:var(--violet-soft); }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--background); color:var(--foreground); font-family:var(--font-sans); text-rendering:optimizeLegibility; }
+h1,h2,h3 { text-wrap:balance; font-family:var(--font-display); }
+p { text-wrap:pretty; }
+button,input { font:inherit; }
+::selection { background:#c6ff00; color:#0b0b10; }
+:focus-visible { outline:2px solid #c6ff00; outline-offset:3px; }
+/* Grão sutil fixo: tira a cara de vetor chapado sem custar repaint no scroll. */
+.grain::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.05; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.grain > * { position:relative; z-index:1; }
+/* Brilho que segue o ponteiro nos cards (variáveis --mx/--my definidas em CSS, sem JS de estado). */
+.glow-card { position:relative; isolation:isolate; }
+.glow-card::after { content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; opacity:0; transition:opacity .3s ease; background:radial-gradient(420px circle at 50% 0%, rgb(192 0 255 / .28), transparent 60%); }
+.glow-card:hover::after, .glow-card:focus-within::after { opacity:1; }
+.no-scrollbar { scrollbar-width:none; } .no-scrollbar::-webkit-scrollbar { display:none; }
+@keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+.rise { animation:rise .6s cubic-bezier(.2,.7,.2,1) both; }
+@media (prefers-reduced-motion: reduce) { .rise { animation:none; } html { scroll-behavior:auto; } }
+
+.btn-hero { display:inline-flex; min-height:3.5rem; min-width:12rem; align-items:center; justify-content:center; gap:.7rem; padding:.85rem 1.6rem; border:1px solid #d5ff4a; border-radius:.85rem; animation:textura 3.4s cubic-bezier(.2,.5,.9,.6) 2s infinite; background-image:linear-gradient(45deg,#c6ff00,#9cff00,#c6ff00,#76ff03); background-size:400% 200%; box-shadow:0 6px 0 #547c00,0 16px 28px rgb(126 255 0 / .16); color:#0b0b10; font-size:1rem; font-weight:800; letter-spacing:.01em; text-decoration:none; transition:transform .2s ease,box-shadow .2s ease; cursor:pointer; }
+.btn-hero:hover { box-shadow:0 4px 0 #547c00,0 18px 34px rgb(166 255 0 / .3); transform:translateY(2px); }
+.btn-hero:active { box-shadow:0 1px 0 #547c00; transform:translateY(5px); }
+.btn-hero:focus-visible { outline:3px solid #9700ff; outline-offset:4px; }
+@keyframes textura { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+@media (prefers-reduced-motion: reduce) { .btn-hero { animation:none; transition:none; } .btn-hero:hover { transform:none; } }

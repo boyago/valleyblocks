@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-09T15:50:58.004Z",
+  "checks": [
+    "all three species appear in a new world",
+    "survival HUD exposes hunger and stamina",
+    "aimed axe attack creates one chicken meat drop",
+    "approaching the hunted animal collects the meat",
+    "barbecue cooks hunted meat and consumes charcoal",
+    "right-click eating restores hunger and consumes cooked food",
+    "sprinting exhausts stamina and schedules audible panting",
+    "standing still recovers energy and breathing",
+    "pet menu enables hunting for a domesticated dog",
+    "dog carries a visible meat package",
+    "dog delivers the hunted meat to inventory",
+    "menus freeze needs and wildlife simulation",
+    "saved needs, hunt command and meat survive reload",
+    "no runtime errors in the hunting and cooking session"
+  ],
+  "errors": []
+}

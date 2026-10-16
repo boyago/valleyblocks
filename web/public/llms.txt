@@ -1,0 +1,19 @@
+# Vale dos Blocos
+
+> Jogo brasileiro de construir em blocos 3D (voxel), estilo sandbox, que roda direto no navegador, sem download. Portais levam a lugares do Brasil e do mundo.
+
+- Página: http://localhost:3000/jogos/vale-dos-blocos
+- Guia (objetivo e controles): http://localhost:3000/jogos/vale-dos-blocos/como-jogar
+- Para quem: famílias e crianças que gostam de construir e explorar; também adultos fãs de jogos de blocos.
+- O que dá para fazer: construir casa, adotar pets, minerar, criar ferramentas na bancada (picareta, pá, espada, espingarda), pescar, usar barco e carretinha no carro.
+- Terras por portais: Sertão, Minas Gerais (com ET de Varginha, capivara e onça), Rio de Janeiro (Cristo Redentor), Tríplice Fronteira (Foz do Iguaçu, Ciudad del Este, Puerto Iguazú), Nova York (Estátua da Liberdade), Estados Unidos, China, Japão e Submundo.
+- Preço: grátis no navegador com tempo diário (15 minutos como visitante, 60 minutos com conta gratuita). Versão completa por R$ 29,90 em pagamento único: sem limite de tempo, mundo salvo na nuvem e multiplayer cooperativo.
+- Aparelhos: computador (teclado e mouse); abre em tela inteira. Versão para celular em desenvolvimento.
+- Criador: Alexandre Boyago (LABSGames, Brasil).
+
+## Informações
+- [Guia](http://localhost:3000/guias)
+- [Sobre](http://localhost:3000/sobre)
+- [Contato](http://localhost:3000/contato)
+- [Privacidade](http://localhost:3000/privacidade)
+- [Termos](http://localhost:3000/termos)

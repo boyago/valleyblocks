@@ -1,0 +1,18 @@
+{
+  "checks": [
+    "seed is optional and defaults to random",
+    "new world includes a grill at home, a car and a dog",
+    "starter grill opens its real recipes",
+    "creating another world generates a different seed",
+    "new world inventory remains empty",
+    "daytime has no hostile enemies",
+    "dusk automatically spawns an enemy",
+    "both original enemy models render",
+    "reaper scythe damages survival player",
+    "specter explodes and leaves green acid",
+    "reload retains seed, enemy and acid",
+    "enemies dissipate at dawn",
+    "no browser runtime errors"
+  ],
+  "errors": []
+}

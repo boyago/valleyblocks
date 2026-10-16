@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vale dos Blocos</string>
+    <string name="title_activity_main">Vale dos Blocos</string>
+    <string name="package_name">cloud.labsgames.valedosblocos</string>
+    <string name="custom_url_scheme">cloud.labsgames.valedosblocos</string>
+</resources>

@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-09T15:17:40.709Z",
+  "version": "1.2.0",
+  "checks": [
+    "first-person pickaxe and hands are visible",
+    "C switches to rear camera with original avatar",
+    "C switches to front camera",
+    "player sinks below the water surface without pressing Control",
+    "swimmer can still climb out onto the bank",
+    "right click fills a bucket from the lake",
+    "right click transfers water to forge and returns empty bucket",
+    "forge UI consumes resources and creates an iron ingot",
+    "sand falls through water to the bottom in live simulation",
+    "reload preserves camera, generator, ingot, forge and settled sand",
+    "new world contains pradaria",
+    "new world contains deserto",
+    "new world contains floresta",
+    "new world contains meseta",
+    "new world contains nevasca",
+    "legacy snapshots retain generator 1, existing edits and inventory",
+    "no browser runtime errors"
+  ],
+  "errors": [],
+  "biomes": {
+    "deserto": [
+      -640,
+      -640
+    ],
+    "pradaria": [
+      -640,
+      -544
+    ],
+    "floresta": [
+      -640,
+      -512
+    ],
+    "serra": [
+      -640,
+      -288
+    ],
+    "nevasca": [
+      -640,
+      128
+    ],
+    "meseta": [
+      -576,
+      448
+    ]
+  }
+}

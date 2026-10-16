@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-09T15:49:42.395Z",
+  "checks": [
+    "new survival inventory remains empty",
+    "E collects resin from a natural tree",
+    "same tree cannot duplicate resin",
+    "workbench crafts the slingshot and eight stones",
+    "left click fires a projectile and hunts at range with one round",
+    "boar retaliates against the hunting dog",
+    "feeding through the pet menu consumes a biscuit and restores 30 health",
+    "E travels through the portal to the underground chamber",
+    "reload retains the cavern, dog health, collected resin and weapon",
+    "return portal reaches the surface safely",
+    "no runtime errors"
+  ],
+  "errors": []
+}

@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-11T12:04:48.902Z",
+  "browser": "153.0.4234.48",
+  "checks": [
+    "game appears in the LABSGames portal",
+    "production iframe completes ready/started handshake for version 1.9.1",
+    "production build has no development mutation hook",
+    "portal new world starts with zero items and nine empty shortcuts",
+    "pointer lock works inside portal iframe",
+    "keyboard movement works in embedded game",
+    "portal pause releases pointer and stops game",
+    "portal restart creates a fresh playable session",
+    "destroy stops simulation",
+    "no portal or iframe runtime errors"
+  ],
+  "errors": [],
+  "messages": [
+    {
+      "labs": 1,
+      "type": "ready",
+      "slug": "vale-dos-blocos",
+      "version": "1.9.1"
+    },
+    {
+      "labs": 1,
+      "type": "started",
+      "slug": "vale-dos-blocos"
+    },
+    {
+      "labs": 1,
+      "type": "started",
+      "slug": "vale-dos-blocos"
+    },
+    {
+      "labs": 1,
+      "type": "started",
+      "slug": "vale-dos-blocos"
+    },
+    {
+      "labs": 1,
+      "type": "started",
+      "slug": "vale-dos-blocos"
+    }
+  ]
+}

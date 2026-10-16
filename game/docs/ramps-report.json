@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-08T19:20:17.777Z",
+  "checks": [
+    "creative: right click places ramp uphill toward facing 0",
+    "creative: right click places ramp uphill toward facing 1",
+    "creative: right click places ramp uphill toward facing 2",
+    "creative: right click places ramp uphill toward facing 3",
+    "creative: all four orientations survive saving and reloading",
+    "survival: right click places ramp uphill toward facing 0",
+    "survival: right click places ramp uphill toward facing 1",
+    "survival: right click places ramp uphill toward facing 2",
+    "survival: right click places ramp uphill toward facing 3",
+    "survival consumes exactly one ramp per placement",
+    "survival: all four orientations survive saving and reloading",
+    "no browser runtime errors"
+  ],
+  "errors": []
+}

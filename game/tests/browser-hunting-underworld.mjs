@@ -1,0 +1,42 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+const browser=await chromium.launch({channel:'msedge',headless:true}),page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],checks=[];
+const check=(name,ok)=>{assert.ok(ok,name);checks.push(name);console.log('PASS',name);};
+page.on('pageerror',e=>errors.push(e.message));
+try{
+  await page.goto('http://127.0.0.1:5186/',{waitUntil:'networkidle'});
+  await page.locator('[data-mode="survival"]').click();await page.locator('[data-action="new-game"]').click();await page.waitForFunction(()=>window.__valeGame?.running);
+  check('new survival inventory remains empty',await page.evaluate(()=>Object.keys(window.__valeGame.inventory.counts).length===0));
+  const trunk=await page.evaluate(()=>{const g=window.__valeGame;for(let x=28;x<65;x++)for(let z=18;z<60;z++){const h=g.world._column(x,z).height;if(g.world.getBlock(x,h+2,z)===5&&!g.world.edits.has(`${x},${h+2},${z}`)){g.player.position.set(x+.5,h+1.002,z+3.5);g.player.velocity.set(0,0,0);g.player.yaw=0;g.player.pitch=-.03;g.updateCamera(1);return {x,z,h};}}});
+  assert.ok(trunk);await page.keyboard.press('e');
+  check('E collects resin from a natural tree',await page.evaluate(()=>window.__valeGame.inventory.count('resin')===1));
+  await page.keyboard.press('e');check('same tree cannot duplicate resin',await page.evaluate(()=>window.__valeGame.inventory.count('resin')===1));
+  await page.evaluate(()=>{const g=window.__valeGame;for(let x=35;x<47;x++)for(let z=30;z<47;z++){g.world.setBlock(x,34,z,3);for(let y=35;y<41;y++)g.world.setBlock(x,y,z,0);}g.world.setBlock(42,35,44,15);g.player.position.set(40.5,35.002,44.5);g.player.velocity.set(0,0,0);g.player.yaw=0;g.player.pitch=-.08;g.inventory.add(5);g.inventory.add(3);g.updateCamera(1);});
+  await page.keyboard.press('Tab');await page.locator('[data-action="craft"][data-recipe="slingshot"]').click();await page.locator('[data-action="craft"][data-recipe="pebbles"]').click();
+  check('workbench crafts the slingshot and eight stones',await page.evaluate(()=>window.__valeGame.inventory.count('slingshot')===1&&window.__valeGame.inventory.count('pebble')===8&&window.__valeGame.inventory.count('resin')===0));
+  await page.locator('[data-action="equip"][data-item="slingshot"]').click();await page.getByRole('button',{name:'Fechar',exact:true}).click();
+  await page.evaluate(()=>{const g=window.__valeGame;for(const a of g.wildlife.animals)a.mesh.removeFromParent();g.wildlife.animals=[];const a=g.wildlife.spawn('chicken',g.player.position.clone().set(40.5,35,37.5));a.timer=100;a.goal=null;g.wildlife.spawnTimer=200;});
+  await page.waitForTimeout(200);await page.screenshot({path:'test-results/slingshot-equipped.png'});
+  await page.mouse.down();await page.mouse.up();await page.waitForFunction(()=>window.__valeGame.wildlife.drops.length>0);
+  check('left click fires a projectile and hunts at range with one round',await page.evaluate(()=>window.__valeGame.inventory.count('pebble')===7&&window.__valeGame.wildlife.animals.length===0));
+  await page.evaluate(()=>{const g=window.__valeGame,p=g.entities.pets[0];p.position.set(42.5,35,40);p.tamed=true;p.mode='hunt';p.health=100;p.path=[];p.goal=null;p.huntCooldown=20;g.wildlife.spawn('boar',p.position.clone().add({x:0,y:0,z:1}));});
+  await page.waitForFunction(()=>window.__valeGame.entities.pets[0].health<100);
+  check('boar retaliates against the hunting dog',await page.evaluate(()=>window.__valeGame.entities.pets[0].health===82));
+  await page.evaluate(()=>{const g=window.__valeGame,p=g.entities.pets[0];p.mode='stay';p.health=40;g.inventory.add('food');g.player.position.set(p.position.x,35.002,p.position.z+2.5);g.player.velocity.set(0,0,0);g.player.yaw=0;g.player.pitch=-.35;g.updateCamera(1);});
+  await page.keyboard.press('e');await page.locator('[data-kind="feed"]').click();
+  check('feeding through the pet menu consumes a biscuit and restores 30 health',await page.evaluate(()=>window.__valeGame.entities.pets[0].health===70&&window.__valeGame.inventory.count('food')===0));
+  await page.screenshot({path:'test-results/boar-pet-health.png'});await page.getByRole('button',{name:'Fechar',exact:true}).click();
+  await page.evaluate(()=>{const g=window.__valeGame;g.entities.pets[0].mode='stay';const a=g.world.underworld.gates[0];g.player.position.set(a.x+.5,a.y+.002,a.z+2.7);g.player.velocity.set(0,0,0);g.player.yaw=0;g.player.pitch=0;g.inventory.hotbar[0]=null;g.updateCamera(1);});
+  await page.screenshot({path:'test-results/underworld-portal.png'});await page.keyboard.press('e');
+  check('E travels through the portal to the underground chamber',await page.evaluate(()=>window.__valeGame.world.underworld.contains(window.__valeGame.player.position)));
+  await page.waitForTimeout(600);await page.screenshot({path:'test-results/underworld-cavern.png'});
+  await page.evaluate(()=>window.__valeGame.menu('pause'));await page.locator('[data-action="save"]').click();await page.waitForFunction(()=>window.__valeGame.saved?.underworld&&!window.__valeGame.savePromise);
+  await page.reload({waitUntil:'networkidle'});await page.locator('[data-action="continue"]').click();await page.waitForFunction(()=>window.__valeGame?.running);
+  check('reload retains the cavern, dog health, collected resin and weapon',await page.evaluate(()=>{const g=window.__valeGame;return g.world.underworld.contains(g.player.position)&&g.entities.pets[0].health<100&&g.resin.tapped.size===1&&g.inventory.count('slingshot')===1;}));
+  await page.evaluate(()=>{const g=window.__valeGame,a=g.world.underworld.gates[1];g.player.position.set(a.x+.5,a.y+.002,a.z+2.7);g.player.velocity.set(0,0,0);g.player.yaw=0;g.player.pitch=0;g.updateCamera(1);});await page.keyboard.press('e');
+  check('return portal reaches the surface safely',await page.evaluate(()=>{const g=window.__valeGame;return !g.world.underworld.contains(g.player.position)&&!g.player.blocked(g.player.position);}));
+  check('no runtime errors',errors.length===0);
+  await writeFile('test-results/hunting-underworld-report.json',JSON.stringify({date:new Date().toISOString(),checks,errors},null,2));
+}catch(e){await page.screenshot({path:'test-results/hunting-underworld-failure.png'});console.log(await page.evaluate(()=>({toast:document.querySelector('#toast')?.textContent,debug:window.__valeDebug?.()})));throw e;}
+finally{await browser.close();}

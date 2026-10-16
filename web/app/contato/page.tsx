@@ -1,0 +1,5 @@
+import type { Metadata } from "next";
+import { InfoPage } from "@/components/info-page";
+import { ContactDetails } from "@/components/contact-details";
+export const metadata: Metadata = { title: "Contato", description: "Fale com o responsável pelo Vale dos Blocos sobre suporte, privacidade e parcerias.", alternates: { canonical: "/contato" } };
+export default function ContactPage() { return <InfoPage title="Fale com o Vale dos Blocos"><ContactDetails /><h2>Suporte aos jogos</h2><p>Informe o nome do jogo, o navegador, o aparelho e o que aconteceu. Não envie senhas, documentos ou outros dados desnecessários.</p><h2>Privacidade e direitos</h2><p>Use o mesmo canal para pedidos relacionados a dados pessoais ou para comunicar problemas de autoria e licenciamento. Inclua a página envolvida e informações suficientes para avaliarmos o caso.</p><h2>Parcerias</h2><p>Recebemos propostas de banners, patrocínio e desenvolvimento de jogos. Formatos, valores e condições são combinados individualmente.</p></InfoPage>; }

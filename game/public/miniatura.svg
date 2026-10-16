@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Vale dos Blocos — LABSGames</title>
+  <desc id="desc">Ilustração original de um pequeno mundo de blocos com casa de telhado laranja, árvores, estrada, carro, cachorro e gato.</desc>
+  <defs>
+    <linearGradient id="paper" x2="1" y2="1"><stop stop-color="#f7f4e8"/><stop offset="1" stop-color="#e9eddf"/></linearGradient>
+    <linearGradient id="halo" x2="0" y2="1"><stop stop-color="#d5e1bf" stop-opacity=".65"/><stop offset="1" stop-color="#cbdabb" stop-opacity="0"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#50694e" stroke-opacity=".04"/></pattern>
+    <g id="tree">
+      <path d="M-8 0v-68l17-8V-5Z" fill="#76593d"/><path d="m9-76 10 6V-10L9-5Z" fill="#584b37"/>
+      <path d="m-43-112 49-25 50 26-50 27Z" fill="#90b26a"/><path d="m-43-112 49 28v57l-49-28Z" fill="#668951"/><path d="m6-84 50-27v56L6-27Z" fill="#426b46"/>
+      <path d="m-32-146 34-17 34 18-34 18Z" fill="#a9c57d"/><path d="m-32-146 34 19v43l-34-19Z" fill="#7da65d"/><path d="m2-127 34-18v44L2-84Z" fill="#567e4e"/>
+      <path d="m-33-105 12 7v11l-12-7Zm20 33 10 6v10l-10-6Z" fill="#91b769" opacity=".65"/>
+    </g>
+    <g id="flower"><path d="M0 0v-13m0 8-6-3" stroke="#557a47" stroke-width="3"/><path d="M-5-18H4V-9H-5Z" fill="#eeb877"/><path d="M-1-15H2V-12H-1Z" fill="#f9ecd0"/></g>
+    <g id="cloud"><path d="M-54 0V-20h20v-18h58v12h33V0Z" fill="#fbfaf2"/><path d="M-54 0h111l-16 10H-37Z" fill="#dae4d5"/></g>
+  </defs>
+  <path fill="url(#paper)" d="M0 0h1280v720H0Z"/>
+  <path fill="url(#grid)" d="M0 0h1280v720H0Z"/>
+  <ellipse cx="948" cy="365" rx="290" ry="270" fill="url(#halo)"/>
+  <path d="M48 48h1184v624H48Z" fill="none" stroke="#78836b" stroke-opacity=".17"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#314c3f">
+    <text x="82" y="98" font-size="21" font-weight="700" letter-spacing=".2">LABS<tspan fill="#82916c" font-weight="400">Games</tspan></text>
+    <path d="M82 153h40" stroke="#c77548" stroke-width="4"/>
+    <text x="136" y="160" font-size="14" font-weight="700" letter-spacing="3.4">SEU MUNDO. NO SEU TEMPO.</text>
+    <text x="76" y="270" font-size="78" font-weight="800" letter-spacing="-4">VALE DOS</text>
+    <text x="75" y="370" font-size="108" font-weight="800" letter-spacing="-5">BLOCOS<tspan fill="#cc7950">.</tspan></text>
+    <text x="83" y="422" font-size="23" fill="#70806b">Um lugar para chamar de seu.</text>
+    <text x="83" y="473" font-size="17" fill="#7c856f">Construa seu lar. Faça novos amigos.</text>
+    <text x="83" y="500" font-size="17" fill="#7c856f">Descubra o que há além da estrada.</text>
+    <rect x="82" y="549" width="239" height="52" rx="26" fill="#3c5946"/>
+    <text x="105" y="581" font-size="14" font-weight="700" letter-spacing="1.2" fill="#faf6e8">UM MUNDO PARA CRIAR</text>
+    <text x="82" y="643" font-size="12" font-weight="700" letter-spacing="2.5" fill="#8a9078">EXPLORAR · CONSTRUIR · CUIDAR</text>
+    <text x="1188" y="643" text-anchor="end" font-size="12" font-weight="700" letter-spacing="2.1" fill="#819074">SANDBOX 3D / 01</text>
+  </g>
+  <g transform="translate(930 410)">
+    <ellipse cy="154" rx="259" ry="40" fill="#7d8b66" opacity=".12"/>
+    <path d="m-292-3 279-145 286 148L-8 149Z" fill="#a9bd78"/>
+    <path d="m-292-3 284 152v57L-292 55Z" fill="#9e7c51"/>
+    <path d="M-8 149 273 0v58L-8 206Z" fill="#785e43"/>
+    <path d="m-292-3 284 152v16L-292 12Z" fill="#72945a"/>
+    <path d="M-8 149 273 0v17L-8 166Z" fill="#527c4f"/>
+    <path d="m-279 28 41 22v16l-41-22Zm64 46 28 15v20l-28-15Zm110 64 31 16v16l-31-17ZM31 151l27-14v24l-27 14Zm97-52 34-18v16l-34 18Zm74-39 22-11v26l-22 12Z" fill="#b69866" opacity=".42"/>
+    <path d="m-273 15 6 3v11l-6-3Zm81 46 7 4v11l-7-4Zm126 67 9 5v13l-9-5ZM60 136l8-4v13l-8 4Zm107-56 7-4v13l-7 4Z" fill="#d0b783" opacity=".7"/>
+    <path d="m-227 31 57 30L117-90l-56-29Z" fill="#e6d19e"/>
+    <path d="m-106 95 68 36L216-4l-69-35Z" fill="#626d63"/>
+    <path d="m-73 107 15 8 23-12-15-8Zm50-26 15 8L15 77 0 69Zm50-27 15 8 23-12-15-8Zm50-26 15 8 23-12-15-8Zm50-26 15 8 23-12-15-8Z" fill="#e5d6a0"/>
+    <path d="m-291-3 40 21 51-27-40-21Zm205-107 32 16 35-18-32-17Zm289 75 32 17 39-21-32-17Z" fill="#bdd191"/>
+    <use href="#tree" transform="translate(114 -82) scale(.9)"/>
+    <use href="#tree" transform="translate(207 -15) scale(.75)"/>
+    <use href="#tree" transform="translate(-247 -5) scale(.7)"/>
+    <g id="house">
+      <path d="m-189-41 109 58 129-68-109-58Z" fill="#6c6048" opacity=".17"/>
+      <path d="m-177-46 95 50V-99l-95-50Z" fill="#d7bf8a"/>
+      <path d="M-82 4 32-57v-102l-114 60Z" fill="#b49b6b"/>
+      <path d="m-177-149 95 50 114-60-95-50Z" fill="#e8d5a5"/>
+      <path d="m-169-51 9 4v-95l-9-5Zm76 40 10 5v-95l-10-5Zm-85-139v11l96 52v-12Z" fill="#806446"/>
+      <path d="M-82-99v12L31-147v-12ZM-3-38l11-6v-94l-11 6Z" fill="#70583f"/>
+      <path d="m-149-35 28 15v-56l-28-15Z" fill="#8d6743"/>
+      <path d="m-146-38 22 12v-44l-22-12Z" fill="#aa7b4e"/>
+      <path d="m-130-54 5 3v5l-5-3Z" fill="#f8dd92"/>
+      <path d="m-67-31 43-23v-42l-43 23Z" fill="#dae3c8"/>
+      <path d="m-63-38 35-18v-34l-35 18Z" fill="#85b1b0"/>
+      <path d="m-46-47 3-2v-34l-3 2Zm-17-7 35-18v-3l-35 18Z" fill="#e1d4ac"/>
+      <path d="m-113-97 16 9v24l-16-9Z" fill="#759e9b"/>
+      <path d="m-198-148 118 63 126-67-117-63Z" fill="#944c35"/>
+      <path d="m-198-157 118 63 126-67v9L-80-85l-118-63Z" fill="#a6593c"/>
+      <path d="m-198-157 21-19 120 64-23 18Z" fill="#cf8556"/>
+      <path d="m-177-176 23-18 120 64-23 18Z" fill="#d68e5b"/>
+      <path d="m-154-194 22-18 120 64-22 18Z" fill="#dda16a"/>
+      <path d="m-132-212 30-16 148 67-58 13Z" fill="#e7b780"/>
+      <path d="m-177-176 120 64m-97-82 120 64m-98-82 120 64" stroke="#a56846" stroke-width="2"/>
+      <path d="m-13-160 0-68 19-10 20 11v68L6-149Z" fill="#af7250"/>
+      <path d="m-13-228 19 10 20-9-20-11Z" fill="#d9a274"/>
+      <path d="m-8-228 14 7 14-6-14-7Z" fill="#6e5a45"/>
+      <path d="m-156-22 42 23 33-18-43-22Z" fill="#dac08b"/>
+      <path d="m-156-22 42 23v9l-42-23Z" fill="#a58a61"/>
+      <path d="m-114 1 33-18v9l-33 18Z" fill="#8f7956"/>
+    </g>
+    <use href="#flower" transform="translate(-204 6)"/>
+    <use href="#flower" transform="translate(-180 22) scale(.8)"/>
+    <use href="#flower" transform="translate(221 23) scale(.85)"/>
+    <g id="car" transform="translate(65 28)">
+      <path d="m-57 4 59 32 76-40-58-31Z" fill="#293b35" opacity=".18"/>
+      <path d="m-46 6 15 8v24l-15-8Zm53 28 15-8v23L7 57Zm36-27 15-8v22l-15 8Z" fill="#344441"/>
+      <path d="m-57-20 63 33v29l-63-33Z" fill="#bc724c"/>
+      <path d="M6 13 75-24V6L6 42Z" fill="#d9935c"/>
+      <path d="m-57-20 63 33 69-37-63-32Z" fill="#ebbf7d"/>
+      <path d="m-45-35 39 21 49-26-39-21Z" fill="#f0d3a0"/>
+      <path d="m-45-35 39 21v27l-39-21Z" fill="#cc8a59"/>
+      <path d="M-6-14 43-40v27L-6 13Z" fill="#90bab9"/>
+      <path d="m-40-29 12 6v18l-12-7Zm18 10 12 6V5l-12-6Z" fill="#9ec4bf"/>
+      <path d="M-2-12v19L38-14v-19Z" fill="#9fc3bb"/>
+      <path d="m9 24 13-7v7l-13 7Zm49-27 13-7v8L58 5Z" fill="#faf0bb"/>
+      <path d="m27 24 23-12v5L27 29Z" fill="#6d7768"/>
+      <path d="m-58 1 64 34v8L-58 9Z" fill="#efdabb"/>
+      <path d="M6 35 77-3v8L6 43Z" fill="#c8c9aa"/>
+      <path d="m-43 7 16 9v19l-16-8Z" fill="#2d3b37"/>
+      <path d="m-39 15 8 4v9l-8-4Z" fill="#9aa28b"/>
+      <path d="m13 31 15-8v21l-15 8Z" fill="#2d3b37"/>
+      <path d="m17 33 7-4v10l-7 4Z" fill="#aab19a"/>
+    </g>
+    <g id="dog" transform="translate(-154 58)">
+      <path d="m-12 0 16-9 29 15-16 9Z" fill="#e8cf96"/><path d="m-12 0 29 15v13L-12 13Z" fill="#c9955c"/><path d="m17 15 16-9v13L17 28Z" fill="#ac784b"/>
+      <path d="m-10 12 6 3v17l-6-3Zm20 11 6 3v15l-6-3Zm15-2 6-3v16l-6 3Z" fill="#b37b4c"/>
+      <path d="m-24-10 15-8L9-8-7 1Z" fill="#eccf96"/><path d="m-24-10 17 11v21l-17-10Z" fill="#dca666"/><path d="M-7 1 9-8v21l-16 9Z" fill="#bd8551"/>
+      <path d="m-23-10 6 4v21l-6-4ZM3-4l6-4v22l-6 4Z" fill="#785339"/>
+      <path d="m-16 4 4 2v4l-4-2Z" fill="#31413b"/><path d="m-25 6 9 5v8l-9-5Z" fill="#f1d8aa"/><path d="m-26 6 5 3v4l-5-3Z" fill="#34443c"/>
+      <path d="m31 12 10-13 5 3-11 18Z" fill="#d8a569"/><path d="m-12 19 18 10v4l-18-10Z" fill="#648f7b"/>
+    </g>
+    <g id="cat" transform="translate(-93 74)">
+      <path d="m-11 1 13-7 16 9-13 7Z" fill="#d0d5c4"/><path d="m-11 1 16 9v20l-16-9Z" fill="#a7b4a4"/><path d="M5 10 18 3v20L5 30Z" fill="#81988c"/>
+      <path d="m-13-16 14-8 15 8-14 8Z" fill="#d6d9c8"/><path d="m-13-16 15 8v18l-15-8Z" fill="#aebead"/><path d="M2-8 16-16V2L2 10Z" fill="#8fa495"/>
+      <path d="m-13-16 1-13 10 13ZM8-20l7-9 1 13Z" fill="#94a99a"/>
+      <path d="m-9-9 4 2v4l-4-2ZM6-7l4-2v4L6-3Z" fill="#354a3f"/><path d="m-2 0 3 1-2 3Z" fill="#c98d7e"/>
+      <path d="m14 22 14-7V0l-6-4v14l-8 5Z" fill="#8fa598"/>
+      <path d="m-12 21 6 3v8l-6-3Zm12 7 6 3v8l-6-3Z" fill="#d8dcc9"/>
+    </g>
+  </g>
+  <use href="#cloud" transform="translate(751 144) scale(.65)"/>
+  <use href="#cloud" transform="translate(1111 195) scale(.85)"/>
+  <path d="M1113 112h34v34h-34Z" fill="#edc787" opacity=".8"/>
+  <path d="m1068 243 6 4 7-4m31 4 6 4 7-4" fill="none" stroke="#738d71" stroke-width="2"/>
+</svg>

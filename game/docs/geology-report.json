@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-10T15:39:38.719Z",
+  "checks": [
+    "new worlds contain an accessible lava pool and exposed diamonds",
+    "lava has a visible unlit material mesh",
+    "left-click with the pickaxe mines and collects diamond ore",
+    "lava damages the player and cannot be mined into inventory",
+    "pool, mined ore and diamond inventory survive save/reload",
+    "no browser runtime errors"
+  ],
+  "errors": []
+}

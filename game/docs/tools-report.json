@@ -1,0 +1,29 @@
+{
+  "checks": [
+    "new world stays empty",
+    "survival hands cannot break stone",
+    "HUD explains required wooden pickaxe",
+    "creative hands cannot break ore",
+    "wooden pickaxe mines stone",
+    "wooden pickaxe cannot mine iron",
+    "stone pickaxe mines iron",
+    "stone pickaxe cannot mine diamond",
+    "barbecue turns ore and fuel into three iron ingots",
+    "workshop crafts iron pickaxe from ingots",
+    "iron pickaxe mines diamond",
+    "equipped iron pickaxe has a first-person model",
+    "workshop crafts diamond pickaxe and axe",
+    "diamond pickaxe mines block 3",
+    "diamond pickaxe mines block 18",
+    "diamond pickaxe mines block 10",
+    "diamond pickaxe mines block 19",
+    "diamond pickaxe mines block 20",
+    "diamond pickaxe mines block 21",
+    "diamond pickaxe mines block 25",
+    "diamond axe cannot mine stone",
+    "diamond axe cuts wood",
+    "crafted tools persist after reload",
+    "no browser runtime errors"
+  ],
+  "errors": []
+}
