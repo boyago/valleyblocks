@@ -127,6 +127,20 @@ export function decorateRealm(put, world, baseX, baseZ, size) {
   decorateNyc(put, world, baseX, baseZ, size);
 }
 
+/** Ossadas de gado do Sertão: mesmas casas da grade de decoração (roll entre .38 e .44).
+ *  Devolve [x, y, z, yaw] com y = topo do chão. Desenhadas por skeletons.js. */
+export function sertaoSkeletons(seed) {
+  const r = REALMS.sertao, [cx, cz] = r.center, out = [];
+  for (let gz = Math.floor((cz - r.radius) / 6); gz <= Math.floor((cz + r.radius) / 6); gz++) for (let gx = Math.floor((cx - r.radius) / 6); gx <= Math.floor((cx + r.radius) / 6); gx++) {
+    const x = gx * 6 + Math.floor(hash(gx, gz, seed + 401) * 4), z = gz * 6 + Math.floor(hash(gx, gz, seed + 409) * 4);
+    const roll = hash(gx, gz, seed + 419); if (roll < .38 || roll >= .44) continue;
+    if (Math.abs(x - cx) <= 7 && Math.abs(z - cz) <= 7) continue;
+    const info = realmColumn(x, z, seed); if (!info || info.surface === BLOCK.CLAY || realmAt(x, z) !== 'sertao') continue;
+    out.push([x + 1.5, info.height + 1, z + .5, hash(gx, gz, seed + 439) * Math.PI * 2]);
+  }
+  return out;
+}
+
 /** Mandacarus, árvores secas, ossadas, pedras e o portal de chegada. */
 function decorateSertao(put, world, baseX, baseZ, size) {
   const r = REALMS.sertao, [cx, cz] = r.center, seed = world.seedHash;
@@ -146,9 +160,7 @@ function decorateSertao(put, world, baseX, baseZ, size) {
       const h = 3 + Math.floor(hash(gx, gz, seed + 433) * 2);
       for (let i = 0; i < h; i++) put(x, y + i, z, BLOCK.WOOD);
       put(x + 1, y + h - 1, z, BLOCK.WOOD); put(x - 1, y + h, z, BLOCK.WOOD); put(x, y + h, z + 1, BLOCK.WOOD);
-    } else if (roll < .44) { // Ossada de gado: costelas e crânio
-      put(x, y, z, BLOCK.BONE); put(x + 1, y, z, BLOCK.BONE); put(x + 2, y, z, BLOCK.BONE);
-      put(x, y + 1, z, BLOCK.BONE); put(x + 2, y + 1, z, BLOCK.BONE); put(x + 3, y, z, BLOCK.BONE); put(x + 3, y + 1, z, BLOCK.BONE);
+    } else if (roll < .44) { // Ossada de gado: modelo 3D do Blender (skeletons.js), sem blocos
     } else if (roll < .52) { put(x, y, z, BLOCK.STONE); if (roll < .48) put(x + 1, y, z, BLOCK.STONE); }
     else if (roll < .545) put(x, y - 1, z, BLOCK.COPPER); // cobre aflorando
     else if (roll < .6) { put(x, y - 3, z, BLOCK.URANIUM); put(x + 1, y - 4, z, BLOCK.URANIUM); } // veio de urânio sob a terra
