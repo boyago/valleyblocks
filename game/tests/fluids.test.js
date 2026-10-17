@@ -45,6 +45,19 @@ test('lava flows through excavated channels, slopes, falls and drains without re
   world.dispose();
 });
 
+test('a pool refills a bucketed hole from two neighbouring sources, a lone source does not multiply', () => {
+  const world=makeWorld();
+  for(let x=0;x<5;x++)for(let z=30;z<35;z++){world.setBlock(x,39,z,BLOCK.STONE);world.setBlock(x,40,z,x>0&&x<4&&z>30&&z<34?BLOCK.WATER:BLOCK.STONE);}
+  settle(world);
+  world.setBlock(2,40,32,BLOCK.AIR);settle(world);
+  assert.equal(world.getBlock(2,40,32),BLOCK.WATER);
+  assert.equal(world.getWaterLevel(2,40,32),0,'the hole becomes a source again');
+  // Um balde só, num canal: vira correnteza e não cria fontes novas.
+  const lone=makeWorld();channel(lone);lone.setBlock(1,40,32,BLOCK.WATER);settle(lone);
+  assert.ok(lone.getWaterLevel(3,40,32)>0);
+  world.dispose();lone.dispose();
+});
+
 test('lava metadata survives save and chunk boundaries without becoming permanent sources', () => {
   const world=makeWorld();channel(world,12,24);world.setBlock(13,40,32,BLOCK.LAVA);settle(world);
   const restored=new VoxelWorld(null,world.seed,world.serialize(),world.serializeFluids());

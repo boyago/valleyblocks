@@ -608,6 +608,24 @@ export class VoxelWorld {
         if (level <= 7 && (!desired || level < desired.level)) { material = neighborBlock; desired = { level, falling: false }; }
       }
     }
+    // Lagos se refazem: um buraco (ou correnteza) com duas fontes de água ao lado e
+    // apoio embaixo vira fonte de novo, então o balde não deixa "bloco quebrado" no lago.
+    if ((material === BLOCK.WATER || !material) && id !== BLOCK.LAVA && desired?.falling !== true) {
+      let sources = 0;
+      for (const [dx, , dz] of fluidNeighbors.slice(1, 5)) {
+        if (this._fluidNeighborBlock(x + dx, y, z + dz) === BLOCK.WATER && !this.fluidLevels.has(editKey(x + dx, y, z + dz))) sources++;
+      }
+      const below = this._fluidNeighborBlock(x, y - 1, z);
+      if (sources >= 2 && below !== null && (BLOCKS[below]?.solid || below === BLOCK.WATER && !this.fluidLevels.has(editKey(x, y - 1, z)))) {
+        if (current || id !== BLOCK.WATER) {
+          this.fluidLevels.delete(key);
+          if (id === BLOCK.TORCH) this.drops.push({ x, y, z, id: BLOCK.TORCH, count: 1 });
+          this._writeBlock(x, y, z, BLOCK.WATER);
+          this._queueFluidAround(x, y, z);
+        }
+        return;
+      }
+    }
     if (current && unknownNeighbors.length && (!desired || desired.level > current.level || current.falling && !desired.falling)) {
       // An unloaded donor is unknown, not removed. Freeze dependent flow and
       // retry when that chunk returns, rather than draining the visible edge.
