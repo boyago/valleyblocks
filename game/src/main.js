@@ -3,6 +3,7 @@ import { restEligibility, completeRest } from './furniture.js';
 import { EnemySystem, ENEMIES, combatTargets } from './enemies.js';
 import { newWorldSeed } from './world-seed.js';
 import { mineBlock, primaryAction } from './mining.js';
+import { stallFor, trade, restock } from './trading.js';
 import { TOOLS, miningRequirement , WEAPON_DAMAGE, RANGED } from './tools.js';
 import { TreeResin, Slingshot } from './hunting-tools.js';
 import * as THREE from 'three';
@@ -121,7 +122,7 @@ class Game {
     this.resin=new TreeResin(this.world,save?.resin);this.slingshot=new Slingshot(this.scene,this.world,this.combat);this.fishing=new Fishing(this.scene,this.world);this.boats=new Boats(this.scene,this.world,save?.boats);this.trailers=new Trailers(this.scene,this.world,this.entities,save?.trailers);this.activeBoat=null;
     this.forges=structuredClone(save?.forges||{});this.focusForge=null;
     this.cameraMode=['first','back','front'].includes(save?.cameraMode)?save.cameraMode:'first';
-    this.time=save?.time??.355;this.chests=structuredClone(save?.chests||{'-6,9,-4':{3:32,12:24,10:12,food:12}});
+    this.time=save?.time??.355;this.trades=save?.trades&&typeof save.trades==='object'?structuredClone(save.trades):{};this.tradeClock=0;this.chests=structuredClone(save?.chests||{'-6,9,-4':{3:32,12:24,10:12,food:12}});
     this.doors=structuredClone(save?.doors||{'-9,9,2':{x:-9,y:9,z:2,open:false}});
     this.goals={mine:false,build:false,pet:false,drive:false,...save?.goals};
     this.activeVehicle=save?.activeVehicle?this.entities.vehicles.find(v=>v.id===save.activeVehicle)||null:null;
@@ -286,6 +287,12 @@ class Game {
           try{localStorage.setItem('vale-settings',JSON.stringify(this.settings));}catch{}
           this.ui.toast(`Você está de ${OUTFITS[data.id].name}.`);this.ui.setMenu('character',this);break;
         }
+        case 'trade':{
+          const v=this.focusTrader;if(!v||this.ui.menu!=='trade')break;
+          const offer=stallFor(v.stallSeed).offers.find(o=>o.id===data.offer);
+          const result=trade(this.inventory,this.trades,v.stallKey,offer);this.ui.toast(result.message);if(result.ok){this.audio.play('craft');this.goals.trade=true;this.ui.lastHotbar='';}
+          this.ui.setMenu('trade',this);break;
+        }
         case 'buy-full':{
           if(bridge.standalone){this.ui.toast('A compra fica disponível no portal LABSGames.');break;}
           this.ui.toast('Abrindo o pagamento no portal…');bridge.purchase(FULL_VERSION.product);break;
@@ -388,6 +395,8 @@ class Game {
     const trailer=this.trailers.nearest(p,2.6);if(trailer)return {kind:'trailer',entity:trailer};
     const nearest=this.entities.nearest(p,3.8);
     if(nearest&&nearest.kind!=='pet')return nearest;
+    const trader=this.wildlife.animals.filter(a=>a.type==='vendedor'&&a.position.distanceTo(p)<3.2).sort((a,b)=>a.position.distanceToSquared(p)-b.position.distanceToSquared(p))[0];
+    if(trader){trader.stallKey=`${Math.floor(trader.home.x)},${Math.floor(trader.home.z)}`;trader.stallSeed=Math.floor(trader.home.x)+Math.floor(trader.home.z);return {kind:'trader',entity:trader};}
     const hit=this.target;
     if(hit&&hit.distance<=5&&[BLOCK.CHEST,BLOCK.WORKBENCH,BLOCK.DOOR,BLOCK.FORGE,BLOCK.WOOD,BLOCK.PORTAL,BLOCK.SOFA,BLOCK.TV].includes(hit.id)||hit&&hit.distance<=5&&PORTAL_BLOCKS.has(hit.id))return {kind:'block',hit};
     for(const door of Object.values(this.doors))if(door.open&&Math.hypot(door.x+.5-p.x,door.y-p.y,door.z+.5-p.z)<2.8)return {kind:'door',door};
@@ -428,6 +437,7 @@ class Game {
       this.resetInput();this.audio.play('door');this.updateCamera(1);this.ui.toast('W acelera · S freia · Q assovia/manda o companheiro descer · E sai');return;
     }
     if(action.kind==='pet'){this.focusPet=action.entity;this.menu('pet');return;}
+    if(action.kind==='trader'){this.focusTrader=action.entity;action.entity.yaw=Math.atan2(this.player.position.x-action.entity.position.x,this.player.position.z-action.entity.position.z);action.entity.goal=null;this.audio.play('inventory');this.menu('trade');return;}
     if(action.kind==='door'){this.toggleDoor(action.door);return;}
     if(PORTAL_BLOCKS.has(action.hit?.id)){const result=this.realms.travel(action.hit.id,this.player,this.entities,this.world);this.ui.toast(result.message);if(result.ok){this.resetInput();this.updateCamera(1);this.audio.play('craft');if(result.realm)this.ui.arrival(result.realm);}return;}
     if(action.hit?.id===BLOCK.PORTAL){const result=this.world.underworld.travel(this.player,this.entities);this.ui.toast(result.message);if(result.ok){this.resetInput();this.updateCamera(1);this.audio.play('door');}return;}
@@ -542,7 +552,7 @@ class Game {
     const context=this.interaction(),petContext=!context&&!this.activeVehicle&&!this.activeBoat?this.interaction(true):null;
     if(context?.kind==='boat'||context?.kind==='leave-boat'||context?.kind==='trailer'){this.ui.context(context.kind==='boat'?'Embarcar no barco':context.kind==='trailer'?'Abrir a caçamba da carretinha':'Desembarcar');return;}
     if(petContext?.kind==='pet'){this.ui.context(`Conhecer ${petContext.entity.name}`,'R');return;}
-    this.ui.context(context?.kind==='exit'?(this.vehicleStopped(this.activeVehicle)?'Sair do carro':''):context?.kind==='vehicle'?(context.entity.passenger?'Entrar no carro · Q para desembarcar companheiro':'Entrar no carro'):context?.kind==='pet'?`Conhecer ${context.entity.name}`:context?.kind==='door'?'Fechar porta':context?.hit?.id===BLOCK.PORTAL?'Atravessar portal':context?.hit?.id===BLOCK.WOOD?'Coletar resina (opcional)':context?.hit?.id===BLOCK.CHEST?'Abrir baú':context?.hit?.id===BLOCK.WORKBENCH?'Usar bancada':context?.hit?.id===BLOCK.FORGE?'Usar churrasqueira':context?.hit?.id===BLOCK.SOFA?'Descansar no sofá':context?.hit?.id===BLOCK.TV?(this.world.televisions.has(this.blockKey(context.hit))?'Desligar TV':'Ligar TV'):context?.hit?.id===BLOCK.DOOR?'Abrir porta':'');
+    this.ui.context(context?.kind==='trader'?`Negociar · ${stallFor(context.entity.stallSeed).name}`:context?.kind==='exit'?(this.vehicleStopped(this.activeVehicle)?'Sair do carro':''):context?.kind==='vehicle'?(context.entity.passenger?'Entrar no carro · Q para desembarcar companheiro':'Entrar no carro'):context?.kind==='pet'?`Conhecer ${context.entity.name}`:context?.kind==='door'?'Fechar porta':context?.hit?.id===BLOCK.PORTAL?'Atravessar portal':context?.hit?.id===BLOCK.WOOD?'Coletar resina (opcional)':context?.hit?.id===BLOCK.CHEST?'Abrir baú':context?.hit?.id===BLOCK.WORKBENCH?'Usar bancada':context?.hit?.id===BLOCK.FORGE?'Usar churrasqueira':context?.hit?.id===BLOCK.SOFA?'Descansar no sofá':context?.hit?.id===BLOCK.TV?(this.world.televisions.has(this.blockKey(context.hit))?'Desligar TV':'Ligar TV'):context?.hit?.id===BLOCK.DOOR?'Abrir porta':'');
   }
   /** Carro no chão e praticamente parado: só então pode sair (e só então o aviso aparece). */
   vehicleStopped(vehicle){return !!vehicle&&vehicle.grounded!==false&&Math.abs(vehicle.speed)<=.25;}
@@ -576,6 +586,7 @@ class Game {
     this.enemies.update(dt,this.player,this.time,this.mode);
     if(this.activeVehicle)this.player.position.copy(this.activeVehicle.position);
     this.time=(this.time+dt/1440)%1;
+    this.tradeClock+=dt;if(this.tradeClock>=240){restock(this.trades,this.tradeClock);this.tradeClock=0;}
     this.updateTarget(dt);
     for(const drop of this.world.drainDrops()){
       this.inventory.add(drop.id,drop.count);
@@ -622,7 +633,7 @@ class Game {
     const fxs=this.realmFx,now=performance.now(),dt=Math.min(.1,(now-fxs.last)/1000);fxs.last=now;fxs.group.visible=true;fxs.group.position.set(focus.x,focus.y-4,focus.z);
     for(const [pts,rise,sway] of [[fxs.embers,2.2,.9],[fxs.smoke,.7,.3]]){const a=pts.geometry.attributes.position;for(let i=0;i<a.count;i++){let y=a.getY(i)+rise*dt;if(y>24)y=0;a.setY(i,y);a.setX(i,a.getX(i)+Math.sin(now/700+i)*sway*dt);}a.needsUpdate=true;}
   }
-  snapshot(){return structuredClone({version:1,boats:this.boats.serialize(),trailers:this.trailers.serialize(),starterGrillVersion:1,homeFurnitureVersion:1,televisions:[...this.world.televisions],generatorVersion:this.world.generatorVersion,geology:this.world.geology.serialize(),underworld:this.world.underworld.serialize(),realms:this.realms.serialize(),seed:this.seed,mode:this.mode,edits:this.world.serialize(),fluids:this.world.serializeFluids(),dynamics:this.world.sand.serialize(),forges:this.forges,cameraMode:this.cameraMode,wildlife:this.wildlife.serialize(),enemies:this.enemies.serialize(),pests:this.pests.serialize(),player:this.player.serialize(),inventory:this.inventory.serialize(),resin:this.resin.serialize(),chests:this.chests,doors:this.doors,time:this.time,entities:this.entities.serialize(),activeVehicle:this.activeVehicle?.id||null,internalCamera:this.internalCamera,settings:this.settings,goals:this.goals});}
+  snapshot(){return structuredClone({version:1,trades:this.trades,boats:this.boats.serialize(),trailers:this.trailers.serialize(),starterGrillVersion:1,homeFurnitureVersion:1,televisions:[...this.world.televisions],generatorVersion:this.world.generatorVersion,geology:this.world.geology.serialize(),underworld:this.world.underworld.serialize(),realms:this.realms.serialize(),seed:this.seed,mode:this.mode,edits:this.world.serialize(),fluids:this.world.serializeFluids(),dynamics:this.world.sand.serialize(),forges:this.forges,cameraMode:this.cameraMode,wildlife:this.wildlife.serialize(),enemies:this.enemies.serialize(),pests:this.pests.serialize(),player:this.player.serialize(),inventory:this.inventory.serialize(),resin:this.resin.serialize(),chests:this.chests,doors:this.doors,time:this.time,entities:this.entities.serialize(),activeVehicle:this.activeVehicle?.id||null,internalCamera:this.internalCamera,settings:this.settings,goals:this.goals});}
   async save(manual=false) {
     if(!this.started)return false;
     if(this.coop?.guest){if(manual)this.ui.toast('Na sala de um amigo, quem salva o mundo é o anfitrião.');return false;}

@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 import { REALMS } from './realms.js';
 import { petHealth, hurtPet } from './pet-health.js';
+import vendorModels from './assets/vendor-models.json' with { type: 'json' };
+
+/** Malhas do vendedor feitas no Blender (assets/blender/create_vendor.py). */
+const vendorGeometry=Object.fromEntries(Object.entries(vendorModels).map(([k,s])=>{const g=new THREE.BufferGeometry();for(const [n,v] of [['position',s.positions],['normal',s.normals],['color',s.colors]])g.setAttribute(n,new THREE.Float32BufferAttribute(v,3));g.computeBoundingSphere();return [k,g];}));
+const VENDOR_SHIRTS=['#e63946','#ffd166','#2a9d8f'];
+const vendorMaterial=new THREE.MeshLambertMaterial({vertexColors:true});
 
 export const SPECIES=Object.freeze({
   chicken:{name:'Galinha',health:18,speed:1.8,drop:'raw_chicken',count:1,radius:.3,height:.95},
@@ -75,8 +81,12 @@ export class Wildlife {
       }else if(type==='salamandra'){
         box([.2,.1,.5],[0,.08,0],'#ff6a1a');box([.16,.1,.18],[0,.1,.32],'#ffb238');const tail=box([.07,.06,.45],[0,.06,-.45],'#ff5a10');tail.rotation.y=.25;
         for(const s2 of [-1,1])for(const e of [-1,1])legs.push(box([.05,.07,.05],[s2*.13,.03,e*.16],'#c03a0a'));
-      }else if(type==='vendedor'||type==='turista'){
-        const shirt=type==='vendedor'?['#e63946','#ffd166','#2a9d8f'][this.serial%3]:'#4cc9f0';
+      }else if(type==='vendedor'){
+        const n=this.serial+1,add=(g,m,p=[0,0,0])=>{const x=new THREE.Mesh(g,m);x.position.set(...p);x.castShadow=true;x.receiveShadow=true;body.add(x);return x;};
+        add(vendorGeometry.body,vendorMaterial);add(vendorGeometry.shirt,new THREE.MeshLambertMaterial({vertexColors:true,color:VENDOR_SHIRTS[n%3]}));
+        for(const s2 of [-1,1])legs.push(add(vendorGeometry.leg,vendorMaterial,[s2*.12,.75,0]));
+      }else if(type==='turista'){
+        const shirt='#4cc9f0';
         box([.5,.6,.3],[0,1.05,0],shirt);box([.38,.38,.36],[0,1.55,0],'#c48e6b');
         box([.42,.1,.4],[0,1.78,0],type==='vendedor'?'#1d3557':'#f1e3b5');if(type==='vendedor')box([.5,.08,.2],[0,1.75,.22],'#1d3557');
         if(type==='vendedor'){box([.6,.18,.34],[0,1.0,.36],'#a46f3c');for(let i=0;i<3;i++)box([.14,.1,.14],[-.18+i*.18,1.14,.36],['#ffd166','#06d6a0','#ef476f'][i]);}
