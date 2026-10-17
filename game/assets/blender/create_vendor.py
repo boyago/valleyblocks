@@ -4,8 +4,8 @@ Rodar no Blender (aba Scripting, ou pelo addon blender-mcp):
   blender --background --python assets/blender/create_vendor.py
 
 Estilo voxel do jogo: só caixas, cores chapadas. Altura total ~1,85.
-Blender: X direita, -Y frente, Z cima. Exportado para Three.js como (-x, z, y),
-um giro de 180 graus, para a frente do personagem ficar voltada para quem fala com ele.
+Blender: X direita, -Y frente, Z cima. Exportado para Three.js como (x, z, -y): a frente
+vira +Z, a mesma convenção dos bichos do jogo (o yaw aponta +Z para onde ele anda ou olha).
 
 Grupos exportados (src/assets/vendor-models.json):
   body   partes fixas (cabeça, chapéu, braços, avental, pochete, bandeja)
@@ -116,8 +116,8 @@ for kind, objects in groups.items():
             n = tri.normal
             for i in tri.vertices:
                 v = ob.matrix_world @ data.vertices[i].co
-                positions.extend(round(k, 4) for k in (-v.x, v.z, v.y))
-                normals.extend(round(k, 4) for k in (-n.x, n.z, n.y))
+                positions.extend(round(k, 4) for k in (v.x, v.z, -v.y))
+                normals.extend(round(k, 4) for k in (n.x, n.z, -n.y))
                 colors.extend(color)
     export[kind] = {'positions': positions, 'normals': normals, 'colors': colors}
 OUT.write_text(json.dumps(export, separators=(',', ':')), encoding='utf8')

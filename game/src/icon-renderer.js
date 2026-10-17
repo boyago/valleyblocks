@@ -70,3 +70,25 @@ export function modelIcon(id, makeAvatar) {
   group.removeFromParent(); return url;
 }
 export function clearModelIcons() { for (const k of [...cache.keys()]) if (k.startsWith('m')) cache.delete(k); }
+
+/** Retrato do personagem com a roupa escolhida, de frente e um pouco de lado. */
+export function avatarIcon(outfit, makeAvatar) {
+  if (!browser()) return null;
+  const key = 'a' + outfit; if (cache.has(key)) return cache.get(key);
+  try {
+    renderer ??= new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setSize(SIZE, SIZE, false); renderer.setClearColor(0x000000, 0);
+    avatar ??= makeAvatar();
+  } catch { return null; }
+  avatar.setOutfit(outfit);
+  const scene = new THREE.Scene(), body = avatar.body, visible = body.visible;
+  scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+  const sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(-2, 3, -4); scene.add(sun);
+  scene.add(body); body.visible = true; body.rotation.set(0, -.45, 0); body.position.set(0, 0, 0);
+  const camera = new THREE.OrthographicCamera(-.62, .62, 1.12, -1.12, .1, 20);
+  camera.position.set(0, 1.02, -5); camera.lookAt(0, 1.02, 0);
+  renderer.setSize(SIZE, SIZE * 1.8, false); renderer.render(scene, camera);
+  const url = renderer.domElement.toDataURL(); cache.set(key, url);
+  renderer.setSize(SIZE, SIZE, false); body.rotation.set(0, 0, 0); body.visible = visible; body.removeFromParent();
+  return url;
+}

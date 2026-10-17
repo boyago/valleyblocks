@@ -59,6 +59,53 @@ export function trade(inventory, ledger, key, offer) {
   return { ok: true, message: `Negócio fechado: ${describe(offer.get)}.` };
 }
 
+/** Um morador por terra, perto do portal de chegada. Cada um vende o que é típico dali e entrega uma missão. */
+export const RESIDENTS = Object.freeze({
+  sertao: Object.freeze({ id: 'sertao', name: 'Zé do Gibão, vaqueiro', shirt: '#9c5a2c', greeting: 'Oxente, visita! Sertão é duro, mas é generoso com quem trabalha.', offers: Object.freeze([
+    { id: 'sertao-sell-calango', give: { raw_calango: 3 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'sertao-buy-calango', give: { [EMERALD]: 1 }, get: { cooked_calango: 3 }, stock: 5 },
+    { id: 'sertao-buy-copper', give: { [EMERALD]: 2 }, get: { 30: 2 }, stock: 4 },
+    { id: 'sertao-sell-copper', give: { copper_ingot: 4 }, get: { [EMERALD]: 1 }, stock: 8 },
+  ]) }),
+  minas: Object.freeze({ id: 'minas', name: 'Dona Lia, garimpeira', shirt: '#2f6f8f', greeting: 'Uai, sô! Nessas grutas tem pedra que brilha mais que estrela.', offers: Object.freeze([
+    { id: 'minas-sell-topaz', give: { 38: 2 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'minas-sell-aluminum', give: { aluminum_ingot: 3 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'minas-buy-diamond-pickaxe', give: { [EMERALD]: 14 }, get: { diamond_pickaxe: 1 }, stock: 1 },
+    { id: 'minas-buy-capivara', give: { [EMERALD]: 1 }, get: { cooked_capivara: 3 }, stock: 5 },
+  ]) }),
+  china: Object.freeze({ id: 'china', name: 'Mestre Wei, artesão', shirt: '#b23a3a', greeting: 'Paciência e bambu: com os dois, se constrói uma muralha.', offers: Object.freeze([
+    { id: 'china-buy-bamboo', give: { [EMERALD]: 1 }, get: { 47: 16 }, stock: 6 },
+    { id: 'china-buy-lacquer', give: { [EMERALD]: 1 }, get: { 48: 12 }, stock: 6 },
+    { id: 'china-sell-ruby', give: { 39: 2 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'china-buy-iron-sword', give: { [EMERALD]: 7 }, get: { iron_sword: 1 }, stock: 1 },
+  ]) }),
+  japao: Object.freeze({ id: 'japao', name: 'Aiko, pescadora', shirt: '#e98fb2', greeting: 'O rio ensina a esperar. E o peixe ensina a puxar na hora certa!', offers: Object.freeze([
+    { id: 'japao-buy-sakura', give: { [EMERALD]: 1 }, get: { 49: 12 }, stock: 6 },
+    { id: 'japao-sell-dourado', give: { raw_dourado: 2 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'japao-sell-tucunare', give: { raw_tucunare: 2 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'japao-buy-fish', give: { [EMERALD]: 1 }, get: { cooked_fish: 4 }, stock: 5 },
+  ]) }),
+  eua: Object.freeze({ id: 'eua', name: 'Hank, guia do cânion', shirt: '#c96a3a', greeting: 'Howdy! A Rota 66 é longa; leve munição e água.', offers: Object.freeze([
+    { id: 'eua-buy-rifle', give: { [EMERALD]: 10 }, get: { rifle: 1 }, stock: 1 },
+    { id: 'eua-buy-pellets', give: { [EMERALD]: 1 }, get: { pellet: 32 }, stock: 6 },
+    { id: 'eua-buy-redrock', give: { [EMERALD]: 1 }, get: { 50: 16 }, stock: 6 },
+    { id: 'eua-sell-uranium', give: { 44: 1 }, get: { [EMERALD]: 2 }, stock: 6 },
+  ]) }),
+  rio: Object.freeze({ id: 'rio', name: 'Seu Jorge do mate', shirt: '#f2c14e', greeting: 'Olha o mate, olha o biscoito! Copacabana tá linda hoje.', offers: Object.freeze([
+    { id: 'rio-buy-food', give: { [EMERALD]: 1 }, get: { food: 8 }, stock: 6 },
+    { id: 'rio-buy-calcadao', give: { [EMERALD]: 1 }, get: { 58: 16 }, stock: 6 },
+    { id: 'rio-sell-lambari', give: { raw_lambari: 4 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'rio-buy-boat', give: { [EMERALD]: 6 }, get: { boat: 1 }, stock: 1 },
+  ]) }),
+  nyc: Object.freeze({ id: 'nyc', name: 'Tony do cachorro-quente', shirt: '#3a5a9c', greeting: 'Hey! Hot dog, pretzel, o que você precisar. Aqui tudo é rápido!', offers: Object.freeze([
+    { id: 'nyc-buy-chicken', give: { [EMERALD]: 1 }, get: { cooked_chicken: 3 }, stock: 6 },
+    { id: 'nyc-buy-steel', give: { [EMERALD]: 2 }, get: { 60: 8 }, stock: 4 },
+    { id: 'nyc-sell-gold', give: { gold_ingot: 2 }, get: { [EMERALD]: 1 }, stock: 8 },
+    { id: 'nyc-buy-trailer', give: { [EMERALD]: 5 }, get: { trailer: 1 }, stock: 1 },
+  ]) }),
+});
+export const residentFor = realm => RESIDENTS[realm] || null;
+
 /** Repõe uma unidade de cada oferta a cada RESTOCK_SECONDS. */
 export function restock(ledger, elapsed) {
   for (const key of Object.keys(ledger || {})) for (const id of Object.keys(ledger[key])) {

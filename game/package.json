@@ -23,7 +23,8 @@
     "test:home": "node tests/browser-home.mjs",
     "test:pests": "node tests/browser-pests.mjs",
     "test:touch": "node tests/browser-touch.mjs",
-    "test:trading": "node tests/browser-trading.mjs"
+    "test:trading": "node tests/browser-trading.mjs",
+    "test:quests": "node tests/browser-quests.mjs"
   },
   "dependencies": {
     "three": "0.170.0"

@@ -24,8 +24,8 @@ Mundo procedural com nove terras por portais, mineração e construção, receit
 ## Roteiro proposto, em ordem
 
 1. **Vendedores e esmeraldas (feito nesta etapa).** Três bancas em Ciudad del Este (ferragens, comidas, importados), troca por esmeralda, estoque que se renova a cada 4 minutos e fica salvo no mundo. Modelo do vendedor feito no Blender (`game/assets/blender/create_vendor.py`).
-2. **Livro de missões.** Pedidos curtos por terra, com recompensa em esmeraldas: "Leve 5 tilápias para a Doña Rosa", "Encontre a ossada do Sertão", "Atravesse a Ponte da Amizade de carro". Reaproveita `this.goals` e o painel "Seu primeiro capítulo".
-3. **Um morador por terra.** Mesma base do vendedor, com ofertas temáticas: vaqueiro no Sertão (couro, carne de sol), garimpeiro em Minas (pedras preciosas), pescador no Rio (iscas, vara melhor), monge na China, guia no Grand Canyon. Cada um entrega uma missão e vende algo que só existe ali.
+2. **Livro de missões (feito).** Tecla J ou botão na pausa. Dez missões: entregas aos moradores, chegar à Tríplice Fronteira, primeira troca e visitar 5 terras; recompensa em esmeraldas, progresso salvo no mundo (`game/src/quests.js`).
+3. **Um morador por terra (feito).** Sete moradores perto do portal de chegada (Sertão, Minas, China, Japão, EUA, Rio, Nova York), cada um com loja temática e um pedido (`RESIDENTS` em `game/src/trading.js`). Mesmo modelo do Blender, camisa na cor da terra. Falta: chapéu ou acessório próprio de cada um no Blender.
 4. **Armaduras.** Capacete, peitoral, calça e bota em couro, ferro e diamante, que reduzem dano dos inimigos noturnos. Modeladas no Blender no mesmo formato das aparências; desgaste como nas ferramentas.
 5. **Vila própria.** Ao construir uma casa com porta, cama (sofá) e tocha, um morador se muda para o Vale e abre banca ali. Dá sentido à construção.
 6. **Melhorias de ferramenta na churrasqueira/bigorna.** Gastar esmeraldas e minérios raros (rubi, topázio, urânio) para "Eficiência" e "Durabilidade". Dá destino aos minérios das terras.

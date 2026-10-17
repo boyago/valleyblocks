@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { REALMS } from './realms.js';
+import { RESIDENTS } from './trading.js';
 import { petHealth, hurtPet } from './pet-health.js';
 import vendorModels from './assets/vendor-models.json' with { type: 'json' };
 
@@ -17,6 +18,7 @@ export const SPECIES=Object.freeze({
   esquilo:{name:'Esquilo',health:12,speed:3,drop:null,count:0,radius:.18,height:.4,scenery:true},
   quati:{name:'Quati',health:20,speed:2.6,drop:null,count:0,radius:.3,height:.6,scenery:true},
   vendedor:{name:'Vendedor de rua',health:40,speed:1.1,drop:null,count:0,radius:.3,height:1.7,scenery:true},
+  morador:{name:'Morador',health:40,speed:.8,drop:null,count:0,radius:.3,height:1.7,scenery:true},
   turista:{name:'Turista',health:40,speed:1.2,drop:null,count:0,radius:.3,height:1.7,scenery:true},
   salamandra:{name:'Salamandra de fogo',health:20,speed:2.4,drop:null,count:0,radius:.25,height:.35,scenery:true},
   panda:{name:'Panda',health:60,speed:1.2,drop:null,count:0,radius:.45,height:1.1,scenery:true},
@@ -39,7 +41,7 @@ export class Wildlife {
     this.randomState=Number.isInteger(saved?.randomState)?saved.randomState>>>0:this.world.seedHash;
     this.geometry=new THREE.BoxGeometry(1,1,1);this.materials=new Map();this.carryMeshes=new Map();
     if(Array.isArray(saved?.animals)){
-      for(const a of saved.animals.slice(0,32))if(SPECIES[a.type]&&goodPosition(a.position)&&Number.isFinite(a.health)&&a.health>0){
+      for(const a of saved.animals.slice(0,32))if(SPECIES[a.type]&&(a.type!=='morador'||RESIDENTS[a.realm])&&goodPosition(a.position)&&Number.isFinite(a.health)&&a.health>0){
         this.spawn(a.type,new THREE.Vector3(...a.position),a);
       }
       for(const d of (saved.drops||[]).slice(0,64))if(rawItems.has(d.item)&&goodPosition(d.position)&&Number.isSafeInteger(d.count)&&d.count>0&&d.count<=3)this.addDrop(d.item,d.count,new THREE.Vector3(...d.position));
@@ -62,7 +64,7 @@ export class Wildlife {
   spawn(type,position,saved={}){
     const spec=SPECIES[type];if(!spec||this.animals.length>=32)return null;
     const mesh=new THREE.Group(),body=new THREE.Group();mesh.add(body);
-    if(['panda','macaco','bisao','quati','vendedor','turista','salamandra','mico','pombo','esquilo'].includes(type)){
+    if(['panda','macaco','bisao','quati','vendedor','morador','turista','salamandra','mico','pombo','esquilo'].includes(type)){
       const legs=[],box=(sz,p,c)=>this.box(body,sz,p,c);
       if(type==='mico'){
         box([.22,.24,.36],[0,.3,0],'#f2a32a');box([.3,.28,.26],[0,.48,.2],'#f7b53c');box([.14,.12,.06],[0,.44,.34],'#5a3a24');
@@ -81,9 +83,9 @@ export class Wildlife {
       }else if(type==='salamandra'){
         box([.2,.1,.5],[0,.08,0],'#ff6a1a');box([.16,.1,.18],[0,.1,.32],'#ffb238');const tail=box([.07,.06,.45],[0,.06,-.45],'#ff5a10');tail.rotation.y=.25;
         for(const s2 of [-1,1])for(const e of [-1,1])legs.push(box([.05,.07,.05],[s2*.13,.03,e*.16],'#c03a0a'));
-      }else if(type==='vendedor'){
+      }else if(type==='vendedor'||type==='morador'){
         const n=this.serial+1,add=(g,m,p=[0,0,0])=>{const x=new THREE.Mesh(g,m);x.position.set(...p);x.castShadow=true;x.receiveShadow=true;body.add(x);return x;};
-        add(vendorGeometry.body,vendorMaterial);add(vendorGeometry.shirt,new THREE.MeshLambertMaterial({vertexColors:true,color:VENDOR_SHIRTS[n%3]}));
+        add(vendorGeometry.body,vendorMaterial);add(vendorGeometry.shirt,new THREE.MeshLambertMaterial({vertexColors:true,color:type==='morador'?RESIDENTS[saved.realm]?.shirt||'#888':VENDOR_SHIRTS[n%3]}));
         for(const s2 of [-1,1])legs.push(add(vendorGeometry.leg,vendorMaterial,[s2*.12,.75,0]));
       }else if(type==='turista'){
         const shirt='#4cc9f0';
@@ -106,7 +108,7 @@ export class Wildlife {
         for(const s2 of [-1,1]){const h=box([.06,.18,.06],[s2*.24,1.24,.86],'#e8e0cc');h.rotation.z=-s2*.6;}
         for(const s2 of [-1,1])for(const e of [-1,1])legs.push(box([.18,.55,.2],[s2*.26,.28,e*.4],'#3f2a1c'));
       }
-      const animal={id:`wild-${++this.serial}`,type,position:position.clone(),home:position.clone(),health:spec.health,yaw:Number.isFinite(saved.yaw)?saved.yaw:0,mesh,body,legs,goal:null,timer:0,panic:0,gait:0,cooldown:0};
+      const animal={id:`wild-${++this.serial}`,type,position:position.clone(),home:position.clone(),health:spec.health,yaw:Number.isFinite(saved.yaw)?saved.yaw:0,mesh,body,legs,goal:null,timer:0,panic:0,gait:0,cooldown:0,realm:type==='morador'?saved.realm:undefined};
       mesh.position.copy(position);mesh.rotation.y=animal.yaw;mesh.name='wildlife:'+type;this.scene.add(mesh);this.animals.push(animal);return animal;
     }
     if(type==='onca'){
@@ -248,7 +250,7 @@ export class Wildlife {
       a.mesh.visible=a.position.distanceToSquared(player)<72*72;if(!a.mesh.visible)continue;
       const spec=SPECIES[a.type];a.timer-=dt;a.panic=Math.max(0,a.panic-dt);a.cooldown=Math.max(0,a.cooldown-dt);
       const hunter=this.entities.pets.find(p=>p.mode==='hunt'&&!p.vehicleId&&petHealth(p.health)>0&&p.position.distanceTo(a.position)<4);
-      const threat=a.position.distanceTo(player)<3.5?player:hunter?.position;
+      const people=a.type==='vendedor'||a.type==='morador',threat=people?null:a.position.distanceTo(player)<3.5?player:hunter?.position;
       if(a.type==='boar'&&hunter){
         a.panic=2;a.goal=hunter.position.clone();
         if(a.cooldown<=0&&a.position.distanceTo(hunter.position)<1.8&&this.visibleBetween(a.position.clone().add(new THREE.Vector3(0,.6,0)),hunter.position.clone().add(new THREE.Vector3(0,.6,0)))){
@@ -257,7 +259,8 @@ export class Wildlife {
         }
       }
       else if(threat){a.panic=2;a.goal=a.position.clone().add(a.position.clone().sub(threat).setY(0).normalize().multiplyScalar(6));}
-      else if(a.timer<=0){a.timer=3+this.random()*4;const angle=this.random()*Math.PI*2;a.goal=a.home.clone().add(new THREE.Vector3(Math.cos(angle)*4,0,Math.sin(angle)*4));}
+      else if(people&&a.position.distanceTo(player)<4){a.goal=null;a.yaw=Math.atan2(player.x-a.position.x,player.z-a.position.z);}
+      else if(a.timer<=0){a.timer=3+this.random()*4;const angle=this.random()*Math.PI*2,r=a.type==='morador'?1.5:4;a.goal=a.home.clone().add(new THREE.Vector3(Math.cos(angle)*r,0,Math.sin(angle)*r));}
       let moving=false;
       if(a.goal){const delta=a.goal.clone().sub(a.position).setY(0),distance=delta.length();
         if(distance>.15){delta.normalize().multiplyScalar(Math.min(distance,dt*spec.speed*(a.panic>0?1:.35)));
@@ -281,6 +284,6 @@ export class Wildlife {
     if(this.collect(inventory,player))this.entities.audio?.play?.('collect');
   }
   blocksPlacement(x,y,z){return this.animals.some(a=>{const s=SPECIES[a.type],p=a.position;return x<p.x+s.radius&&x+1>p.x-s.radius&&z<p.z+s.radius&&z+1>p.z-s.radius&&y<p.y+s.height&&y+1>p.y;});}
-  serialize(){return {serial:this.serial,randomState:this.randomState,spawnTimer:this.spawnTimer,animals:this.animals.map(a=>({type:a.type,position:a.position.toArray(),health:a.health,yaw:a.yaw})),drops:this.drops.map(d=>({item:d.item,count:d.count,position:d.position.toArray()}))};}
+  serialize(){return {serial:this.serial,randomState:this.randomState,spawnTimer:this.spawnTimer,animals:this.animals.map(a=>({type:a.type,realm:a.realm,position:a.position.toArray(),health:a.health,yaw:a.yaw})),drops:this.drops.map(d=>({item:d.item,count:d.count,position:d.position.toArray()}))};}
   dispose(){for(const e of [...this.animals,...this.drops])e.mesh.removeFromParent();for(const mesh of this.carryMeshes.values())mesh.removeFromParent();this.geometry.dispose();for(const m of this.materials.values())m.dispose();}
 }
