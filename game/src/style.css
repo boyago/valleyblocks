@@ -121,3 +121,8 @@
 .quest .primary{width:auto;margin:0;padding:8px 12px;font-size:12px}
 .quest-card{display:flex;flex-direction:column;gap:4px;margin:8px 0 12px;padding:12px;border-radius:12px;background:#e0efb91f;border:1px solid #e0efb966}
 .quest-card small{font-size:9px;letter-spacing:1.4px;opacity:.8}.quest-card .primary{margin-top:6px}.quest-card em{opacity:.75}
+
+.account-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px;font-size:12px;opacity:.9}.account-row .text-button{white-space:nowrap;font-weight:700}
+.login-form{display:grid;gap:10px;margin:10px 0}.login-form label{display:grid;gap:4px;font-size:12px;font-weight:600}.login-form input{padding:10px 12px;border-radius:10px;border:1px solid #25333033;background:#fff;font:inherit;color:#1f2a24}
+.login-error{margin:0;color:#a3352b;font-size:13px}
+@media(max-height:560px){.account-row{margin:0 0 4px;font-size:11px}.account-row>span{display:none}}

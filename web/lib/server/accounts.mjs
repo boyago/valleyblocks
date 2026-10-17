@@ -132,7 +132,7 @@ export function createAccounts(db) {
       });
       return { token: await this.openSession(activated, now) };
     },
-    async login(name, password, now = Date.now(), client = '') {
+    async login(name, password, now = Date.now(), client = '', ttl = 12 * 3600000) {
       const normalized = username(name);
       // Per account+client: slows guessing without letting a stranger lock someone out.
       await this.rateLimit(tokenHash('login:'+normalized+':'+String(client).slice(0,64)),10,now);
@@ -144,8 +144,8 @@ export function createAccounts(db) {
       const valid = await verifyPassword(password,account?.password_hash);
       if (!valid || account.disabled) { await this.rateLimit(accountBucket,300,now); throw new AccountError('Usuário ou senha inválidos.',401); }
       const token=randomBytes(32).toString('hex');
-      await db.query('INSERT INTO labs_auth_sessions (token_hash,account_id,expires_at) VALUES (?,?,?)',[tokenHash(token),account.id,now+12*3600000]);
-      return { token, account:publicAccount(account) };
+      await db.query('INSERT INTO labs_auth_sessions (token_hash,account_id,expires_at) VALUES (?,?,?)',[tokenHash(token),account.id,now+ttl]);
+      return { token, account:publicAccount(account), expiresAt:now+ttl };
     },
     async session(token, now = Date.now()) {
       if (!/^[a-f0-9]{64}$/.test(token || '')) return null;

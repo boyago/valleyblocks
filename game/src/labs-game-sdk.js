@@ -50,7 +50,7 @@ export function createLabsBridge({ slug, version = '1.0.0' }) {
       const request=accessRequests.get(msg.requestId);if(request){clearTimeout(request.timer);accessRequests.delete(msg.requestId);request.resolve({allowed:msg.allowed===true,message:msg.message||''});}return;
     }
     if(msg.type==='start')accessRequired=msg.playAccess===true;
-    if (!['start', 'restart', 'pause', 'resume', 'destroy'].includes(msg.type)) return;
+    if (!['start', 'restart', 'pause', 'resume', 'destroy', 'account'].includes(msg.type)) return;
     emitLocal(msg.type, msg);
   }
   window.addEventListener('message', onMessage);
@@ -81,6 +81,8 @@ export function createLabsBridge({ slug, version = '1.0.0' }) {
     error: (message, code = 'runtime') => send('error', { message, code }),
     requestFullscreen: () => send('fullscreen-request'),
     /** Asks the portal to open the checkout of a product; the portal decides, never the game. */
+    /** Pede ao portal para abrir a página de login e voltar ao jogo depois. */
+    login: () => send('login-request'),
     purchase: (product) => send('purchase-request', { product: String(product).slice(0, 64) }),
     dispose: () => {
       send('gameplay', { active: false });

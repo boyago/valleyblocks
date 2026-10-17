@@ -48,10 +48,11 @@ export function GamePlayer({ game }: { game: Game }) {
   const ownedOutfits = useRef<string[]>([]);
   const unlimitedRef = useRef(false);
   const baseAccess = useRef<{account?:boolean;unlimited?:boolean}>({});
+  const accountName = useRef<string|null>(null);
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_LABS_PLAY_ENABLED !== 'true') return;
     let alive = true;
-    fetch('/api/account/me', { cache: 'no-store' }).then(r => r.json()).then(d => { if (alive && Array.isArray(d?.account?.entitlements?.outfits)) ownedOutfits.current = d.account.entitlements.outfits; if (alive && d?.account) { unlimitedRef.current = !!d.account.unlimited; baseAccess.current = { account: true, unlimited: !!d.account.unlimited }; setAccessStatus(prev => ({ ...baseAccess.current, ...prev })); } }).catch(() => {});
+    fetch('/api/account/me', { cache: 'no-store' }).then(r => r.json()).then(d => { if (alive && typeof d?.account?.username === 'string') { accountName.current = d.account.username; frame.current?.contentWindow?.postMessage({ labs: 1, type: 'account', account: { username: d.account.username } }, window.location.origin); } if (alive && Array.isArray(d?.account?.entitlements?.outfits)) ownedOutfits.current = d.account.entitlements.outfits; if (alive && d?.account) { unlimitedRef.current = !!d.account.unlimited; baseAccess.current = { account: true, unlimited: !!d.account.unlimited }; setAccessStatus(prev => ({ ...baseAccess.current, ...prev })); } }).catch(() => {});
     return () => { alive = false; };
   }, [game.slug]);
   const isTouch = useMediaQuery("(pointer: coarse)");
@@ -128,7 +129,7 @@ export function GamePlayer({ game }: { game: Game }) {
         checked = true; void access.check().then(data => { if (failed) return; if (data.allowed) updateOrientation(); else setPhase("playing"); });
         return;
       }
-      if (!startSent && !blocked()) { startSent = true; arm(); post("start",{playAccess:enforceAccess&&!portalTimed,cloudSaves,outfits:ownedOutfits.current,unlimited:unlimitedRef.current,multiplayer:process.env.NEXT_PUBLIC_LABS_MULTIPLAYER_ENABLED==="true"&&!!baseAccess.current.account}); }
+      if (!startSent && !blocked()) { startSent = true; arm(); post("start",{playAccess:enforceAccess&&!portalTimed,cloudSaves,outfits:ownedOutfits.current,unlimited:unlimitedRef.current,multiplayer:process.env.NEXT_PUBLIC_LABS_MULTIPLAYER_ENABLED==="true"&&!!baseAccess.current.account,accounts:enforceAccess,account:accountName.current?{username:accountName.current}:null}); }
       if (started && blocked() && !pausedForRotation) { post("pause"); pausedForRotation = true; if (portalTimed) { access?.state(false); usage.state(false); } }
       if (started && !blocked() && pausedForRotation) { post("resume"); pausedForRotation = false; frame.current?.focus(); if (portalTimed) { access?.state(true); usage.state(true); } }
     };
@@ -157,6 +158,7 @@ export function GamePlayer({ game }: { game: Game }) {
         // The game only asks; the checkout page handles sign-in, coupon and payment.
         location.assign(`/comprar/${data.product}`);
       }
+      if (data.type === "login-request") location.assign(`/conta/entrar?next=${encodeURIComponent(location.pathname)}`);
       if (data.type === "fullscreen-request" && game.telaCheia) { setImmersive(true); void shell.current?.requestFullscreen?.().then(() => { enteredFullscreen.current = true; }).catch(() => {}); }
     };
     // Ao voltar para a aba: nos jogos cronometrados pelo portal, retoma o jogo e o relógio se ainda houver tempo.

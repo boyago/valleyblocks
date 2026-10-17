@@ -25,6 +25,7 @@ import { Coop } from './multiplayer.js';
 import { Fishing } from './fishing.js';
 import { Boats, Trailers } from './watercraft.js';
 import { Landmarks } from './landmarks.js';
+import { Skeletons } from './skeletons.js';
 import { Realms, activatePortal, realmAt, PORTAL_BLOCKS, REALMS, buildStarterHouse } from './realms.js';
 import { OUTFITS, OUTFIT_PACKS, resolveOutfit } from './outfits.js';
 import { useBucket, heatMaterial } from './interactions.js';
@@ -32,6 +33,7 @@ import { rampFacingFromYaw } from './ramps.js';
 import { Wildlife, SPECIES } from './wildlife.js';
 import { FOODS, eatFood, updateNeeds } from './survival.js';
 import { TouchControls, touchPreferred } from './touch.js';
+import { createAccount } from './account.js';
 import './style.css';
 
 const bridge=createLabsBridge({slug:'valleyblocks',version:'1.25.0'});
@@ -39,6 +41,7 @@ const canvas=document.querySelector('#world');
 /** App Android/iOS (Capacitor injeta window.Capacitor antes de qualquer script). */
 const NATIVE_APP=typeof window.Capacitor?.isNativePlatform==='function'&&window.Capacitor.isNativePlatform();
 const TOUCH=touchPreferred({native:NATIVE_APP});
+const account=createAccount({bridge,native:NATIVE_APP});
 const DEFAULT_SETTINGS={quality:'medium',shadows:true,fog:true,music:.3,effects:.65,sensitivity:1,showFps:false,outfit:'explorer'};
 // Celular: começa leve (3 × 3 regiões, sem sombras). O jogador pode subir em Som e imagem.
 const TOUCH_DEFAULTS={quality:'low',shadows:false};
@@ -97,13 +100,18 @@ class Game {
     this.ui=new UI(document.querySelector('#app'),(action,data,button)=>this.action(action,data,button),{touch:TOUCH});
     this.touch=TOUCH?new TouchControls(this,document.querySelector('#app')):null;
     this.coopAvailable=coopAvailable&&!bridge.standalone;this.coop=new Coop(this);
+    this.account=account;account.onChange(s=>{
+      // No app as roupas compradas vêm da conta; no portal, o site já manda no 'start'.
+      if(s.mode==='app'){this.ownedPacks=s.outfits.filter(id=>OUTFIT_PACKS[id]);this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);}
+      if(['landing','login','character'].includes(this.ui.menu))this.ui.setMenu(this.ui.menu,this);
+    });
     this.landingBoot=true;this.createWorld(null);this.landingBoot=false;this.coop.bindWorld(this.world);
     this.bindInput();this.resize();this.ui.setMenu('landing',this);
     this.frameTimes=[];this.fps=0;this.perfElapsed=0;this.frameCounter=0;this.accumulator=0;this.elapsed=0;
     this.lastFrame=performance.now();this.frame=this.frame.bind(this);this.raf=requestAnimationFrame(this.frame);
   }
   createWorld(save) {
-    this.realmFx?.group.removeFromParent();this.realmFx=null;this.fishing?.dispose();this.boats?.dispose();this.landmarks?.dispose();this.trailers?.dispose();this.activeBoat=null;this.landmarks=new Landmarks(this.scene);this.slingshot?.dispose();this.pests?.dispose();this.enemies?.dispose();this.wildlife?.dispose();this.world?.dispose();this.entities?.dispose();this.torchLights.forEach(l=>this.scene.remove(l));this.torchLights=[];
+    this.realmFx?.group.removeFromParent();this.realmFx=null;this.fishing?.dispose();this.boats?.dispose();this.landmarks?.dispose();this.skeletons?.dispose();this.trailers?.dispose();this.activeBoat=null;this.landmarks=new Landmarks(this.scene);this.skeletons=new Skeletons(this.scene,()=>this.world);this.slingshot?.dispose();this.pests?.dispose();this.enemies?.dispose();this.wildlife?.dispose();this.world?.dispose();this.entities?.dispose();this.torchLights.forEach(l=>this.scene.remove(l));this.torchLights=[];
     this.seed=save?.seed||newWorldSeed(this.newSeed);this.mode=save?.mode||this.newMode;
     this.world=new VoxelWorld(this.scene,this.seed,save?.edits||[],save?.fluids||null,{generatorVersion:save?(save.generatorVersion||1):3,dynamics:save?.dynamics,geology:save?.geology||{version:1},underworld:save?.underworld||{version:1},televisions:save?.televisions});
     this.world.ensureAround(0,0,1);
@@ -262,6 +270,13 @@ class Game {
         }
         case 'coop-leave':this.coop.leave();if(this.started)this.menu('pause');break;
         case 'coop-copy':navigator.clipboard?.writeText(this.coop.code).then(()=>this.ui.toast('Código copiado.')).catch(()=>{});break;
+        case 'account-login':if(account.state.mode==='portal')account.login();else this.menu('login');break;
+        case 'account-submit':{
+          const user=document.querySelector('#account-user')?.value,pass=document.querySelector('#account-pass')?.value;
+          void account.login(user,pass).then(r=>{if(r.ok&&account.state.username){this.ui.toast(`Olá, ${account.state.username}!`);this.menu(this.started?'pause':'landing');}});break;
+        }
+        case 'account-logout':void account.logout().then(()=>this.ui.toast('Você saiu da conta.'));break;
+        case 'account-signup':window.open(account.signupUrl,'_blank','noopener');break;
         case 'close':if(this.started)this.resume();else this.menu('landing');break;
         // Ações dos controles de toque (o aviso de contexto vira botão; a mochila, a câmera e o voo têm botões próprios).
         case 'context':if(!this.running)break;if(data.key==='R')this.interactPet();else this.interact();break;
@@ -592,7 +607,7 @@ class Game {
     else if(this.player.update(dt,this.keys,this.mode,(a,b)=>this.playerEntityCollision(a,b))==='respawn')this.ui.toast('Você voltou ao início em segurança.');
     {const ev=this.fishing.update(dt,this.player);if(ev==='bite'){this.ui.toast('Fisgou! Botão direito agora para puxar!');this.audio.play('hunt-hit',this.player.position);}else if(ev==='escaped')this.ui.toast(this.fishing.active?'O peixe escapou. A linha continua na água.':'A linha voltou para a vara.');if(this.fishing.active&&this.inventory.selectedItem!=='fishing_rod')this.fishing.stop();}
     this.boats.update(dt);this.trailers.update(dt);
-    this.slingshot.update(dt);this.wildlife.update(dt,this.player.position,this.inventory);
+    this.slingshot.update(dt);this.wildlife.update(dt,this.player.position,this.inventory);this.skeletons.update(this.player.position);
     this.pests.update(dt,this.player,this.chests,this.mode);
     this.entities.update(dt,this.player.position,this.keys,this.activeVehicle);
     this.enemies.update(dt,this.player,this.time,this.mode);
@@ -720,6 +735,7 @@ async function boot() {
     if(initializing||game||destroyed)return;initializing=true;
     try{
       if(options.cloudSaves)saves=createRemoteSaves({request:bridge.worldRequest});
+      account.fromPortal(options);void account.restore();
       ownedPacks=Array.isArray(options.outfits)?options.outfits.filter(id=>typeof id==='string'&&OUTFIT_PACKS[id]):[];fullAccess=options.unlimited===true;coopAvailable=options.multiplayer===true;
       const saved=huntingDemo?null:await saves.load();
       if(destroyed)return;

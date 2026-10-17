@@ -16,8 +16,10 @@ export async function requireAccount(request, role) {
   if (role && account.role!==role) throw new AccountError('Acesso administrativo necessário.',403);
   return {accounts,account};
 }
-export async function readBody(request, max=4096) {
-  if (!process.env.LABS_ORIGIN || request.headers.get('origin')!==process.env.LABS_ORIGIN) throw new AccountError('Origem não permitida.',403);
+/** Token do app (Authorization: Bearer <64 hex>); o app não usa cookie. */
+export function bearerToken(request) { return /^Bearer ([a-f0-9]{64})$/.exec(request.headers.get('authorization')||'')?.[1]; }
+export async function readBody(request, max=4096, origins=[process.env.LABS_ORIGIN]) {
+  if (!origins.filter(Boolean).includes(request.headers.get('origin'))) throw new AccountError('Origem não permitida.',403);
   if (!request.headers.get('content-type')?.startsWith('application/json')) throw new AccountError('Formato inválido.',415);
   const reader=request.body?.getReader();if (!reader) throw new AccountError('Dados inválidos.');
   const chunks=[];let size=0;
