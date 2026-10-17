@@ -26,7 +26,8 @@
     "test:trading": "node tests/browser-trading.mjs",
     "test:quests": "node tests/browser-quests.mjs",
     "test:account": "node tests/browser-account.mjs",
-    "test:skeletons": "node tests/browser-skeletons.mjs"
+    "test:skeletons": "node tests/browser-skeletons.mjs",
+    "test:backpack-search": "node tests/browser-backpack-search.mjs"
   },
   "dependencies": {
     "three": "0.170.0"

@@ -291,6 +291,12 @@ class Game {
         case 'slot':this.inventory.select(Number(data.slot));break;
         case 'equip':if(this.inventory.has(data.item)){this.inventory.hotbar[this.inventory.selected]=ITEMS[data.item].id;this.audio.play('inventory');this.ui.setMenu('inventory',this);this.ui.toast(`${ITEMS[data.item].name} no espaço ${this.inventory.selected+1}.`);}break;
         case 'catalog-add':if(this.mode==='creative'&&ITEMS[data.item]&&this.inventory.add(ITEMS[data.item].id)){this.inventory.hotbar[this.inventory.selected]=ITEMS[data.item].id;this.audio.play('inventory');this.ui.setMenu('inventory',this);this.ui.toast(`${ITEMS[data.item].name} adicionado à mochila.`);}break;
+        case 'hotbar-pick':this.inventory.select(Number(data.slot));this.ui.setMenu('inventory',this);break;
+        case 'hotbar-drop':{
+          const slot=Number(data.slot),item=ITEMS[data.item];if(!item||!(slot>=0&&slot<9))break;
+          if(!this.inventory.has(item.id)&&!(this.mode==='creative'&&this.inventory.add(item.id)))break;
+          this.inventory.hotbar[slot]=item.id;this.inventory.select(slot);this.audio.play('inventory');this.ui.setMenu('inventory',this);this.ui.toast(`${item.name} no espaço ${slot+1}.`);break;
+        }
         case 'inventory-tab':this.ui.inventoryTab=data.tab;this.ui.setMenu('inventory',this);break;
         case 'bench-pick':this.ui.benchRecipe=data.recipe;this.ui.setMenu('workbench',this);break;
         case 'bench-tab':this.ui.benchTab=data.tab;this.ui.benchRecipe=null;this.ui.setMenu('workbench',this);break;
@@ -371,6 +377,7 @@ class Game {
         if(this.running)this.menu('pause');else if(this.started&&this.ui.menu!=='pause')this.menu('pause');return;
       }
       if(e.code==='Tab'&&this.started&&!e.repeat){this.openInventory();return;}
+      if(e.target?.matches?.('input,textarea,select')&&e.code!=='Escape')return;
       if(this.ui.menu==='inventory'&&/^Digit[1-9]$/.test(e.code)){this.inventory.select(Number(e.code.slice(-1))-1);this.ui.setMenu('inventory',this);return;}
       if(!this.running)return;
       if(/^(Key[WASDEVCHLF]|Space|ShiftLeft|ShiftRight|ControlLeft|ControlRight|Digit[1-9])$/.test(e.code))e.preventDefault();

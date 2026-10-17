@@ -126,3 +126,13 @@
 .login-form{display:grid;gap:10px;margin:10px 0}.login-form label{display:grid;gap:4px;font-size:12px;font-weight:600}.login-form input{padding:10px 12px;border-radius:10px;border:1px solid #25333033;background:#fff;font:inherit;color:#1f2a24}
 .login-error{margin:0;color:#a3352b;font-size:13px}
 @media(max-height:560px){.account-row{margin:0 0 4px;font-size:11px}.account-row>span{display:none}}
+
+.hotbar-picker{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;margin:4px 0 10px}
+.pick-slot{position:relative;height:52px;padding:4px;border:1.5px solid #d9dfcd;border-radius:10px;background:#fbfcf7;display:grid;place-items:center}
+.pick-slot i{position:absolute;top:2px;left:5px;font-style:normal;font-size:10px;font-weight:800;opacity:.6}
+.pick-slot .item-art{transform:scale(.8)}.pick-slot.active{border-color:#253c30;background:#e0efb9;box-shadow:0 0 0 2px #253c3033}.pick-slot.drop{border-color:#5d8f3a;background:#e0efb9}
+.inventory-search input{width:100%;padding:9px 12px;margin:0 0 8px;border:1px solid #d9dfcd;border-radius:10px;background:#fff;color:#1f2a24}
+.inventory-grid.searching .empty-slot{display:none}
+.inventory-empty{margin:6px 0;font-size:13px;opacity:.7}.inventory-item[hidden]{display:none}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:650px){.hotbar-picker{gap:3px}.pick-slot{height:40px;border-radius:8px}}
