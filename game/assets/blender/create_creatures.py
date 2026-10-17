@@ -40,9 +40,10 @@ def box(center, size, color, rot=(0, 0, 0), glow=False):
     """glow: peça que brilha no escuro (olhos, magma, fantasma); o jogo desenha sem sombra."""
     return {'c': center, 's': size, 'color': color, 'r': rot, 'glow': glow}
 
-def corners(b):
+def corners(b, grow=0):
+    """grow: folga por lado; detalhes saem um pouco para fora e não piscam (z-fighting)."""
     m = Euler(b['r'], 'XYZ').to_matrix()
-    half = [v / 2 for v in b['s']]
+    half = [v / 2 + grow for v in b['s']]
     return [Vector(b['c']) + m @ Vector((sx * half[0], sy * half[1], sz * half[2])) for sx, sy, sz in CORNERS]
 
 def geometry(boxes, pivot=(0, 0, 0)):
@@ -55,8 +56,9 @@ def geometry(boxes, pivot=(0, 0, 0)):
 def triangles(boxes, pivot):
     """Triângulos com normal por face e cor por vértice, relativos ao pivô."""
     p0 = Vector(pivot); positions, normals, colors = [], [], []
-    for b in boxes:
-        v = [c - p0 for c in corners(b)]; col = rgb(b['color'])
+    for k, b in enumerate(boxes):
+        # Cada peça seguinte fica 0,5 mm mais "por cima" (até 5 mm): faces coplanares não brigam.
+        v = [c - p0 for c in corners(b, min(.0005 * k, .005))]; col = rgb(b['color'])
         for f in FACES:
             a, bb, c, d = [v[i] for i in f]
             n = (bb - a).cross(d - a).normalized()

@@ -114,14 +114,17 @@ box('Escapula', (-.36, -.52, .02), (.24, .18, .04), bone_old, (0, 0, .5))
 
 bpy.context.view_layer.update()
 positions, normals, colors = [], [], []
-for ob in parts:
+for k, ob in enumerate(parts):
+    # Cada peça seguinte fica 0,5 mm mais "por cima" (até 5 mm): faces coplanares não piscam.
+    grow = min(.0005 * k, .005)
     data = ob.data; data.calc_loop_triangles()
     color = [round(c, 4) for c in data.materials[0].diffuse_color[:3]]
     world, rot = ob.matrix_world, ob.matrix_world.to_3x3()
     for tri in data.loop_triangles:
         n = (rot @ tri.normal).normalized()
         for i in tri.vertices:
-            v = world @ data.vertices[i].co
+            co = data.vertices[i].co
+            v = world @ Vector([c + math.copysign(grow, c) for c in co])
             positions.extend(round(k, 4) for k in (v.x, v.z, -v.y))
             normals.extend(round(k, 4) for k in (n.x, n.z, -n.y))
             colors.extend(color)

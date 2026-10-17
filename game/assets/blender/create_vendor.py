@@ -12,7 +12,7 @@ Grupos exportados (src/assets/vendor-models.json):
   shirt  camisa em branco; o jogo tinge com a cor de cada vendedor
   leg    uma perna com o topo em z = 0 (o quadril), para balançar ao andar
 """
-import bpy, json
+import bpy, json, math
 from pathlib import Path
 
 try:
@@ -109,13 +109,14 @@ bpy.context.view_layer.update()
 export = {}
 for kind, objects in groups.items():
     positions, normals, colors = [], [], []
-    for ob in objects:
+    for k, ob in enumerate(objects):
+        grow = min(.0005 * k, .005)  # detalhes 0,5 mm por cima: faces coplanares não piscam
         data = ob.data; data.calc_loop_triangles()
         color = [round(c, 4) for c in data.materials[0].diffuse_color[:3]]
         for tri in data.loop_triangles:
             n = tri.normal
             for i in tri.vertices:
-                v = ob.matrix_world @ data.vertices[i].co
+                v = ob.matrix_world @ data.vertices[i].co.__class__([c + math.copysign(grow, c) for c in data.vertices[i].co])
                 positions.extend(round(k, 4) for k in (v.x, v.z, -v.y))
                 normals.extend(round(k, 4) for k in (n.x, n.z, -n.y))
                 colors.extend(color)
