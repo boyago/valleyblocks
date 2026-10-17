@@ -771,6 +771,36 @@ export class EntitySystem {
     }
   }
 
+  // O corpo do bicho é mais comprido que a caixa de colisão (0,42). Confere focinho
+  // e rabo na direção em que ele olha, para não atravessar a parede de uma vala.
+  petFits(pet, yaw, at = pet.position) {
+    const half = pet.type === 'dog' ? 0.48 : 0.4, sx = Math.sin(yaw), sz = Math.cos(yaw);
+    for (const e of [-half, half]) for (const h of [0.3, 0.75]) {
+      if (this.world.isSolid(Math.floor(at.x + sx * e), Math.floor(at.y + h), Math.floor(at.z + sz * e))) return false;
+    }
+    return true;
+  }
+
+  /** Vira para onde o corpo cabe; preso num buraco 1x1, pula para fora. */
+  fitPet(dt, pet) {
+    if (this.petFits(pet, pet.yaw)) { pet.cramped = 0; return; }
+    for (const turn of [Math.PI / 2, -Math.PI / 2, Math.PI]) {
+      const yaw = pet.yaw + turn;
+      if (this.petFits(pet, yaw)) { pet.yaw = yaw; pet.cramped = 0; return; }
+    }
+    pet.cramped = (pet.cramped || 0) + dt;
+    if (pet.cramped < 1.5) return;
+    for (let r = 1; r <= 2; r++) for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      const x = Math.floor(pet.position.x + Math.cos(a) * r) + 0.5, z = Math.floor(pet.position.z + Math.sin(a) * r) + 0.5;
+      const p = this.safeStand(x, z, pet.position.y, 1.17, 0.23, 2.1, 1.1);
+      if (p && !this.petLavaAt(x, z, p.y) && this.petOverlap(pet, p) < 0.001 && [0, Math.PI / 2].some(y => this.petFits(pet, y, p))) {
+        pet.position.copy(p); pet.jump = 0.4; pet.path.length = 0; pet.routeAge = 2; pet.cramped = 0;
+        return;
+      }
+    }
+  }
+
   petLavaAt(x, z, y) {
     for (const dx of [-.23, .23]) for (const dz of [-.23, .23]) {
       for (let by = Math.floor(y + .02); by <= Math.floor(y + 1.13); by++) {
@@ -924,9 +954,11 @@ export class EntitySystem {
         pet.stuck = 0;
         if (pet.affection > 0 || distance < 5) {
           const wanted = Math.atan2(playerPosition.x - pet.position.x, playerPosition.z - pet.position.z);
-          pet.yaw += Math.atan2(Math.sin(wanted - pet.yaw), Math.cos(wanted - pet.yaw)) * Math.min(1, dt * 3);
+          const yaw = pet.yaw + Math.atan2(Math.sin(wanted - pet.yaw), Math.cos(wanted - pet.yaw)) * Math.min(1, dt * 3);
+          if (this.petFits(pet, yaw)) pet.yaw = yaw;
         }
       }
+      this.fitPet(dt, pet);
       // A removed support block invalidates routes and settles the pet safely.
       const support = this.petStep(pet.position.x, pet.position.z, pet.position.y);
       if (support && support.y < pet.position.y - 0.1) pet.position.y = Math.max(support.y, pet.position.y - dt * 5);

@@ -192,6 +192,20 @@ test('pet pathfinding routes around walls, follows and honors stay', () => {
   close();
 });
 
+test('a pet in a one-block trench turns along it instead of poking into the walls', () => {
+  const { world, entities, close } = create();
+  const dog = entities.pets[0];
+  const x = Math.floor(dog.position.x), y = Math.floor(dog.position.y), z = Math.floor(dog.position.z);
+  for (let dx = -3; dx <= 3; dx++) for (const dz of [-1, 1]) for (let h = 0; h <= 1; h++) world.setBlock(x + dx, y + h, z + dz, BLOCK.BRICK);
+  entities.interactPet(dog, 'stay', dog.position);
+  dog.yaw = 0; // olhando para a parede (+z)
+  assert.equal(entities.petFits(dog, 0), false);
+  for (let frame = 0; frame < 10; frame++) entities.update(1 / 60, dog.position.clone().add(new THREE.Vector3(0, 0, 3)), {}, null);
+  assert.ok(Math.abs(Math.sin(dog.yaw)) > 0.99, `yaw ${dog.yaw}`);
+  assert.ok(entities.petFits(dog, dog.yaw));
+  close();
+});
+
 test('pet boarding survives save/restore and requires a stationary safe exit', () => {
   const { scene, world, entities, close } = create();
   const car = entities.vehicles[0], dog = entities.pets[0];
