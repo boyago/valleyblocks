@@ -32,9 +32,9 @@ const YELLOW = "bg-[#ffd23f] text-black shadow-[0_4px_0_#9c7a00] hover:bg-[#ffe0
 const btn = "inline-flex min-h-12 items-center gap-2 px-6 text-sm font-bold uppercase tracking-wide transition active:translate-y-1 active:shadow-none";
 
 const SLIDES = [
-  { img: "abertura.jpg", kicker: "Grátis no navegador", title: "Construa o seu vale", text: "Casa, garagem, estrada, pets e um mundo inteiro de blocos para moldar do seu jeito.", cta: "Jogar grátis", href: "play" },
-  { img: "terra-rio.jpg", kicker: "Nove terras", title: "Atravesse o portal", text: "Do Sertão a Nova York: monte a moldura, espirre o spray e chegue a outra terra.", cta: "Ver as terras", href: "#terras" },
-  { img: "terra-submundo.jpg", kicker: "Sobrevivência", title: "Aguente a noite", text: "Quando escurece, saem o Ceifador Rubro, o Saci e o Boitatá. Tochas e paredes ajudam.", cta: "Conhecer os modos", href: "#modos" },
+  { img: "arte-heroi.jpg", kicker: "Grátis no navegador", title: "Construa o seu vale", text: "Casa, garagem, estrada, pets e um mundo inteiro de blocos para moldar do seu jeito.", cta: "Jogar grátis", href: "play" },
+  { img: "arte-portal.jpg", kicker: "Nove terras", title: "Atravesse o portal", text: "Do Sertão a Nova York: monte a moldura, espirre o spray e chegue a outra terra.", cta: "Ver as terras", href: "#terras" },
+  { img: "arte-noite.jpg", kicker: "Sobrevivência", title: "Aguente a noite", text: "Quando escurece, saem o Ceifador Rubro, o Saci e o Boitatá. Tochas e paredes ajudam.", cta: "Conhecer os modos", href: "#modos" },
 ];
 
 const TERRAS = [
@@ -50,21 +50,21 @@ const TERRAS = [
 ];
 
 const EXTRAS = [
-  { img: "cena.jpg", tag: "Pets", nome: "Cachorros e gatos", by: "Três pelagens cada", note: "Adote" },
-  { img: "casa.jpg", tag: "Veículos", nome: "Carro e carretinha", by: "Compacto ou utilitário", note: "Na garagem" },
-  { img: "terra-minas.jpg", tag: "Pesca", nome: "Do lambari ao pirarucu", by: "Rios e mar", note: "Vara" },
-  { img: "terra-sertao.jpg", tag: "Missões", nome: "Livro de missões", by: "Um morador por terra", note: "Tecla J" },
-  { img: "terra-triplice.jpg", tag: "Trocas", nome: "Vendedores e moradores", by: "Pague em esmeraldas", note: "Negocie" },
-  { img: "terra-china.jpg", tag: "Bichos", nome: "Pandas, onças, bisões", by: "Cada terra tem os seus", note: "Explore" },
-  { img: "terra-submundo.jpg", tag: "Noite", nome: "Onze inimigos", by: "Do Saci ao Golem", note: "Cuidado" },
-  { img: "terra-nyc.jpg", tag: "Amigos", nome: "Sala com amigos", by: "Até 4 jogadores", note: "Completo" },
+  { img: "arte-pets.jpg", tag: "Pets", nome: "Cachorros e gatos", by: "Três pelagens cada", note: "Adote" },
+  { img: "arte-carro.jpg", tag: "Veículos", nome: "Carro e carretinha", by: "Compacto ou utilitário", note: "Na garagem" },
+  { img: "arte-pesca.jpg", tag: "Pesca", nome: "Do lambari ao pirarucu", by: "Rios e mar", note: "Vara" },
+  { img: "arte-morador.jpg", tag: "Missões", nome: "Livro de missões", by: "Um morador por terra", note: "Tecla J" },
+  { img: "arte-trocas.jpg", tag: "Trocas", nome: "Vendedores e moradores", by: "Pague em esmeraldas", note: "Negocie" },
+  { img: "arte-bichos.jpg", tag: "Bichos", nome: "Pandas, onças, bisões", by: "Cada terra tem os seus", note: "Explore" },
+  { img: "arte-noite.jpg", tag: "Noite", nome: "Onze inimigos", by: "Do Saci ao Golem", note: "Cuidado" },
+  { img: "arte-amigos.jpg", tag: "Amigos", nome: "Sala com amigos", by: "Até 4 jogadores", note: "Completo" },
 ];
 
 const MODOS = [
-  { id: "criativo", nome: "Criativo", img: "abertura.jpg", texto: "Blocos ilimitados, voo livre e inimigos que não causam dano. Para imaginar sem pressa." },
-  { id: "sobrevivencia", nome: "Sobrevivência", img: "terra-submundo.jpg", texto: "Fome, fôlego e ferramentas que gastam. Um dia dura 24 minutos, e a noite traz perigo." },
-  { id: "terras", nome: "Viagem", img: "terra-japao.jpg", texto: "Portais ligam nove terras com paisagem, bichos, moradores e inimigos próprios." },
-  { id: "amigos", nome: "Com amigos", img: "casa.jpg", texto: "Na versão completa, crie uma sala, passe o código e construam juntos no mesmo mundo." },
+  { id: "criativo", nome: "Criativo", img: "arte-heroi.jpg", texto: "Blocos ilimitados, voo livre e inimigos que não causam dano. Para imaginar sem pressa." },
+  { id: "sobrevivencia", nome: "Sobrevivência", img: "arte-noite.jpg", texto: "Fome, fôlego e ferramentas que gastam. Um dia dura 24 minutos, e a noite traz perigo." },
+  { id: "terras", nome: "Viagem", img: "arte-portal.jpg", texto: "Portais ligam nove terras com paisagem, bichos, moradores e inimigos próprios." },
+  { id: "amigos", nome: "Com amigos", img: "arte-amigos.jpg", texto: "Na versão completa, crie uma sala, passe o código e construam juntos no mesmo mundo." },
 ];
 
 const FAQ = [
@@ -172,11 +172,11 @@ function Card({ img, alt, title, link, href, className = "", big }: { img: strin
 function Destaques(p: ValleyLandingProps) {
   return <section id="destaques" className="scroll-mt-16 bg-[#0d2a45] bg-[radial-gradient(ellipse_at_top,#14507d,transparent_70%)] py-10 sm:py-14">
     <div className="mx-auto grid max-w-[1440px] gap-4 px-4 sm:px-8 lg:grid-cols-2">
-      <Card big img="abertura.jpg" alt="Casa, garagem e estrada no vale do ValleyBlocks" title={`Versão completa por ${p.fullPrice}`} link="Comprar agora" href={p.buyHref} className="lg:row-span-2" />
-      <Card img="terra-japao.jpg" alt="Cerejeiras e o monte Fuji na terra do Japão" title="Explore uma nova terra" link="Ver os portais" href="#terras" />
+      <Card big img="arte-heroi.jpg" alt="Casa, garagem e estrada no vale do ValleyBlocks" title={`Versão completa por ${p.fullPrice}`} link="Comprar agora" href={p.buyHref} className="lg:row-span-2" />
+      <Card img="arte-portal.jpg" alt="Jogador atravessando um portal de esmeralda para Copacabana" title="Explore uma nova terra" link="Ver os portais" href="#terras" />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card img="cena.jpg" alt="Cachorro na estrada do vale" title="Adote um pet" link="Cães e gatos" href="#extras" />
-        <Card img="terra-sertao.jpg" alt="Sertão com mandacarus" title="Ajude os moradores" link="Livro de missões" href="#novidade" />
+        <Card img="arte-pets.jpg" alt="Cachorros e gatos de blocos brincando no gramado" title="Adote um pet" link="Cães e gatos" href="#extras" />
+        <Card img="arte-morador.jpg" alt="Morador do Sertão oferecendo uma missão" title="Ajude os moradores" link="Livro de missões" href="#novidade" />
       </div>
     </div>
   </section>;
@@ -206,7 +206,7 @@ function Novidade({ playHref }: { playHref: string }) {
   return <section id="novidade" className="relative scroll-mt-16 overflow-hidden bg-[#0b3a66] py-14 sm:py-20">
     <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(#ffffff22_2px,transparent_2px),linear-gradient(90deg,#ffffff22_2px,transparent_2px)] [background-size:48px_48px]" aria-hidden="true" />
     <div className="relative mx-auto grid max-w-[1200px] items-center gap-10 px-4 sm:px-8 lg:grid-cols-[1.3fr_1fr]">
-      <div className="border-[6px] border-[#6fe3ff] bg-black p-1 shadow-[0_0_40px_rgba(111,227,255,.45)]"><img src={`${IMG}/terra-sertao.jpg`} alt="Sertão, onde o Zé do Gibão espera os calangos" width={900} height={560} loading="lazy" className="aspect-[16/10] w-full object-cover" /></div>
+      <div className="border-[6px] border-[#6fe3ff] bg-black p-1 shadow-[0_0_40px_rgba(111,227,255,.45)]"><img src={`${IMG}/arte-morador.jpg`} alt="Zé do Gibão, morador do Sertão, oferecendo uma missão" width={900} height={560} loading="lazy" className="aspect-[16/10] w-full object-cover" /></div>
       <div>
         <p className="text-sm font-bold uppercase tracking-[.2em] text-[#6fe3ff]">Novidade</p>
         <H2 className="mt-3 text-white">Livro de missões</H2>
