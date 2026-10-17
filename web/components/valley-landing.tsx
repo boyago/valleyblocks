@@ -191,7 +191,7 @@ function Terras({ playHref }: { playHref: string }) {
         <button type="button" onClick={() => setAll(a => !a)} aria-expanded={all} className="inline-flex min-h-11 items-center gap-1 text-sm font-bold uppercase text-[#ff9f1c] hover:underline">{all ? "Mostrar menos" : "Ver as nove"} <ChevronRight className="size-4" aria-hidden="true" /></button></div>
       <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {list.map(t => <li key={t.slug}><Link href={playHref} className="group block">
-          <span className="block overflow-hidden"><img src={`${IMG}/terra-${t.slug}.jpg`} alt={`${t.nome} no ValleyBlocks`} width={720} height={720} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" /></span>
+          <span className="block overflow-hidden"><img src={`${IMG}/arte-terra-${t.slug}.jpg`} alt={`${t.nome} no ValleyBlocks`} width={900} height={900} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" /></span>
           <span className="mt-4 block text-xl font-semibold text-white">{t.nome}</span>
           <span className="mt-1 block text-sm text-white/60">{t.tags}</span>
           <span className="mt-0.5 block text-sm text-white/60">{t.extra}</span>
