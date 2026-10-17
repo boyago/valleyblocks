@@ -268,7 +268,7 @@ class Game {
         case 'fly':this.toggleFly();break;
         case 'landing':this.started=false;this.menu('landing');break;
         case 'pause':if(this.started)this.menu('pause');break;
-        case 'settings':case 'help':this.menu(action);break;
+        case 'settings':case 'help':case 'character':this.menu(action);break;
         case 'save':await this.save(true);break;
         case 'save-exit':if(this.coop?.guest){this.coop.leave();break;}if(this.coop?.active)this.coop.leave();if(await this.save(true)){this.started=false;this.activeVehicle=null;this.menu('landing');this.landingKey='vale';this.landingCamera(0);}break;
         case 'slot':this.inventory.select(Number(data.slot));break;
@@ -284,7 +284,7 @@ class Game {
           if(resolveOutfit(data.id,this.ownedPacks)!==data.id){this.ui.toast(`${OUTFITS[data.id].name} faz parte do ${OUTFIT_PACKS[OUTFITS[data.id].pack].name}.`);break;}
           this.settings.outfit=data.id;this.avatar.setOutfit(data.id);this.coop?.setOutfit(data.id);this.audio.play('craft');
           try{localStorage.setItem('vale-settings',JSON.stringify(this.settings));}catch{}
-          this.ui.setMenu('settings',this);break;
+          this.ui.toast(`Você está de ${OUTFITS[data.id].name}.`);this.ui.setMenu('character',this);break;
         }
         case 'buy-full':{
           if(bridge.standalone){this.ui.toast('A compra fica disponível no portal LABSGames.');break;}
