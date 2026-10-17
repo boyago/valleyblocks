@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { buildCreature } from './creatures.js';
 import { BLOCK } from './blocks.js';
 import { realmAt, REALMS } from './realms.js';
 import { heldModel, loadHeldModels } from './held-models.js';
@@ -43,9 +44,12 @@ export class EnemySystem {
   }
   spawn(type,position,state={}){
     const spec=ENEMIES[type];if(!spec||this.enemies.length>=8)return null;
-    const mesh=new THREE.Group(),body=new THREE.Group(),arm=new THREE.Group();mesh.add(body);
+    const mesh=new THREE.Group(),body=new THREE.Group();let arm=new THREE.Group();mesh.add(body);
     mesh.name=`enemy:${type}`;const legs=[];
-    if(type==='saci'){
+    // Modelo do Blender (creatures.js); o código de caixas abaixo fica como reserva.
+    const model=buildCreature(`enemy-${type}`,body);
+    if(model){legs.push(...model.legs);arm=model.arm||arm;if(!arm.parent)body.add(arm);}
+    else if(type==='saci'){
       // Saci: uma perna só, gorro vermelho, cachimbo e o corpo pequeno e ágil.
       this.box(body,[.4,.45,.26],[0,.85,0],'#5a3a24');this.box(body,[.36,.34,.32],[0,1.24,0],'#6b4630');
       this.box(body,[.3,.14,.3],[0,1.45,0],'#d9342b');this.box(body,[.18,.14,.18],[0,1.56,-.04],'#d9342b');this.box(body,[.1,.1,.1],[0,1.66,-.1],'#d9342b');

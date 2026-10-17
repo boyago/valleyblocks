@@ -36,8 +36,9 @@ def shade(color, k):
 FACES = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
 CORNERS = [(-1, -1, -1), (1, -1, -1), (1, 1, -1), (-1, 1, -1), (-1, -1, 1), (1, -1, 1), (1, 1, 1), (-1, 1, 1)]
 
-def box(center, size, color, rot=(0, 0, 0)):
-    return {'c': center, 's': size, 'color': color, 'r': rot}
+def box(center, size, color, rot=(0, 0, 0), glow=False):
+    """glow: peça que brilha no escuro (olhos, magma, fantasma); o jogo desenha sem sombra."""
+    return {'c': center, 's': size, 'color': color, 'r': rot, 'glow': glow}
 
 def corners(b):
     m = Euler(b['r'], 'XYZ').to_matrix()
@@ -45,6 +46,13 @@ def corners(b):
     return [Vector(b['c']) + m @ Vector((sx * half[0], sy * half[1], sz * half[2])) for sx, sy, sz in CORNERS]
 
 def geometry(boxes, pivot=(0, 0, 0)):
+    """Peças comuns + chave 'glow' com as peças brilhantes, se houver."""
+    out = triangles([b for b in boxes if not b['glow']], pivot)
+    lit = [b for b in boxes if b['glow']]
+    if lit: out['glow'] = triangles(lit, pivot)
+    return out
+
+def triangles(boxes, pivot):
     """Triângulos com normal por face e cor por vértice, relativos ao pivô."""
     p0 = Vector(pivot); positions, normals, colors = [], [], []
     for b in boxes:
@@ -357,12 +365,141 @@ def calango():
     return {'body': body, 'parts': small_legs(quad_pos(.14, -.17, .17), .06, (.06, .06, .06), '#7d7840', (.09, .02, .07)) + [
         {'name': 'head', 'pivot': (0, .11, .24), 'boxes': head}]}
 
+# ---------------------------------------------------------------- inimigos da noite
+def humanoid(m, torso, skin, legs_color, boots, sleeve, hand, eye, eye_glow=True, extra_body=(), extra_arm=(), head_color=None, glow_body=False):
+    """Base dos humanoides: corpo, cabeça, braço esquerdo fixo, braço direito (pivô 'arm') e duas pernas."""
+    body = [box((0, 1.03 * m, 0), (.62 * m, .66 * m, .34 * m), torso, glow=glow_body),
+            box((0, 1.58 * m, 0), (.45 * m, .42 * m, .42 * m), head_color or skin, glow=glow_body),
+            box((-.43 * m, 1.0 * m, 0), (.2 * m, .6 * m, .23 * m), sleeve, glow=glow_body),
+            box((-.43 * m, .66 * m, .02), (.17 * m, .14 * m, .19 * m), hand, glow=glow_body),
+            *[box((s * .11 * m, 1.62 * m, .213 * m), (.07 * m, .055 * m, .02), eye, glow=eye_glow) for s in (-1, 1)],
+            *extra_body]
+    legs = []
+    for i, s in enumerate((-1, 1)):
+        x = s * .16 * m
+        legs.append({'name': f'leg{i}', 'pivot': (x, .73 * m, 0), 'boxes': [
+            box((x, .45 * m, 0), (.24 * m, .57 * m, .29 * m), legs_color, glow=glow_body),
+            box((x, .07 * m, .06 * m), (.27 * m, .14 * m, .4 * m), boots)]})
+    ax, ay = .43 * m, 1.28 * m
+    arm = [box((ax, ay - .22 * m, 0), (.19 * m, .5 * m, .21 * m), sleeve, glow=glow_body),
+           box((ax, ay - .52 * m, .03), (.17 * m, .18 * m, .2 * m), hand, glow=glow_body), *extra_arm]
+    return {'body': body, 'parts': legs + [{'name': 'arm', 'pivot': (ax, ay, 0), 'boxes': arm}]}
+
+def reaper():
+    hood, cloak = '#8f1f28', '#b72f38'
+    return humanoid(1, cloak, '#c48e6b', '#354951', '#382e2c', cloak, '#c48e6b', '#ffcf5a', extra_body=[
+        box((0, 1.68, -.03), (.53, .5, .47), hood), box((0, 1.56, .2), (.36, .3, .05), '#2a1416'),
+        box((0, 1.92, -.12), (.3, .12, .3), hood), box((0, .78, 0), (.64, .08, .36), '#5a1a20'),
+        box((0, .66, -.17), (.6, .34, .06), hood), box((0, .73, .175), (.1, .1, .02), '#c9a24a')])
+
+def cangaceiro():
+    ghost, ghost2, ghost3, leather, gold = '#c8b48d', '#8a6a45', '#e9dcc0', '#6b4426', '#e4c06a'
+    return humanoid(1, ghost, ghost3, ghost2, '#4a3220', ghost, ghost3, '#ffb347', head_color=ghost3, glow_body=True, extra_body=[
+        box((0, 1.03, .175), (.06, .7, .02), '#5b3b22', (0, 0, .7)), box((0, 1.03, .177), (.06, .7, .02), '#5b3b22', (0, 0, -.7)),
+        *[box((x, 1.03 + abs(x) * .3, .19), (.04, .07, .02), gold) for x in (-.18, -.09, .09, .18)],
+        box((0, 1.81, 0), (.92, .06, .5), leather), box((0, 1.93, 0), (.5, .22, .42), leather), box((0, 2.02, .18), (.64, .14, .06), leather),
+        *[box((x, 2.02, .215), (.06, .06, .02), gold) for x in (-.2, 0, .2)], box((0, 1.45, .215), (.2, .05, .02), '#3a2618')],
+        extra_arm=[box((.43, -.27 + 1.28 - .3, .4), (.05, .08, .7), '#d9dee0'), box((.43, .72, .02), (.07, .1, .12), '#5b3b22')])
+
+def terracota():
+    skin, cloth, dark, plate = '#b98a62', '#9c6b46', '#6e4a30', '#7e5638'
+    return humanoid(1, cloth, skin, dark, '#4a3220', cloth, skin, '#3a2a20', eye_glow=False, extra_body=[
+        *[box((0, .86 + i * .16, 0), (.66, .06, .4), plate) for i in range(3)], *[box((x, .86 + i * .16, .205), (.04, .04, .02), '#c9a46a') for i in range(3) for x in (-.2, 0, .2)],
+        box((0, 1.86, -.06), (.16, .14, .16), dark), box((0, 1.79, -.06), (.3, .04, .2), dark),
+        box((0, 1.5, .215), (.2, .04, .02), dark), *[box((s * .12, 1.47, .215), (.04, .07, .02), dark) for s in (-1, 1)],
+        *[box((s * .38, 1.3, 0), (.24, .1, .3), plate) for s in (-1, 1)]],
+        extra_arm=[box((.46, 1.08, .18), (.05, 1.6, .05), '#6b4a2e'), box((.46, 1.94, .18), (.09, .22, .09), '#9aa3a8'), box((.46, 1.78, .18), (.12, .05, .12), '#b2292e')])
+
+def oni():
+    m, skin = 1.12, '#c8322d'
+    return humanoid(m, '#2f3a4a', skin, '#1d1d1d', '#1d1d1d', skin, skin, '#ffe066', head_color=skin, extra_body=[
+        *[box((s * .17 * m, 1.93 * m, 0), (.08, .24, .08), '#f2e6c8', (0, 0, -s * .3)) for s in (-1, 1)],
+        box((0, 1.8 * m, -.04), (.52 * m, .12, .48 * m), '#1d1d1d'), box((0, 1.66 * m, -.22 * m), (.5 * m, .4, .06), '#1d1d1d'),
+        box((0, 1.47 * m, .22 * m), (.3, .08, .04), '#f6f1e0'), *[box((s * .1, 1.43 * m, .225 * m), (.05, .07, .03), '#f6f1e0') for s in (-1, 1)],
+        box((0, 1.69 * m, .214 * m), (.3, .04, .02), '#7a1414'),
+        box((0, .78 * m, 0), (.66 * m, .22, .38 * m), '#e8b923'), *[box((x, .78 * m, .195 * m), (.05, .2, .02), '#1d1d1d') for x in (-.22, -.06, .1, .24)]],
+        extra_arm=[box((.43 * m, .78, .32), (.12, .9, .12), '#4a3a2a'), *[box((.43 * m, .58 + i * .12, .32), (.16, .05, .16), '#9aa3a8') for i in range(4)]])
+
+def pegrande():
+    m, fur, face = 1.22, '#5a3e2b', '#8c6a50'
+    return humanoid(m, '#4b3323', fur, fur, '#3a281b', fur, '#3a281b', '#2a1a10', eye_glow=False, extra_body=[
+        box((0, 1.55 * m, .22 * m), (.32, .26, .03), face), box((0, 1.66 * m, .225 * m), (.36, .05, .04), '#3a281b'),
+        box((0, 1.28 * m, 0), (.72 * m, .2, .42 * m), fur), *[box((s * .33 * m, 1.12 * m, .05), (.1, .3, .3), '#4b3323') for s in (-1, 1)],
+        *[box((x, .9 * m, .2 * m), (.08, .14, .03), '#6b4a33') for x in (-.15, .05, .2)], box((0, 1.48 * m, .245 * m), (.12, .03, .02), '#2a1a10')],
+        extra_arm=[box((.43 * m, 1.28 * m - .3, .1), (.08, .3, .08), '#6b4a33')])
+
+def golem():
+    m, rock, dark, magma = 1.3, '#3d3633', '#2c2624', '#ff9a2a'
+    cracks = [(-.15, 1.2, .24, .08, .4), (.18, .95, .24, .3, .06), (0, 1.45, .24, .06, .3), (.1, 1.7, .27, .2, .05), (-.2, .8, .24, .05, .2)]
+    return humanoid(m, dark, rock, dark, '#221d1b', rock, rock, '#ffdd55', head_color=rock, extra_body=[
+        *[box((x * m, y * m, z * m), (w * m, h * m, .03), magma, glow=True) for x, y, z, w, h in cracks],
+        *[box((s * .4 * m, 1.38 * m, 0), (.34 * m, .26 * m, .4 * m), rock) for s in (-1, 1)],
+        *[box((s * .44 * m, 1.52 * m, 0), (.06 * m, .04, .3 * m), magma, (0, 0, 0), True) for s in (-1, 1)],
+        box((0, 1.82 * m, 0), (.3 * m, .1, .3 * m), dark), box((0, 1.46 * m, .215 * m), (.24, .05, .02), magma, glow=True)],
+        extra_arm=[box((.43 * m, .62 * m, .03), (.24 * m, .2 * m, .26 * m), rock), box((.43 * m, .9 * m, .14 * m), (.02, .2, .03), magma, glow=True)])
+
+def et():
+    skin, dark = '#6b4a33', '#5a3d2a'
+    body = [box((0, .85, 0), (.42, .55, .26), skin), box((0, 1.33, .02), (.62, .5, .52), skin),
+            *[box((x, 1.62, -.02), (.14, .16, .3), dark) for x in (-.2, 0, .2)],
+            *[box((s * .15, 1.33, .28), (.17, .13, .04), '#d91f1f', glow=True) for s in (-1, 1)],
+            *[box((s * .15, 1.35, .3), (.05, .04, .01), '#ffb0a0', glow=True) for s in (-1, 1)],
+            box((0, 1.17, .285), (.12, .03, .02), '#3a2618'), box((0, .85, .135), (.3, .3, .02), '#7a5a40'),
+            box((-.3, .78, 0), (.12, .62, .13), skin), box((-.3, .44, 0), (.16, .08, .16), dark)]
+    legs = [{'name': f'leg{i}', 'pivot': (s * .12, .58, 0), 'boxes': [box((s * .12, .3, 0), (.14, .56, .16), skin), box((s * .12, .03, .04), (.18, .06, .24), dark)]} for i, s in enumerate((-1, 1))]
+    arm = [box((.3, .78, 0), (.12, .62, .13), skin), box((.3, .45, 0), (.16, .08, .16), dark)]
+    return {'body': body, 'parts': legs + [{'name': 'arm', 'pivot': (.3, 1.08, 0), 'boxes': arm}]}
+
+def saci():
+    skin, red = '#5a3a24', '#d9342b'
+    body = [box((0, .85, 0), (.4, .45, .26), '#6b4630'), box((0, .66, 0), (.42, .12, .28), '#f4efe4'),
+            box((0, 1.24, 0), (.36, .34, .32), skin), box((0, 1.45, 0), (.3, .14, .3), red), box((0, 1.56, -.04), (.18, .14, .18), red), box((0, 1.66, -.1), (.1, .1, .1), red),
+            *[box((s * .09, 1.27, .165), (.06, .06, .03), '#fff3c0', glow=True) for s in (-1, 1)], box((0, 1.15, .165), (.14, .03, .02), '#f4efe4'),
+            box((.08, 1.17, .22), (.04, .04, .18), '#3a2616'), box((.08, 1.2, .32), (.07, .07, .07), '#3a2616'), box((.08, 1.26, .32), (.04, .04, .04), '#ff7a1a', glow=True),
+            box((-.27, .86, 0), (.12, .4, .14), skin)]
+    legs = [{'name': 'leg0', 'pivot': (0, .62, 0), 'boxes': [box((0, .32, 0), (.14, .6, .16), skin), box((0, .03, .04), (.16, .06, .22), '#3a2616')]}]
+    arm = [box((.27, .82, 0), (.12, .4, .14), skin)]
+    return {'body': body, 'parts': legs + [{'name': 'arm', 'pivot': (.27, 1.02, 0), 'boxes': arm}]}
+
+def ratao():
+    fur, pink = '#6d6a66', '#d79a9a'
+    body = [box((0, .38, 0), (.5, .42, .9), fur), box((0, .6, -.05), (.44, .06, .7), '#5a5753'), box((0, .2, 0), (.4, .04, .7), '#8a8682'),
+            box((0, .3, -.78), (.06, .06, .7), pink, (-.25, 0, 0))]
+    arm = [box((0, .44, .58), (.34, .3, .36), fur), box((0, .4, .8), (.12, .1, .12), pink), box((0, .43, .865), (.06, .04, .02), '#2a1a1a'),
+           *[box((s * .14, .66, .52), (.12, .14, .04), pink) for s in (-1, 1)], *[box((s * .1, .5, .765), (.05, .05, .03), '#c0201a', glow=True) for s in (-1, 1)],
+           *[box((s * .05, .33, .83), (.03, .06, .02), '#f2ead8') for s in (-1, 1)], *[box((s * .2, .38, .78), (.16, .01, .01), '#c9c4bd') for s in (-1, 1)]]
+    return {'body': body, 'parts': small_legs(quad_pos(.2, -.3, .3), .2, (.1, .2, .1), '#4d4a46', (.12, .03, .14)) + [
+        {'name': 'arm', 'pivot': (0, .4, .6), 'boxes': [{**b, 'c': b['c']} for b in arm]}]}
+
+def boitata():
+    body = []
+    for i in range(9):
+        w, h = .42 - i * .03, .36 - i * .025
+        body.append(box((math.sin(i * .9) * .18, .3, -i * .38), (w, h, .42), '#ff7a1a' if i % 2 else '#ffb238', glow=True))
+        body.append(box((math.sin(i * .9) * .18, .3 + h / 2 + .03, -i * .38), (w * .5, .06, .2), '#fff3a0', glow=True))
+    body += [box((0, .36, .36), (.5, .38, .5), '#ff5a10', glow=True), box((0, .42, .66), (.36, .2, .16), '#ff5a10', glow=True),
+             *[box((s * .14, .5, .62), (.09, .09, .05), '#ffffff', glow=True) for s in (-1, 1)], *[box((s * .14, .5, .645), (.04, .07, .02), '#3a0a00') for s in (-1, 1)],
+             *[box((s * .22, .62, .3), (.06, .2, .06), '#fff3a0', (0, 0, -s * .4), True) for s in (-1, 1)], box((0, .27, .76), (.26, .03, .04), '#7a1a00')]
+    return {'body': body, 'parts': [{'name': 'arm', 'pivot': (0, .36, .36), 'boxes': []}]}
+
+def specter():
+    body = [box((0, 1.03, 0), (.65, .77, .5), '#d6e9c0', glow=True), box((0, 1.58, 0), (.53, .41, .47), '#e6f1d4', glow=True),
+            *[box((s * .15, 1.6, .245), (.13, .16, .025), '#305e40') for s in (-1, 1)], *[box((s * .15, 1.58, .264), (.055, .07, .04), '#82ff47', glow=True) for s in (-1, 1)],
+            *[box((s * .43, 1.07, 0), (.21, .58, .23), '#c4dbb0', (0, 0, s * .35)) for s in (-1, 1)],
+            box((0, 1.33, .27), (.19, .21, .03), '#406344'), *[box((i * .13, .58 - (i % 2) * .05, 0), (.13, .3 + (i % 2) * .1, .4), '#a5d980') for i in range(-2, 3)],
+            box((0, .91, .28), (.36, .25, .11), '#7add35', glow=True), *[box((x, .3, z), (.08, .12, .08), '#7add35', glow=True) for x, z in ((-.2, .1), (.15, -.12), (0, .18))]]
+    return {'body': body, 'parts': [{'name': 'arm', 'pivot': (0, 1.2, 0), 'boxes': []}]}
+
+ENEMY_MODELS = {'reaper': reaper(), 'cangaceiro': cangaceiro(), 'terracota': terracota(), 'oni': oni(), 'pegrande': pegrande(), 'golem': golem(),
+                'et': et(), 'saci': saci(), 'ratao': ratao(), 'boitata': boitata(), 'specter': specter()}
+
 CREATURES = {
     **{f'dog{i}': dog(p, i) for i, p in enumerate(DOG_COATS)},
     **{f'cat{i}': cat(p, i) for i, p in enumerate(CAT_COATS)},
     'chicken': chicken(), 'rabbit': rabbit(), 'boar': boar(),
     'mico': mico(), 'pombo': pombo(), 'esquilo': esquilo(), 'quati': quati(), 'turista': turista(), 'salamandra': salamandra(),
     'panda': panda(), 'macaco': macaco(), 'bisao': bisao(), 'onca': onca(), 'capivara': capivara(), 'calango': calango(),
+    **{f'enemy-{k}': v for k, v in ENEMY_MODELS.items()},
 }
 
 # ---------------------------------------------------------------- exportação
@@ -401,14 +538,14 @@ for i, (name, spec) in enumerate(CREATURES.items()):
     for p in spec['parts']:
         for b in p['boxes']: blender_box(coll, f"{name} {p['name']}", b, offset, depth)
 
-ground = bpy.data.meshes.new('Chao'); ground.from_pydata([(-10, -3, 0), (10, -3, 0), (10, 7, 0), (-10, 7, 0)], [], [(0, 1, 2, 3)]); ground.update()
+ground = bpy.data.meshes.new('Chao'); ground.from_pydata([(-10, -3, 0), (10, -3, 0), (10, 10, 0), (-10, 10, 0)], [], [(0, 1, 2, 3)]); ground.update()
 ground.materials.append(material('#8fb35a')); g = bpy.data.objects.new('Chao', ground); scene.collection.objects.link(g)
 cam = bpy.data.objects.new('Camera', bpy.data.cameras.new('Camera')); scene.collection.objects.link(cam)
-cam.data.type = 'ORTHO'; cam.data.ortho_scale = 15
+cam.data.type = 'ORTHO'; cam.data.ortho_scale = 17.5
 cam.location = (-5, -12, 7.5); cam.rotation_euler = (math.radians(62), 0, math.radians(-22)); scene.camera = cam
 sun = bpy.data.objects.new('Sol', bpy.data.lights.new('Sol', 'SUN')); sun.data.energy = 3.5; sun.rotation_euler = (.6, .3, .4); scene.collection.objects.link(sun)
 scene.render.engine = 'BLENDER_EEVEE_NEXT' if 'BLENDER_EEVEE_NEXT' in [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items] else 'BLENDER_EEVEE'
-scene.render.resolution_x, scene.render.resolution_y = 1700, 950
+scene.render.resolution_x, scene.render.resolution_y = 1800, 1100
 scene.world = scene.world or bpy.data.worlds.new('Mundo'); scene.world.color = (.6, .75, .88)
 scene.render.filepath = str(ROOT / 'test-results' / 'creatures-preview.png')
 bpy.ops.render.render(write_still=True)

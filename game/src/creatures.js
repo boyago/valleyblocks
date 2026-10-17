@@ -5,6 +5,8 @@ import creatureModels from './assets/creature-models.json' with { type: 'json' }
 // um corpo fixo e peças com pivô (leg0..legN, head, tail) que o jogo anima. As geometrias
 // são compartilhadas entre todos os bichos do mesmo tipo.
 const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+// Peças que brilham (olhos, magma, fantasmas): sem luz nem sombra, continuam vivas à noite.
+const glowMaterial = new THREE.MeshBasicMaterial({ vertexColors: true });
 const geometries = new Map();
 function geometry(s) {
   if (geometries.has(s)) return geometries.get(s);
@@ -14,7 +16,11 @@ function geometry(s) {
   for (const [n, v] of [['position', s.positions], ['normal', s.normals], ['color', linear]]) g.setAttribute(n, new THREE.Float32BufferAttribute(v, 3));
   g.computeBoundingSphere(); geometries.set(s, g); return g;
 }
-const mesh = s => { const m = new THREE.Mesh(geometry(s), material); m.castShadow = true; m.receiveShadow = true; return m; };
+const mesh = s => {
+  const m = new THREE.Mesh(geometry(s), material); m.castShadow = true; m.receiveShadow = true;
+  if (s.glow) m.add(new THREE.Mesh(geometry(s.glow), glowMaterial));
+  return m;
+};
 
 export const hasCreature = name => Object.hasOwn(creatureModels, name);
 
@@ -22,7 +28,7 @@ export const hasCreature = name => Object.hasOwn(creatureModels, name);
 export function buildCreature(name, parent) {
   const spec = creatureModels[name]; if (!spec) return null;
   parent.add(mesh(spec.body));
-  const out = { legs: [], head: null, tail: null };
+  const out = { legs: [], head: null, tail: null, arm: null };
   for (const p of spec.parts) {
     const group = new THREE.Group(); group.position.set(...p.pivot); group.add(mesh(p)); parent.add(group);
     if (p.name.startsWith('leg')) out.legs.push(group); else out[p.name] = group;

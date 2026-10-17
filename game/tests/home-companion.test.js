@@ -51,7 +51,7 @@ test('whistle cannot recruit wild dogs, board a moving vehicle or unload into wa
 test('reaper feet move with hip pivots while walking and stop when winding up or blocked',()=>{
   const world=new VoxelWorld(null,'walk'),entities=new EntitySystem(new THREE.Scene(),world),enemies=new EnemySystem(entities);
   const enemy=enemies.spawn('reaper',new THREE.Vector3(-2,9,13)),player={position:new THREE.Vector3(-2,9,19),health:100};enemies.spawnTimer=15;
-  assert.equal(enemy.legs[0].type,'Group');assert.equal(enemy.legs[0].children.length,2);
+  assert.equal(enemy.legs[0].type,'Group');assert.ok(enemy.legs[0].children.length>=1&&enemy.legs[0].position.y>.5,'perna é um grupo com pivô no quadril');
   enemies.update(.1,player,.8,'creative');const angle=enemy.legs[0].rotation.x;
   assert.ok(Math.abs(angle)>.1);assert.equal(enemy.legs[0].rotation.x,-enemy.legs[1].rotation.x);
   enemies.update(.1,player,.8,'creative');assert.notEqual(enemy.legs[0].rotation.x,angle);

@@ -28,7 +28,8 @@
     "test:account": "node tests/browser-account.mjs",
     "test:skeletons": "node tests/browser-skeletons.mjs",
     "test:backpack-search": "node tests/browser-backpack-search.mjs",
-    "test:creatures": "node tests/browser-creatures.mjs"
+    "test:creatures": "node tests/browser-creatures.mjs",
+    "test:enemies-models": "node tests/browser-enemies-models.mjs"
   },
   "dependencies": {
     "three": "0.170.0"

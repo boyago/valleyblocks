@@ -42,7 +42,7 @@ try{
   await page.locator('#menu-layer').evaluate(el=>el.style.visibility='hidden');
   await page.screenshot({path:'test-results/night-enemies.png'});
   await page.locator('#menu-layer').evaluate(el=>el.style.visibility='');
-  check('both original enemy models render',await page.evaluate(()=>window.__valeGame.enemies.enemies.every(e=>e.mesh.visible&&e.body.children.length>8)));
+  check('both original enemy models render',await page.evaluate(()=>window.__valeGame.enemies.enemies.every(e=>e.mesh.visible&&(()=>{let tris=0;e.body.traverse(m=>{if(m.isMesh)tris+=(m.geometry.getAttribute('position')?.count||0)/3*(m.geometry.index?0:1)+(m.geometry.index?12:0);});return tris>100;})())));
   await page.evaluate(()=>{
     const g=window.__valeGame;for(const e of [...g.enemies.enemies])g.enemies.remove(e);
     g.enemies.spawn('reaper',g.player.position.clone().set(42.5,35,42.5));g.player.health=100;
