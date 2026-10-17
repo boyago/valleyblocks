@@ -113,8 +113,14 @@ export class ExplorerAvatar {
       for(let i=-4;i<=4;i++){const y=.3+i*.09,x=.12-Math.abs(i)*Math.abs(i)*.008;b([.045,.1,.045],[x,y,0],i===0?'#5a3d22':'#a46f3c',i*.1);}
       b([.008,.72,.008],[-.02,.3,0],'#efe6cf');b([.03,.03,.5],[.02,.3,.18],'#8e653e');
     }else if(id==='fishing_rod'){
-      for(let i=0;i<8;i++)b([.04-i*.003,.13,.04-i*.003],[0,.05+i*.12,.02*i],i<2?'#4a3324':'#a46f3c',0,-.05*i);
-      b([.06,.06,.06],[.05,.12,0],'#55606a');b([.006,.5,.006],[0,.7,.25],'#e8e2d0',0,.5);
+      // Vara reta e afinando: cabo de cortiça, molinete com manivela, passadores, ponta
+      // vermelha. A linha só aparece quando é lançada (fishing.js).
+      b([.07,.04,.07],[0,-.13,0],'#2e3439');b([.062,.24,.062],[0,0,0],'#c9a06a');b([.066,.03,.066],[0,.13,0],'#2e3439');
+      b([.09,.08,.07],[0,.2,.075],'#55606a');b([.05,.05,.03],[0,.2,.125],'#8a949b');b([.015,.07,.015],[.05,.2,.09],'#2e3439');b([.03,.03,.03],[.05,.24,.09],'#e8e2d0');
+      for(const [w,h,y] of [[.04,.42,.36],[.03,.4,.77],[.02,.32,1.13]])b([w,h,w],[0,y,0],'#2f5d7a');
+      b([.018,.06,.018],[0,1.31,0],'#d9342b');
+      for(const y of [.4,.7,.98,1.2])b([.034,.012,.034],[0,y,.022],'#c9ccd1');
+      g.scale.setScalar(.62);g.rotation.x=.45;g.rotation.z=-.15;
     }else if(/^raw_(lambari|tilapia|tucunare|dourado|pirarucu)$|^cooked_fish$/.test(id)){
       const c=ITEMS[id].color;b([.1,.14,.32],[0,.15,0],c);b([.03,.12,.08],[0,.15,-.2],shade(c,.8));b([.03,.06,.12],[0,.24,0],shade(c,.8));
     }else if(id==='rifle'){
