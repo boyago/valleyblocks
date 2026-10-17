@@ -34,6 +34,7 @@ import { Wildlife, SPECIES } from './wildlife.js';
 import { FOODS, eatFood, updateNeeds } from './survival.js';
 import { TouchControls, touchPreferred } from './touch.js';
 import { createAccount } from './account.js';
+import { TEST_TIME, NEW_VISUAL } from './visual.js';
 import './style.css';
 
 const bridge=createLabsBridge({slug:'valleyblocks',version:'1.25.0'});
@@ -72,6 +73,8 @@ try {
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  // Visual novo: cor mais viva e contraste de "foto de capa" (filtro do próprio navegador, barato).
+  if(NEW_VISUAL){canvas.style.filter="saturate(1.22) contrast(1.07)";renderer.toneMappingExposure=1.05;}
 } catch(error){fatal('Este navegador precisa de WebGL 2 para abrir o vale.',error);}
 
 function fatal(message,error){
@@ -131,7 +134,7 @@ class Game {
     this.resin=new TreeResin(this.world,save?.resin);this.slingshot=new Slingshot(this.scene,this.world,this.combat);this.fishing=new Fishing(this.scene,this.world);this.boats=new Boats(this.scene,this.world,save?.boats);this.trailers=new Trailers(this.scene,this.world,this.entities,save?.trailers);this.activeBoat=null;
     this.forges=structuredClone(save?.forges||{});this.focusForge=null;
     this.cameraMode=['first','back','front'].includes(save?.cameraMode)?save.cameraMode:'first';
-    this.time=save?.time??.355;this.trades=save?.trades&&typeof save.trades==='object'?structuredClone(save.trades):{};this.tradeClock=0;this.chests=structuredClone(save?.chests||{'-6,9,-4':{3:32,12:24,10:12,food:12}});
+    this.time=TEST_TIME??save?.time??.355;this.trades=save?.trades&&typeof save.trades==='object'?structuredClone(save.trades):{};this.tradeClock=0;this.chests=structuredClone(save?.chests||{'-6,9,-4':{3:32,12:24,10:12,food:12}});
     this.doors=structuredClone(save?.doors||{'-9,9,2':{x:-9,y:9,z:2,open:false}});
     this.goals={mine:false,build:false,pet:false,drive:false,...save?.goals};this.quests=normalizeQuests(save?.quests);this.residentClock=0;
     this.activeVehicle=save?.activeVehicle?this.entities.vehicles.find(v=>v.id===save.activeVehicle)||null:null;
@@ -619,7 +622,7 @@ class Game {
     this.entities.update(dt,this.player.position,this.keys,this.activeVehicle);
     this.enemies.update(dt,this.player,this.time,this.mode);
     if(this.activeVehicle)this.player.position.copy(this.activeVehicle.position);
-    this.time=(this.time+dt/1440)%1;
+    if(TEST_TIME==null)this.time=(this.time+dt/1440)%1;
     this.residentClock-=dt;if(this.residentClock<=0){this.residentClock=2;this.updateResidents();}
     this.tradeClock+=dt;if(this.tradeClock>=240){restock(this.trades,this.tradeClock);this.tradeClock=0;}
     this.updateTarget(dt);

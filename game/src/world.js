@@ -9,6 +9,7 @@ import { BLOCK, BLOCKS } from './blocks.js';
 import { SandSimulation } from './granular.js';
 import { validFacing, rampHeight, rotateRamp } from './ramps.js';
 import { Geology } from './geology.js';
+import { NEW_VISUAL } from './visual.js';
 
 export const CHUNK_SIZE = 16;
 export const WORLD_HEIGHT = 64;
@@ -753,18 +754,35 @@ export class VoxelWorld {
       if (!neighborChunks.has(key)) neighborChunks.set(key, this._generate(cx + dx, cz + dz));
       return neighborChunks.get(key).data[index(x - dx * SIZE, y, z - dz * SIZE)];
     };
-    const addFace = (group, x, y, z, corners, normal, tile, shade, scale = null) => {
+    // Sombra de canto (visual novo): cada vértice escurece conforme os blocos opacos
+    // encostados nele, do lado de fora da face. É o que dá volume aos blocos.
+    const opaque = (x, y, z) => { const b = peek(x, y, z); return !!b && BLOCKS[b].solid && !BLOCKS[b].transparent; };
+    const AO_LEVELS = [.38, .6, .8, 1];
+    const cornerShade = (x, y, z, normal, corners) => {
+      const axis = normal.findIndex(v => v !== 0), [t1, t2] = [0, 1, 2].filter(i => i !== axis);
+      return corners.map(c => {
+        const o = [x + normal[0], y + normal[1], z + normal[2]], d1 = [0, 0, 0], d2 = [0, 0, 0];
+        d1[t1] = c[t1] ? 1 : -1; d2[t2] = c[t2] ? 1 : -1;
+        const s1 = opaque(o[0] + d1[0], o[1] + d1[1], o[2] + d1[2]), s2 = opaque(o[0] + d2[0], o[1] + d2[1], o[2] + d2[2]);
+        const k = opaque(o[0] + d1[0] + d2[0], o[1] + d1[1] + d2[1], o[2] + d1[2] + d2[2]);
+        return AO_LEVELS[s1 && s2 ? 0 : 3 - s1 - s2 - k];
+      });
+    };
+    const addFace = (group, x, y, z, corners, normal, tile, shade, scale = null, ao = null) => {
       const offset = group.positions.length / 3;
       const inset = .035;
       const u0 = ((tile % atlasColumns) + inset) / atlasColumns, u1 = ((tile % atlasColumns) + 1 - inset) / atlasColumns;
       const v0 = (Math.floor(tile / atlasColumns) + inset) / atlasRows, v1 = (Math.floor(tile / atlasColumns) + 1 - inset) / atlasRows;
-      for (const corner of corners) {
+      for (let n = 0; n < corners.length; n++) {
+        const corner = corners[n], light = ao ? shade * ao[n] : shade;
         group.positions.push(x + (scale ? scale[0] + corner[0] * scale[3] : corner[0]), y + (scale ? scale[1] + corner[1] * scale[4] : corner[1]), z + (scale ? scale[2] + corner[2] * scale[5] : corner[2]));
         group.normals.push(...normal);
-        group.colors.push(shade, shade, shade);
+        group.colors.push(light, light, light);
       }
       group.uvs.push(u0, v0, u1, v0, u1, v1, u0, v1);
-      group.indices.push(offset, offset + 1, offset + 2, offset, offset + 2, offset + 3);
+      // Com sombra de canto, a diagonal segue os cantos mais claros (sem "dobra" escura).
+      if (ao && ao[0] + ao[2] < ao[1] + ao[3]) group.indices.push(offset + 1, offset + 2, offset + 3, offset + 1, offset + 3, offset);
+      else group.indices.push(offset, offset + 1, offset + 2, offset, offset + 2, offset + 3);
     };
     for (let y = 0; y < WORLD_HEIGHT; y++) for (let z = 0; z < SIZE; z++) for (let x = 0; x < SIZE; x++) {
       const id = data[index(x, y, z)];
@@ -809,7 +827,8 @@ export class VoxelWorld {
         if (id === BLOCK.ASPHALT && side === 2 && cx * SIZE + x === 3 && ((cz * SIZE + z) % 8 + 8) % 8 < 4) tile = 34;
         const scale = id === BLOCK.TORCH ? [.4, 0, .4, .2, .8, .2] : null;
         const corners=isFluid(id)?face.corners.map(([a,b,c])=>[a,b?this.waterCornerHeight(cx*SIZE+x+a,y,cz*SIZE+z+c,id):0,c]):face.corners;
-        addFace(group, x, y, z, corners, face.normal, tile, face.shade, scale);
+        const ao = NEW_VISUAL && !scale && !isFluid(id) && group === groups[0] ? cornerShade(x, y, z, face.normal, corners) : null;
+        addFace(group, x, y, z, corners, face.normal, tile, face.shade, scale, ao);
       }
     }
     this._disposeMeshes(chunk);

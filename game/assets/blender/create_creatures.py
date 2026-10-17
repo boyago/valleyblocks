@@ -158,6 +158,73 @@ def cat(p, variant):
         {'name': 'head', 'pivot': (0, .74, .38), 'boxes': head},
         {'name': 'tail', 'pivot': (0, .57, -.4), 'boxes': tail}]}
 
+# -------------------------------------------- pets no estilo das artes (visual novo)
+# Proporção "fofa": cabeça grande, olhos grandes com dois brilhos, focinho claro,
+# corpo curto e patas gordinhas. Mesmo tamanho de chão que os de cima.
+def big_eyes(x, y, z, w=.11, h=.13, iris='#2a1d16'):
+    out = []
+    for s in (-1, 1):
+        out += [box((s * x, y, z), (w, h, .02), iris),
+                box((s * x - s * w * .18, y + h * .22, z + .008), (w * .42, h * .36, .012), SHINE),
+                box((s * x + s * w * .2, y - h * .25, z + .008), (w * .18, h * .16, .012), SHINE)]
+    return out
+
+def dog_novo(p, variant):
+    c, l, dark = p['coat'], p['light'], shade(p['coat'], .8)
+    body = [
+        box((0, .5, -.08), (.54, .42, .72), c),
+        box((0, .48, .26), (.42, .36, .16), l),               # peito claro
+        box((0, .3, -.08), (.4, .04, .52), l),                # barriga
+        box((0, .72, -.12), (.46, .04, .5), dark),            # dorso
+    ]
+    if variant == 2: body.append(box((0, .73, .05), (.48, .03, .2), l))
+    head = [
+        box((0, .98, .42), (.64, .56, .52), c),                # cabeção
+        box((0, 1.265, .4), (.5, .04, .4), dark),              # topo
+        box((0, .82, .74), (.38, .24, .16), l),                # focinho claro
+        box((0, .94, .69), (.2, .1, .04), l),                  # mancha entre os olhos
+        box((0, .9, .83), (.16, .1, .05), '#1e2120'),          # nariz
+        box((-.03, .925, .858), (.05, .03, .01), '#6a6e6c'),   # brilho do nariz
+        box((0, .75, .826), (.18, .02, .02), '#3a2a24'),       # boca
+        box((0, .71, .8), (.09, .06, .08), '#e9798a'),         # língua
+        *big_eyes(.15, 1.03, .685),
+        *[box((s * .15, 1.15, .684), (.11, .025, .02), dark) for s in (-1, 1)],   # sobrancelhas
+        *[box((s * .35, .92, .4), (.1, .42, .26), p['ear'], (0, 0, s * .2)) for s in (-1, 1)],
+        *[box((s * .37, .72, .4), (.09, .08, .24), shade(p['ear'], .85), (0, 0, s * .2)) for s in (-1, 1)],
+    ]
+    tail = [box((0, .82, -.5), (.12, .3, .12), p['tail'], (-.5, 0, 0)), box((0, .98, -.58), (.11, .11, .11), l)]
+    return {'body': body, 'parts': quad_legs(.18, .32, .26, -.32, (.18, .26, .2), .1, c, l, (.21, .1, .26)) + [
+        {'name': 'head', 'pivot': (0, .86, .42), 'boxes': head},
+        {'name': 'tail', 'pivot': (0, .66, -.44), 'boxes': tail}]}
+
+def cat_novo(p, variant):
+    c, l, dark = p['coat'], p['light'], shade(p['coat'], .8)
+    body = [
+        box((0, .4, -.05), (.44, .34, .62), c),
+        box((0, .38, .22), (.3, .28, .16), l),
+        box((0, .24, -.05), (.32, .04, .46), l),
+    ]
+    if variant == 2: body += [box((0, .575, z), (.45, .03, .07), p['tail']) for z in (-.22, -.06, .1)]
+    head = [
+        box((0, .8, .36), (.58, .48, .44), c),
+        *[box((s * .19, .7, .54), (.17, .15, .12), l) for s in (-1, 1)],      # bochechas
+        box((0, .69, .6), (.2, .1, .04), l),
+        box((0, .74, .625), (.08, .05, .02), '#e58e98'),                      # nariz
+        box((0, .675, .622), (.09, .015, .01), '#7a5a55'),
+        *[box((s * .13, .85, .585), (.12, .12, .02), '#7fd36b') for s in (-1, 1)],
+        *[box((s * .13, .845, .597), (.04, .1, .01), '#13201a') for s in (-1, 1)],
+        *[box((s * .11, .88, .604), (.035, .035, .008), SHINE) for s in (-1, 1)],
+        *[box((s * .18, 1.08, .34), (.17, .14, .13), c, (0, 0, -s * .22)) for s in (-1, 1)],
+        *[box((s * .2, 1.17, .34), (.09, .09, .1), c, (0, 0, -s * .22)) for s in (-1, 1)],
+        *[box((s * .18, 1.09, .41), (.09, .09, .01), '#eaa6a6', (0, 0, -s * .22)) for s in (-1, 1)],
+        *[box((s * .32, y, .55), (.2, .01, .01), '#f2f0e4') for s in (-1, 1) for y in (.7, .66)],
+    ]
+    if variant != 1: head.append(box((0, 1.045, .38), (.24, .03, .3), dark))
+    tail = [box((0, .72, -.42), (.1, .44, .1), c, (-.35, 0, 0)), box((0, .95, -.5), (.12, .14, .12), p['tail'])]
+    return {'body': body, 'parts': quad_legs(.15, .27, .22, -.22, (.15, .23, .16), .08, c, l, (.18, .08, .2)) + [
+        {'name': 'head', 'pivot': (0, .72, .36), 'boxes': head},
+        {'name': 'tail', 'pivot': (0, .52, -.36), 'boxes': tail}]}
+
 # ---------------------------------------------------------------- bichos do Vale
 def chicken():
     w, cream, red, beak = '#f3e9cc', '#fbf4e0', '#c94a3d', '#e8a83a'
@@ -498,6 +565,8 @@ ENEMY_MODELS = {'reaper': reaper(), 'cangaceiro': cangaceiro(), 'terracota': ter
 CREATURES = {
     **{f'dog{i}': dog(p, i) for i, p in enumerate(DOG_COATS)},
     **{f'cat{i}': cat(p, i) for i, p in enumerate(CAT_COATS)},
+    **{f'dog{i}@novo': dog_novo(p, i) for i, p in enumerate(DOG_COATS)},
+    **{f'cat{i}@novo': cat_novo(p, i) for i, p in enumerate(CAT_COATS)},
     'chicken': chicken(), 'rabbit': rabbit(), 'boar': boar(),
     'mico': mico(), 'pombo': pombo(), 'esquilo': esquilo(), 'quati': quati(), 'turista': turista(), 'salamandra': salamandra(),
     'panda': panda(), 'macaco': macaco(), 'bisao': bisao(), 'onca': onca(), 'capivara': capivara(), 'calango': calango(),

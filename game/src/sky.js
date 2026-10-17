@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { NEW_VISUAL } from './visual.js';
+import { createSkyDome } from './sky-dome.js';
 
 export class Sky {
   constructor(scene) {
@@ -27,6 +29,7 @@ export class Sky {
     this.stars=new THREE.Points(geometry,new THREE.PointsMaterial({color:0xfff4d4,size:.6,transparent:true,opacity:0,depthWrite:false}));scene.add(this.stars);
     this.sunDisc=new THREE.Mesh(new THREE.BoxGeometry(6,6,1),new THREE.MeshBasicMaterial({color:0xffedb1,fog:false}));scene.add(this.sunDisc);
     this.color=new THREE.Color();
+    if(NEW_VISUAL){this.dome=createSkyDome();scene.add(this.dome);this.ambient.groundColor.set(0x8d7a4c);}
   }
   update(time,dt,position,settings) {
     // One full day lasts 24 real minutes; time is a normalized fraction.
@@ -46,8 +49,22 @@ export class Sky {
     this.sun.castShadow=!!settings.shadows;
     this.sunDisc.position.set(position.x+Math.cos(phase)*150,Math.sin(phase)*145,position.z-100);this.sunDisc.lookAt(position);
     this.sunDisc.visible=daylight>.1;
+    if(this.dome){
+      // Visual novo: topo azul, horizonte claro (e alaranjado no fim de tarde), halo no sol.
+      const u=this.dome.material.uniforms;
+      u.top.value.set(0x0b1530).lerp(new THREE.Color(0x4f9be0),daylight);
+      u.horizon.value.set(0x1b2748).lerp(new THREE.Color(0xd9eef2),daylight).lerp(new THREE.Color(0xffc48a),sunset*.75);
+      u.glow.value.set(0xffd59a).multiplyScalar(daylight);
+      u.sunDir.value.set(Math.cos(phase)*150,Math.sin(phase)*145,-100);
+      this.dome.position.copy(position);
+      this.color.copy(u.horizon.value);this.scene.background=this.color;if(this.scene.fog)this.scene.fog.color.copy(this.color);
+      this.sun.color.set(daylight>.7?0xffd9a0:0xffb070);this.sun.intensity=.15+daylight*3.6;
+      this.ambient.color.set(0xb9d8ff);this.ambient.intensity=.3+daylight*1.05;
+      if(this.scene.fog){this.scene.fog.near*=1.5;this.scene.fog.far*=1.35;}
+      this.sunDisc.visible=false;
+    }
     this.stars.position.set(position.x,0,position.z);this.stars.material.opacity=(1-daylight)*.85;
     for(const cloud of this.clouds.children){cloud.position.x+=dt*.4;if(cloud.position.x-position.x>160)cloud.position.x-=300;if(cloud.position.x-position.x<-160)cloud.position.x+=300;if(cloud.position.z-position.z>160)cloud.position.z-=300;if(cloud.position.z-position.z<-160)cloud.position.z+=300;}
   }
-  dispose() {this.scene.remove(this.ambient,this.sun,this.sun.target,this.clouds,this.stars,this.sunDisc);const geometries=new Set(),materials=new Set();for(const root of [this.clouds,this.stars,this.sunDisc])root.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)materials.add(o.material);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());this.sun.shadow.dispose();}
+  dispose() {if(this.dome){this.scene.remove(this.dome);this.dome.geometry.dispose();this.dome.material.dispose();}this.scene.remove(this.ambient,this.sun,this.sun.target,this.clouds,this.stars,this.sunDisc);const geometries=new Set(),materials=new Set();for(const root of [this.clouds,this.stars,this.sunDisc])root.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)materials.add(o.material);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());this.sun.shadow.dispose();}
 }
