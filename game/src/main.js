@@ -542,7 +542,20 @@ class Game {
     const context=this.interaction(),petContext=!context&&!this.activeVehicle&&!this.activeBoat?this.interaction(true):null;
     if(context?.kind==='boat'||context?.kind==='leave-boat'||context?.kind==='trailer'){this.ui.context(context.kind==='boat'?'Embarcar no barco':context.kind==='trailer'?'Abrir a caçamba da carretinha':'Desembarcar');return;}
     if(petContext?.kind==='pet'){this.ui.context(`Conhecer ${petContext.entity.name}`,'R');return;}
-    this.ui.context(context?.kind==='exit'?'Sair do carro':context?.kind==='vehicle'?(context.entity.passenger?'Entrar no carro · Q para desembarcar companheiro':'Entrar no carro'):context?.kind==='pet'?`Conhecer ${context.entity.name}`:context?.kind==='door'?'Fechar porta':context?.hit?.id===BLOCK.PORTAL?'Atravessar portal':context?.hit?.id===BLOCK.WOOD?'Coletar resina (opcional)':context?.hit?.id===BLOCK.CHEST?'Abrir baú':context?.hit?.id===BLOCK.WORKBENCH?'Usar bancada':context?.hit?.id===BLOCK.FORGE?'Usar churrasqueira':context?.hit?.id===BLOCK.SOFA?'Descansar no sofá':context?.hit?.id===BLOCK.TV?(this.world.televisions.has(this.blockKey(context.hit))?'Desligar TV':'Ligar TV'):context?.hit?.id===BLOCK.DOOR?'Abrir porta':'');
+    this.ui.context(context?.kind==='exit'?(this.vehicleStopped(this.activeVehicle)?'Sair do carro':''):context?.kind==='vehicle'?(context.entity.passenger?'Entrar no carro · Q para desembarcar companheiro':'Entrar no carro'):context?.kind==='pet'?`Conhecer ${context.entity.name}`:context?.kind==='door'?'Fechar porta':context?.hit?.id===BLOCK.PORTAL?'Atravessar portal':context?.hit?.id===BLOCK.WOOD?'Coletar resina (opcional)':context?.hit?.id===BLOCK.CHEST?'Abrir baú':context?.hit?.id===BLOCK.WORKBENCH?'Usar bancada':context?.hit?.id===BLOCK.FORGE?'Usar churrasqueira':context?.hit?.id===BLOCK.SOFA?'Descansar no sofá':context?.hit?.id===BLOCK.TV?(this.world.televisions.has(this.blockKey(context.hit))?'Desligar TV':'Ligar TV'):context?.hit?.id===BLOCK.DOOR?'Abrir porta':'');
+  }
+  /** Carro no chão e praticamente parado: só então pode sair (e só então o aviso aparece). */
+  vehicleStopped(vehicle){return !!vehicle&&vehicle.grounded!==false&&Math.abs(vehicle.speed)<=.25;}
+  /** Em cavernas e túneis escavados a luz do dia vai sumindo; tochas e faróis continuam iluminando. */
+  updateCaveLight(dt,focus,underground){
+    this.caveClock=(this.caveClock||0)+dt;
+    if(this.caveTarget===undefined||this.caveClock>=.15){this.caveClock=0;this.caveTarget=underground||!this.started?0:this.world.burial(focus.x,focus.y+1,focus.z);}
+    this.caveDarkness=THREE.MathUtils.lerp(this.caveDarkness||0,this.caveTarget,1-Math.exp(-dt*2.5));
+    const d=this.caveDarkness;if(d<.002)return;
+    this.sky.ambient.intensity=THREE.MathUtils.lerp(this.sky.ambient.intensity,.14,d);
+    this.sky.sun.intensity=THREE.MathUtils.lerp(this.sky.sun.intensity,0,d);
+    const dark=new THREE.Color('#06090b');this.scene.background.lerp(dark,d*.92);if(this.scene.fog){this.scene.fog.color.lerp(dark,d*.92);this.scene.fog.near*=1-d*.6;this.scene.fog.far*=1-d*.45;}
+    this.sky.sunDisc.visible=this.sky.sunDisc.visible&&d<.5;
   }
   playerEntityCollision(min,max) {
     return this.entities.vehicles.some(vehicle=>this.entities.vehicleIntersectsBox(vehicle,min,max,.13));
@@ -633,6 +646,7 @@ class Game {
     this.world.update(focus.x,focus.z,({low:1,medium:3,high:4})[this.settings.quality]);
     this.sky.update(this.time,this.running||!this.started?dt:0,focus,{...this.settings,preview:!this.started});
     const underground=this.world.underworld.contains(focus);
+    this.updateCaveLight(dt,focus,underground);
     if(underground){this.scene.background.set('#241b2f');if(this.scene.fog)this.scene.fog.color.set('#241b2f');this.sky.ambient.intensity=.95;this.sky.sun.intensity=.1;this.sky.sunDisc.visible=false;}
     {const tint=!underground&&REALM_TINTS[realmAt(focus.x,focus.z)];if(tint){if(tint.sky)this.scene.background.lerp(tint.sky,tint.tint);if(tint.haze&&this.scene.fog)this.scene.fog.color.lerp(tint.haze,Math.max(.5,tint.tint));if(tint.fx){this.sky.clouds.visible=false;this.sky.sunDisc.visible=false;}}
      this.updateRealmFx(tint?.fx,focus);}

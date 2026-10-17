@@ -423,6 +423,29 @@ export class VoxelWorld {
     }
   }
 
+  /**
+   * Quanto o ponto está enterrado (0 = céu aberto, 1 = caverna fechada).
+   * Amostra as colunas ao redor: cada uma conta como coberta se houver bloco opaco
+   * acima do ponto, e só pesa se o ponto estiver abaixo do terreno original — assim
+   * uma casa construída na superfície continua clara, mas um túnel na encosta ou
+   * um buraco escavado para baixo vai escurecendo.
+   */
+  burial(x, y, z, radius = 3) {
+    const cx = Math.floor(x), cy = Math.floor(y), cz = Math.floor(z);
+    if (cy >= WORLD_HEIGHT) return 0;
+    let covered = 0, total = 0;
+    for (let dz = -radius; dz <= radius; dz++) for (let dx = -radius; dx <= radius; dx++) {
+      const weight = 1 / (1 + (dx * dx + dz * dz) * .3);
+      total += weight;
+      const depth = Math.min(1, Math.max(0, (this._column(cx + dx, cz + dz).height - cy) / 3));
+      if (!depth) continue;
+      let roof = false;
+      for (let yy = cy + 1; yy < WORLD_HEIGHT; yy++) { const block = BLOCKS[this.getBlock(cx + dx, yy, cz + dz)]; if (block?.solid && !block.transparent) { roof = true; break; } }
+      if (roof) covered += weight * depth;
+    }
+    return total ? covered / total : 0;
+  }
+
   getBlock(x, y, z) {
     x = Math.floor(x); y = Math.floor(y); z = Math.floor(z);
     if (y < 0) return BLOCK.STONE;
