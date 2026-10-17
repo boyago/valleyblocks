@@ -29,6 +29,10 @@ try{
       g.player.position.set(base.x+.55,base.y+.35,base.z+3.1);g.player.yaw=0;g.player.pitch=-.12;g.updateCamera(1);
       await new Promise(r=>setTimeout(r,1500));});
     await page.screenshot({path:`test-results/visual-${name}-pets.png`});
+    // Jogador de frente (câmera de frente), no chão.
+    await page.evaluate(async()=>{const g=window.__valeGame;g.player.flying=false;g.cameraMode='front';g.player.pitch=-.05;
+      g.player.position.set(2.5,g.world.heightAt?g.world.heightAt(2.5,4,40):9,4);g.updateCamera(1);await new Promise(r=>setTimeout(r,1500));});
+    await page.screenshot({path:`test-results/visual-${name}-jogador.png`});
     await page.close();
   }
 }finally{await browser.close();}

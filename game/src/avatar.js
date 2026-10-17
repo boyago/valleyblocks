@@ -3,6 +3,7 @@ import { ITEMS } from './inventory.js';
 import { TOOLS } from './tools.js';
 import { loadHeldModels, onHeldModel, heldModel } from './held-models.js';
 import { domesticGeometry } from './domestic-models.js';
+import { NEW_VISUAL } from './visual.js';
 
 import { OUTFITS, DEFAULT_OUTFIT } from './outfits.js';
 import outfitModels from './assets/outfit-models.json' with { type: 'json' };
@@ -22,8 +23,16 @@ export class ExplorerAvatar {
     this.box(this.head,[.39,.4,.35],[0,0,0],'skin');
     this.box(this.head,[.41,.12,.37],[0,.15,.014],'hair');
     this.capParts=[this.box(this.head,[.43,.1,.39],[0,.24,0],'cap'),this.box(this.head,[.48,.045,.17],[0,.18,-.22],'visor')];
-    for(const x of [-.1,.1]){this.box(this.head,[.065,.06,.018],[x,.025,-.184],'#263c42');this.box(this.head,[.022,.022,.02],[x-.012,.04,-.195],'#f0e4c8');}
-    this.box(this.head,[.075,.06,.055],[0,-.055,-.195],'#ad7357');
+    if(NEW_VISUAL){
+      // Visual novo (estilo das artes): cabeça maior, olhos grandes com dois brilhos,
+      // sobrancelha, bochecha corada e sorriso. Acessórios crescem junto com a cabeça.
+      this.head.scale.setScalar(1.22);this.head.position.y=1.575;
+      for(const x of [-.095,.095]){this.box(this.head,[.085,.1,.018],[x,.02,-.184],'#2a1d16');this.box(this.head,[.034,.038,.012],[x-.016,.042,-.195],'#fffbe8');this.box(this.head,[.016,.016,.012],[x+.02,-.01,-.195],'#fffbe8');this.box(this.head,[.1,.02,.016],[x,.09,-.182],'hair');this.box(this.head,[.07,.035,.012],[x*1.55,-.07,-.18],'#f0a08a');}
+      this.box(this.head,[.05,.04,.04],[0,-.04,-.192],'#c98a6c');this.box(this.head,[.11,.022,.012],[0,-.11,-.182],'#7a3b2e');this.box(this.head,[.07,.018,.012],[0,-.128,-.18],'#e9798a');
+    }else{
+      for(const x of [-.1,.1]){this.box(this.head,[.065,.06,.018],[x,.025,-.184],'#263c42');this.box(this.head,[.022,.022,.02],[x-.012,.04,-.195],'#f0e4c8');}
+      this.box(this.head,[.075,.06,.055],[0,-.055,-.195],'#ad7357');
+    }
     this.box(this.body,[.4,.09,.39],[0,1.34,0],'scarf');
     this.box(this.body,[.115,.23,.03],[.12,1.18,-.18],'scarfTail');
     this.box(this.body,[.35,.44,.19],[0,1.08,.23],'backpack');
