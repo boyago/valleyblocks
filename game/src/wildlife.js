@@ -4,6 +4,7 @@ import { RESIDENTS } from './trading.js';
 import { buildCreature, hasCreature } from './creatures.js';
 import { petHealth, hurtPet } from './pet-health.js';
 import vendorModels from './assets/vendor-models.json' with { type: 'json' };
+import { NEW_VISUAL } from './visual.js';
 
 /** Malhas do vendedor feitas no Blender (assets/blender/create_vendor.py). */
 const vendorGeometry=Object.fromEntries(Object.entries(vendorModels).map(([k,s])=>{const g=new THREE.BufferGeometry();for(const [n,v] of [['position',s.positions],['normal',s.normals],['color',s.colors]])g.setAttribute(n,new THREE.Float32BufferAttribute(v,3));g.computeBoundingSphere();return [k,g];}));
@@ -91,7 +92,7 @@ export class Wildlife {
         for(const s2 of [-1,1])for(const e of [-1,1])legs.push(box([.05,.07,.05],[s2*.13,.03,e*.16],'#c03a0a'));
       }else if(type==='vendedor'||type==='morador'){
         const n=this.serial+1,add=(g,m,p=[0,0,0])=>{const x=new THREE.Mesh(g,m);x.position.set(...p);x.castShadow=true;x.receiveShadow=true;body.add(x);return x;};
-        add(vendorGeometry.body,vendorMaterial);add(vendorGeometry.shirt,new THREE.MeshLambertMaterial({vertexColors:true,color:type==='morador'?RESIDENTS[saved.realm]?.shirt||'#888':VENDOR_SHIRTS[n%3]}));
+        add(vendorGeometry.body,vendorMaterial);add(NEW_VISUAL&&vendorGeometry['face@novo']||vendorGeometry.face,vendorMaterial);add(vendorGeometry.shirt,new THREE.MeshLambertMaterial({vertexColors:true,color:type==='morador'?RESIDENTS[saved.realm]?.shirt||'#888':VENDOR_SHIRTS[n%3]}));
         for(const s2 of [-1,1])legs.push(add(vendorGeometry.leg,vendorMaterial,[s2*.12,.75,0]));
       }else if(type==='turista'){
         const shirt='#4cc9f0';

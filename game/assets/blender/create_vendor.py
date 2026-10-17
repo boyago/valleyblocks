@@ -64,11 +64,22 @@ box('Cabeca', (0, 0, 1.53), (.38, .36, .38), skin, 'body')
 box('Cabelo nuca', (0, .17, 1.58), (.4, .04, .3), hair, 'body')
 box('Costeleta E', (-.19, 0, 1.56), (.03, .3, .2), hair, 'body')
 box('Costeleta D', (.19, 0, 1.56), (.03, .3, .2), hair, 'body')
+# Rosto: 'face' é o de sempre; 'face@novo' é o do visual novo (estilo das artes):
+# olhos grandes com dois brilhos, sobrancelha grossa, bochecha corada e sorriso.
+shine = material('Brilho do olho', '#fffbe8'); blush = material('Bochecha', '#f0a08a'); smile = material('Sorriso', '#7a3b2e')
 for s in (-1, 1):
-    box('Olho', (s * .08, F * .182, 1.57), (.06, .01, .06), eye, 'body')
-    box('Sobrancelha', (s * .08, F * .182, 1.62), (.09, .012, .02), hair, 'body')
-box('Nariz', (0, F * .2, 1.52), (.06, .04, .07), skin_dark, 'body')
-box('Bigode', (0, F * .19, 1.47), (.2, .03, .04), mustache, 'body')
+    box('Olho', (s * .08, F * .182, 1.57), (.06, .01, .06), eye, 'face')
+    box('Sobrancelha', (s * .08, F * .182, 1.62), (.09, .012, .02), hair, 'face')
+    box('Olho grande', (s * .085, F * .183, 1.565), (.085, .012, .1), eye, 'face@novo')
+    box('Brilho grande', (s * .085 - s * .016, F * .19, 1.585), (.034, .01, .038), shine, 'face@novo')
+    box('Brilho pequeno', (s * .085 + s * .02, F * .19, 1.535), (.016, .01, .016), shine, 'face@novo')
+    box('Sobrancelha grossa', (s * .085, F * .183, 1.635), (.1, .014, .025), hair, 'face@novo')
+    box('Bochecha', (s * .13, F * .183, 1.49), (.06, .01, .035), blush, 'face@novo')
+box('Nariz', (0, F * .2, 1.52), (.06, .04, .07), skin_dark, 'face')
+box('Bigode', (0, F * .19, 1.47), (.2, .03, .04), mustache, 'face')
+box('Nariz', (0, F * .2, 1.51), (.05, .04, .05), skin_dark, 'face@novo')
+box('Bigode', (0, F * .19, 1.465), (.2, .03, .035), mustache, 'face@novo')
+box('Sorriso', (0, F * .183, 1.425), (.1, .01, .02), smile, 'face@novo')
 box('Pescoco', (0, 0, 1.31), (.18, .16, .08), skin_dark, 'body')
 
 # Chapéu de palha de aba larga com fita vermelha

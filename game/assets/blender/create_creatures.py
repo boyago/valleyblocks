@@ -562,6 +562,22 @@ def specter():
 ENEMY_MODELS = {'reaper': reaper(), 'cangaceiro': cangaceiro(), 'terracota': terracota(), 'oni': oni(), 'pegrande': pegrande(), 'golem': golem(),
                 'et': et(), 'saci': saci(), 'ratao': ratao(), 'boitata': boitata(), 'specter': specter()}
 
+def fofo(spec, head_scale=1.25, eye_scale=1.45):
+    """Versão '@novo' de um bicho no estilo das artes: cabeça maior (em volta do pivô)
+    e olhos maiores com brilho. Corpo, pernas e pivôs continuam os mesmos."""
+    def grow_eye(b):
+        if b['color'] not in (EYE, SHINE): return b
+        thin = min(range(3), key=lambda i: b['s'][i])
+        return {**b, 's': tuple(v if i == thin else v * eye_scale for i, v in enumerate(b['s']))}
+    def scale_about(b, pivot, k):
+        return {**b, 'c': tuple(p + (c - p) * k for c, p in zip(b['c'], pivot)), 's': tuple(v * k for v in b['s'])}
+    parts = []
+    for p in spec['parts']:
+        boxes = [grow_eye(b) for b in p['boxes']]
+        if p['name'] == 'head': boxes = [scale_about(b, p['pivot'], head_scale) for b in boxes]
+        parts.append({**p, 'boxes': boxes})
+    return {'body': [grow_eye(b) for b in spec['body']], 'parts': parts}
+
 CREATURES = {
     **{f'dog{i}': dog(p, i) for i, p in enumerate(DOG_COATS)},
     **{f'cat{i}': cat(p, i) for i, p in enumerate(CAT_COATS)},
@@ -572,6 +588,9 @@ CREATURES = {
     'panda': panda(), 'macaco': macaco(), 'bisao': bisao(), 'onca': onca(), 'capivara': capivara(), 'calango': calango(),
     **{f'enemy-{k}': v for k, v in ENEMY_MODELS.items()},
 }
+# Bichos das terras no estilo novo (pets e inimigos têm versão própria ou ficam como estão).
+for name in ['chicken', 'rabbit', 'boar', 'mico', 'pombo', 'esquilo', 'quati', 'salamandra', 'panda', 'macaco', 'bisao', 'onca', 'capivara', 'calango']:
+    CREATURES[name + '@novo'] = fofo(CREATURES[name])
 
 # ---------------------------------------------------------------- exportação
 export = {}
