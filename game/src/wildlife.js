@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { REALMS } from './realms.js';
 import { RESIDENTS } from './trading.js';
+import { buildCreature, hasCreature } from './creatures.js';
 import { petHealth, hurtPet } from './pet-health.js';
 import vendorModels from './assets/vendor-models.json' with { type: 'json' };
 
@@ -64,6 +65,11 @@ export class Wildlife {
   spawn(type,position,saved={}){
     const spec=SPECIES[type];if(!spec||this.animals.length>=32)return null;
     const mesh=new THREE.Group(),body=new THREE.Group();mesh.add(body);
+    if(hasCreature(type)){ // modelo do Blender (creatures.js); o código de caixas abaixo fica como reserva
+      const {legs}=buildCreature(type,body);
+      const animal={id:`wild-${++this.serial}`,type,position:position.clone(),home:position.clone(),health:Math.min(spec.health,saved.health??spec.health),yaw:Number.isFinite(saved.yaw)?saved.yaw:0,mesh,body,legs,goal:null,timer:0,panic:0,gait:0,cooldown:0};
+      mesh.position.copy(position);mesh.rotation.y=animal.yaw;mesh.name=`wildlife:${type}`;this.scene.add(mesh);this.animals.push(animal);return animal;
+    }
     if(['panda','macaco','bisao','quati','vendedor','morador','turista','salamandra','mico','pombo','esquilo'].includes(type)){
       const legs=[],box=(sz,p,c)=>this.box(body,sz,p,c);
       if(type==='mico'){

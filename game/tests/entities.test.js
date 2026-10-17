@@ -266,7 +266,8 @@ test('save restore preserves vehicle and pet positions beyond the original start
 test('starter animals have distinct coats and restore all three variants without duplicating pets', () => {
   const { scene, world, entities, close } = create();
   assert.deepEqual(entities.pets.map(p => [p.name, p.coatVariant]), [['Pingo', 0], ['Lua', 0], ['Mel', 1], ['Nino', 1]]);
-  const coat = pet => pet.bodyGroup.children[0].material.color.getHex();
+  // Modelo do Blender: a pelagem está na cor por vértice do corpo; reserva de caixas: na cor do material.
+  const coat = pet => { const m = pet.bodyGroup.children[0], c = m.geometry.getAttribute('color'); return c ? [...c.array.slice(0, 3)].join() : m.material.color.getHex(); };
   assert.notEqual(coat(entities.pets[0]), coat(entities.pets[2]));
   assert.notEqual(coat(entities.pets[1]), coat(entities.pets[3]));
   for (const pet of entities.pets) assert.ok(entities.petStand(pet.position.x, pet.position.z, pet.position.y), `${pet.name} needs a safe starter floor`);
