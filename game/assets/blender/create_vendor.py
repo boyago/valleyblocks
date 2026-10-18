@@ -66,7 +66,7 @@ box('Costeleta E', (-.19, 0, 1.56), (.03, .3, .2), hair, 'body')
 box('Costeleta D', (.19, 0, 1.56), (.03, .3, .2), hair, 'body')
 # Rosto: 'face' é o de sempre; 'face@novo' é o do visual novo (estilo das artes):
 # olhos grandes com dois brilhos, sobrancelha grossa, bochecha corada e sorriso.
-shine = material('Brilho do olho', '#fffbe8'); blush = material('Bochecha', '#f0a08a'); smile = material('Sorriso', '#7a3b2e')
+cuff = material('Punho', '#d9d2c2'); shine = material('Brilho do olho', '#fffbe8'); blush = material('Bochecha', '#f0a08a'); smile = material('Sorriso', '#7a3b2e')
 for s in (-1, 1):
     box('Olho', (s * .08, F * .182, 1.57), (.06, .01, .06), eye, 'face')
     box('Sobrancelha', (s * .08, F * .182, 1.62), (.09, .012, .02), hair, 'face')
@@ -93,7 +93,11 @@ box('Tronco', (0, 0, 1.0), (.5, .3, .6), white, 'shirt')
 for s in (-1, 1):
     box('Manga', (s * .33, 0, 1.17), (.16, .2, .26), white, 'shirt')
     box('Braco', (s * .33, F * .04, .95), (.13, .15, .24), skin, 'body')
-    box('Mao', (s * .33, F * .08, .8), (.12, .12, .1), skin_dark, 'body')
+    box('Mao', (s * .33, F * .08, .8), (.12, .12, .1), skin_dark, 'face')
+    # Visual novo: punho da manga, mão maior e polegar separado por dentro, como nas artes
+    box('Punho', (s * .33, F * .04, .86), (.17, .19, .04), cuff, 'face@novo')
+    box('Mao grande', (s * .33, F * .08, .78), (.14, .14, .12), skin_dark, 'face@novo')
+    box('Polegar', (s * .33 - s * .085, F * .13, .8), (.05, .06, .08), skin_dark, 'face@novo')
 
 # Avental com bolso e alças
 box('Avental', (0, F * .158, .92), (.44, .02, .62), apron, 'body')

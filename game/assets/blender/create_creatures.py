@@ -441,6 +441,9 @@ def humanoid(m, torso, skin, legs_color, boots, sleeve, hand, eye, eye_glow=True
             box((0, 1.58 * m, 0), (.45 * m, .42 * m, .42 * m), head_color or skin, glow=glow_body),
             box((-.43 * m, 1.0 * m, 0), (.2 * m, .6 * m, .23 * m), sleeve, glow=glow_body),
             box((-.43 * m, .66 * m, .02), (.17 * m, .14 * m, .19 * m), hand, glow=glow_body),
+            # punho e polegar (visual novo e antigo: mão mais viva em todos)
+            box((-.43 * m, .74 * m, 0), (.22 * m, .05 * m, .25 * m), shade(sleeve, .8), glow=glow_body),
+            box((-.33 * m, .68 * m, .09 * m), (.06 * m, .1 * m, .07 * m), hand, glow=glow_body),
             *[box((s * .11 * m, 1.62 * m, .213 * m), (.07 * m, .055 * m, .02), eye, glow=eye_glow) for s in (-1, 1)],
             *extra_body]
     legs = []
@@ -451,7 +454,9 @@ def humanoid(m, torso, skin, legs_color, boots, sleeve, hand, eye, eye_glow=True
             box((x, .07 * m, .06 * m), (.27 * m, .14 * m, .4 * m), boots)]})
     ax, ay = .43 * m, 1.28 * m
     arm = [box((ax, ay - .22 * m, 0), (.19 * m, .5 * m, .21 * m), sleeve, glow=glow_body),
-           box((ax, ay - .52 * m, .03), (.17 * m, .18 * m, .2 * m), hand, glow=glow_body), *extra_arm]
+           box((ax, ay - .52 * m, .03), (.17 * m, .18 * m, .2 * m), hand, glow=glow_body),
+           box((ax, ay - .44 * m, 0), (.22 * m, .05 * m, .25 * m), shade(sleeve, .8), glow=glow_body),
+           box((ax - .1 * m, ay - .5 * m, .1 * m), (.06 * m, .1 * m, .07 * m), hand, glow=glow_body), *extra_arm]
     return {'body': body, 'parts': legs + [{'name': 'arm', 'pivot': (ax, ay, 0), 'boxes': arm}]}
 
 def reaper():
@@ -516,7 +521,7 @@ def et():
             box((0, 1.17, .285), (.12, .03, .02), '#3a2618'), box((0, .85, .135), (.3, .3, .02), '#7a5a40'),
             box((-.3, .78, 0), (.12, .62, .13), skin), box((-.3, .44, 0), (.16, .08, .16), dark)]
     legs = [{'name': f'leg{i}', 'pivot': (s * .12, .58, 0), 'boxes': [box((s * .12, .3, 0), (.14, .56, .16), skin), box((s * .12, .03, .04), (.18, .06, .24), dark)]} for i, s in enumerate((-1, 1))]
-    arm = [box((.3, .78, 0), (.12, .62, .13), skin), box((.3, .45, 0), (.16, .08, .16), dark)]
+    arm = [box((.3, .78, 0), (.12, .62, .13), skin), box((.3, .45, 0), (.16, .08, .16), dark), box((.23, .46, .08), (.05, .07, .05), dark)]  # mão com polegar
     return {'body': body, 'parts': legs + [{'name': 'arm', 'pivot': (.3, 1.08, 0), 'boxes': arm}]}
 
 def saci():
@@ -527,7 +532,7 @@ def saci():
             box((.08, 1.17, .22), (.04, .04, .18), '#3a2616'), box((.08, 1.2, .32), (.07, .07, .07), '#3a2616'), box((.08, 1.26, .32), (.04, .04, .04), '#ff7a1a', glow=True),
             box((-.27, .86, 0), (.12, .4, .14), skin)]
     legs = [{'name': 'leg0', 'pivot': (0, .62, 0), 'boxes': [box((0, .32, 0), (.14, .6, .16), skin), box((0, .03, .04), (.16, .06, .22), '#3a2616')]}]
-    arm = [box((.27, .82, 0), (.12, .4, .14), skin)]
+    arm = [box((.27, .82, 0), (.12, .4, .14), skin), box((.27, .58, .01), (.14, .1, .15), shade(skin, .85)), box((.19, .6, .08), (.05, .06, .05), shade(skin, .85))]  # mão e polegar
     return {'body': body, 'parts': legs + [{'name': 'arm', 'pivot': (.27, 1.02, 0), 'boxes': arm}]}
 
 def ratao():

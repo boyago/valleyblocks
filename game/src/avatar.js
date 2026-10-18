@@ -3,7 +3,7 @@ import { ITEMS } from './inventory.js';
 import { TOOLS } from './tools.js';
 import { loadHeldModels, onHeldModel, heldModel } from './held-models.js';
 import { domesticGeometry } from './domestic-models.js';
-import { NEW_VISUAL } from './visual.js';
+import { NEW_VISUAL, pixelate } from './visual.js';
 
 import { OUTFITS, DEFAULT_OUTFIT } from './outfits.js';
 import outfitModels from './assets/outfit-models.json' with { type: 'json' };
@@ -43,20 +43,26 @@ export class ExplorerAvatar {
       const leg=new THREE.Group();leg.position.set(side*.135,.77,0);this.body.add(leg);this.legs.push(leg);
       this.box(leg,[.22,.55,.25],[0,-.28,0],'pants');this.box(leg,[.24,.2,.34],[0,-.66,-.04],'boots');
       const arm=new THREE.Group();arm.position.set(side*.34,1.31,0);this.body.add(arm);this.arms.push(arm);
-      this.box(arm,[.19,.33,.23],[0,-.15,0],'sleeve');this.box(arm,[.17,.25,.19],[0,-.43,0],'hand');
+      this.box(arm,[.19,.33,.23],[0,-.15,0],'sleeve');
+      if(NEW_VISUAL){
+        // Mão como nas artes: punho da manga, palma mais larga e polegar separado por dentro.
+        this.box(arm,[.22,.06,.26],[0,-.32,0],'strap');this.box(arm,[.18,.22,.2],[0,-.46,0],'hand');this.box(arm,[.07,.13,.08],[-side*.11,-.42,-.08],'hand');
+      }else this.box(arm,[.17,.25,.19],[0,-.43,0],'hand');
     }
     this.hand=new THREE.Group();this.hand.position.set(.32,-.34,-.65);this.hand.scale.setScalar(.7);this.hand.rotation.z=-.16;this.view.add(this.hand);
-    this.box(this.hand,[.18,.3,.21],[0,-.16,.15],'sleeve');this.box(this.hand,[.15,.2,.18],[0,.02,.03],'hand');
+    this.box(this.hand,[.18,.3,.21],[0,-.16,.15],'sleeve');
+    if(NEW_VISUAL){this.box(this.hand,[.21,.05,.24],[0,-.03,.15],'strap');this.box(this.hand,[.16,.2,.19],[0,.04,.03],'hand');this.box(this.hand,[.07,.12,.08],[-.1,.08,-.04],'hand');}
+    else this.box(this.hand,[.15,.2,.18],[0,.02,.03],'hand');
     this.held=null;this.heldWorld=null;this.item=null;this.swing=0;
     this.domesticGeometries={bucket:domesticGeometry('bucket'),grill:domesticGeometry('grill')};
-    this.domesticMaterial=new THREE.MeshLambertMaterial({vertexColors:true});
+    this.domesticMaterial=pixelate(new THREE.MeshLambertMaterial({vertexColors:true}));
     this.waterGeometry=new THREE.CylinderGeometry(.132,.132,.012,12);
     this.waterMaterial=new THREE.MeshLambertMaterial({color:'#52b8df'});
     this.setOutfit(DEFAULT_OUTFIT);
     // Quando um modelo do Blender termina de carregar, refaz o item na mão.
     loadHeldModels();this.offHeldModel=onHeldModel(()=>{this.item=undefined;});
   }
-  material(color){if(!this.materials.has(color))this.materials.set(color,new THREE.MeshLambertMaterial({color}));return this.materials.get(color);}
+  material(color){if(!this.materials.has(color))this.materials.set(color,pixelate(new THREE.MeshLambertMaterial({color})));return this.materials.get(color);}
   /** role: a palette key (recolored by outfits) or a literal color. */
   box(parent,size,pos,role){
     const palette=OUTFITS[DEFAULT_OUTFIT].palette,color=palette[role]||role;

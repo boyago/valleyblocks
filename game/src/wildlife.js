@@ -4,12 +4,12 @@ import { RESIDENTS } from './trading.js';
 import { buildCreature, hasCreature } from './creatures.js';
 import { petHealth, hurtPet } from './pet-health.js';
 import vendorModels from './assets/vendor-models.json' with { type: 'json' };
-import { NEW_VISUAL } from './visual.js';
+import { NEW_VISUAL, pixelate } from './visual.js';
 
 /** Malhas do vendedor feitas no Blender (assets/blender/create_vendor.py). */
 const vendorGeometry=Object.fromEntries(Object.entries(vendorModels).map(([k,s])=>{const g=new THREE.BufferGeometry();for(const [n,v] of [['position',s.positions],['normal',s.normals],['color',s.colors]])g.setAttribute(n,new THREE.Float32BufferAttribute(v,3));g.computeBoundingSphere();return [k,g];}));
 const VENDOR_SHIRTS=['#e63946','#ffd166','#2a9d8f'];
-const vendorMaterial=new THREE.MeshLambertMaterial({vertexColors:true});
+const vendorMaterial=pixelate(new THREE.MeshLambertMaterial({vertexColors:true}));
 
 export const SPECIES=Object.freeze({
   chicken:{name:'Galinha',health:18,speed:1.8,drop:'raw_chicken',count:1,radius:.3,height:.95},
