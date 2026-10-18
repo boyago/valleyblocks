@@ -703,6 +703,7 @@ class Game {
     const focus=this.started?this.activeVehicle?.position||this.player.position:this.landingFocus();
     this.world.update(focus.x,focus.z,({low:1,medium:3,high:4})[this.settings.quality]);
     this.sky.update(this.time,this.running||!this.started?dt:0,focus,{...this.settings,preview:!this.started});
+    if(this.sky.dome&&this.world.waterSky){const d=this.sky.dome.material.uniforms,w=this.world.waterSky;w.top.value.copy(d.top.value);w.horizon.value.copy(d.horizon.value);w.glow.value.copy(d.glow.value);w.sunDir.value.copy(d.sunDir.value);}
     const underground=this.world.underworld.contains(focus);
     this.updateCaveLight(dt,focus,underground);
     if(underground){this.scene.background.set('#241b2f');if(this.scene.fog)this.scene.fog.color.set('#241b2f');this.sky.ambient.intensity=.95;this.sky.sun.intensity=.1;this.sky.sunDisc.visible=false;}

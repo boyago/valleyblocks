@@ -48,20 +48,42 @@ function noise(x, z, seed) {
 
 /** Líquidos vivos: a superfície ondula, o brilho corre e a lava pulsa. Só muda o desenho;
  *  a física da água (níveis e espalhamento) continua no CPU. */
-function animateFluid(material, clock, lava) {
+function animateFluid(material, clock, lava, sky) {
   material.onBeforeCompile = shader => {
     shader.uniforms.uTime = clock;
-    const head = 'uniform float uTime;\nvarying vec2 vFluidXZ;\n';
+    const head = 'uniform float uTime;\nvarying vec2 vFluidXZ;\nvarying vec3 vFluidPos;\nvarying float vFluidTop;\n';
     shader.vertexShader = head + shader.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
       vec4 fluidWorld = modelMatrix * vec4(transformed, 1.0);
-      vFluidXZ = fluidWorld.xz;
+      vFluidXZ = fluidWorld.xz; vFluidPos = fluidWorld.xyz; vFluidTop = step(0.5, normal.y);
       if (normal.y > 0.5) transformed.y += ${lava ? 'sin(uTime * 0.9 + fluidWorld.x * 0.7 + fluidWorld.z * 0.5) * 0.035 - 0.04' : 'sin(uTime * 1.7 + fluidWorld.x * 0.9 + fluidWorld.z * 0.7) * 0.045 + sin(uTime * 2.3 - fluidWorld.z * 1.1) * 0.03 - 0.07'};`);
     shader.fragmentShader = head + shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
       ${lava
         ? 'diffuseColor.rgb *= 0.82 + 0.28 * sin(uTime * 1.3 + vFluidXZ.x * 1.4 + sin(vFluidXZ.y * 1.1 + uTime * 0.6) * 2.0);'
         : 'float ripple = sin(uTime * 2.0 + vFluidXZ.x * 2.1 + sin(vFluidXZ.y * 1.7 + uTime) * 1.5) * sin(uTime * 1.3 - vFluidXZ.y * 1.6); diffuseColor.rgb *= 0.92 + 0.14 * ripple; diffuseColor.a = min(1.0, diffuseColor.a + 0.05 * ripple);'}`);
+    if (!sky) return;
+    // Visual novo: a superfície reflete o céu (mais de raspão, menos de cima) e o sol
+    // faz um brilho que corre pelas ondas. Sem render extra: o céu é o mesmo degradê do domo.
+    Object.assign(shader.uniforms, { uSkyTop: sky.top, uSkyHorizon: sky.horizon, uSkyGlow: sky.glow, uSunDir: sky.sunDir });
+    // Os tracinhos do atlas somem quase todos: a água fica lisa e o que dá vida é o reflexo.
+    shader.fragmentShader = shader.fragmentShader.replace('float ripple = sin(', 'diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.1, 0.43, 0.6), 0.78 * vFluidTop); float ripple = sin(');
+    shader.fragmentShader = 'uniform vec3 uSkyTop; uniform vec3 uSkyHorizon; uniform vec3 uSkyGlow; uniform vec3 uSunDir;\n' + shader.fragmentShader.replace('#include <opaque_fragment>', `
+      if (vFluidTop > 0.5) {
+        float wx = cos(uTime * 1.7 + vFluidPos.x * 0.9 + vFluidPos.z * 0.7) * 0.9 * 0.045 + cos(uTime * 2.6 + vFluidPos.x * 2.3 - vFluidPos.z * 1.4) * 2.3 * 0.012;
+        float wz = cos(uTime * 1.7 + vFluidPos.x * 0.9 + vFluidPos.z * 0.7) * 0.7 * 0.045 - cos(uTime * 2.3 - vFluidPos.z * 1.1) * 1.1 * 0.03 - cos(uTime * 2.6 + vFluidPos.x * 2.3 - vFluidPos.z * 1.4) * 1.4 * 0.012;
+        vec3 wn = normalize(vec3(-wx * 2.2, 1.0, -wz * 2.2));
+        vec3 view = normalize(cameraPosition - vFluidPos);
+        float facing = max(dot(wn, view), 0.0);
+        float fresnel = 0.08 + 0.72 * pow(1.0 - facing, 3.0);
+        vec3 refl = reflect(-view, wn);
+        vec3 skyCol = mix(uSkyHorizon, uSkyTop, pow(max(refl.y, 0.0), 0.55));
+        float s = max(dot(refl, normalize(uSunDir)), 0.0);
+        vec3 glint = uSkyGlow * (pow(s, 220.0) * 1.6 + pow(s, 18.0) * 0.18);
+        outgoingLight = mix(outgoingLight, skyCol, fresnel) + glint;
+        diffuseColor.a = mix(diffuseColor.a, 0.97, fresnel);
+      }
+      #include <opaque_fragment>`);
   };
-  material.customProgramCacheKey = () => lava ? 'fluid-lava' : 'fluid-water';
+  material.customProgramCacheKey = () => lava ? 'fluid-lava' : sky ? 'fluid-water-sky' : 'fluid-water';
 }
 
 /** A deliberately tiny, locally generated pixel atlas: no remote textures or assets. */
@@ -225,7 +247,8 @@ export class VoxelWorld {
     this.lavaMaterial = new THREE.MeshBasicMaterial({ map: this.atlas, vertexColors: true });
     this.fluidClock = { value: 0 };
     this.waterMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide });
-    animateFluid(this.waterMaterial, this.fluidClock, false); animateFluid(this.lavaMaterial, this.fluidClock, true);
+    this.waterSky = NEW_VISUAL ? { top: { value: new THREE.Color(0x4f9be0) }, horizon: { value: new THREE.Color(0xd9eef2) }, glow: { value: new THREE.Color(0xffd59a) }, sunDir: { value: new THREE.Vector3(0, 1, 0) } } : null;
+    animateFluid(this.waterMaterial, this.fluidClock, false, this.waterSky); animateFluid(this.lavaMaterial, this.fluidClock, true);
     for (const edit of Array.isArray(edits) ? edits : []) {
       const [x, y, z, id, facing] = Array.isArray(edit) ? edit : [edit.x, edit.y, edit.z, edit.id, edit.facing];
       if ([x, y, z, id].every(Number.isInteger) && y >= 1 && y < WORLD_HEIGHT && BLOCKS[id]) this._saveEdit(x, y, z, id, facing);

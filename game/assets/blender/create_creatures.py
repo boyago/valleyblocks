@@ -462,8 +462,9 @@ def humanoid(m, torso, skin, legs_color, boots, sleeve, hand, eye, eye_glow=True
 def reaper():
     hood, cloak = '#8f1f28', '#b72f38'
     return humanoid(1, cloak, '#c48e6b', '#354951', '#382e2c', cloak, '#c48e6b', '#ffcf5a', extra_body=[
-        box((0, 1.68, -.03), (.53, .5, .47), hood), box((0, 1.56, .2), (.36, .3, .05), '#2a1416'),
-        box((0, 1.92, -.12), (.3, .12, .3), hood), box((0, .78, 0), (.64, .08, .36), '#5a1a20'),
+        # Capuz aberto na frente (o rosto e os olhos ficam de fora), barba só no queixo e bigode, boné com aba.
+        box((0, 1.68, -.09), (.53, .5, .35), hood), box((0, 1.49, .215), (.34, .17, .05), '#2a1416'), box((0, 1.495, .245), (.11, .035, .01), '#b05a5a'),  # barba com a boca no meio
+        box((0, 1.92, -.12), (.3, .12, .3), hood), box((0, 1.81, .25), (.44, .05, .2), hood), box((0, .78, 0), (.64, .08, .36), '#5a1a20'),
         box((0, .66, -.17), (.6, .34, .06), hood), box((0, .73, .175), (.1, .1, .02), '#c9a24a')])
 
 def cangaceiro():
@@ -513,12 +514,12 @@ def golem():
         extra_arm=[box((.43 * m, .62 * m, .03), (.24 * m, .2 * m, .26 * m), rock), box((.43 * m, .9 * m, .14 * m), (.02, .2, .03), magma, glow=True)])
 
 def et():
-    skin, dark = '#6b4a33', '#5a3d2a'
+    skin, dark = '#3f6b2a', '#2e5120'  # verde escuro, como o ET de Varginha
     body = [box((0, .85, 0), (.42, .55, .26), skin), box((0, 1.33, .02), (.62, .5, .52), skin),
             *[box((x, 1.62, -.02), (.14, .16, .3), dark) for x in (-.2, 0, .2)],
             *[box((s * .15, 1.33, .28), (.17, .13, .04), '#d91f1f', glow=True) for s in (-1, 1)],
             *[box((s * .15, 1.35, .3), (.05, .04, .01), '#ffb0a0', glow=True) for s in (-1, 1)],
-            box((0, 1.17, .285), (.12, .03, .02), '#3a2618'), box((0, .85, .135), (.3, .3, .02), '#7a5a40'),
+            box((0, 1.17, .285), (.12, .03, .02), '#3a2618'), box((0, .85, .135), (.3, .3, .02), '#4d7a36'),
             box((-.3, .78, 0), (.12, .62, .13), skin), box((-.3, .44, 0), (.16, .08, .16), dark)]
     legs = [{'name': f'leg{i}', 'pivot': (s * .12, .58, 0), 'boxes': [box((s * .12, .3, 0), (.14, .56, .16), skin), box((s * .12, .03, .04), (.18, .06, .24), dark)]} for i, s in enumerate((-1, 1))]
     arm = [box((.3, .78, 0), (.12, .62, .13), skin), box((.3, .45, 0), (.16, .08, .16), dark), box((.23, .46, .08), (.05, .07, .05), dark)]  # mão com polegar
