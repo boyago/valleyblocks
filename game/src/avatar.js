@@ -3,7 +3,7 @@ import { ITEMS } from './inventory.js';
 import { TOOLS } from './tools.js';
 import { loadHeldModels, onHeldModel, heldModel } from './held-models.js';
 import { domesticGeometry } from './domestic-models.js';
-import { NEW_VISUAL, pixelate } from './visual.js';
+import { NEW_VISUAL } from './visual.js';
 
 import { OUTFITS, DEFAULT_OUTFIT } from './outfits.js';
 import outfitModels from './assets/outfit-models.json' with { type: 'json' };
@@ -55,14 +55,14 @@ export class ExplorerAvatar {
     else this.box(this.hand,[.15,.2,.18],[0,.02,.03],'hand');
     this.held=null;this.heldWorld=null;this.item=null;this.swing=0;
     this.domesticGeometries={bucket:domesticGeometry('bucket'),grill:domesticGeometry('grill')};
-    this.domesticMaterial=pixelate(new THREE.MeshLambertMaterial({vertexColors:true}));
+    this.domesticMaterial=new THREE.MeshLambertMaterial({vertexColors:true});
     this.waterGeometry=new THREE.CylinderGeometry(.132,.132,.012,12);
     this.waterMaterial=new THREE.MeshLambertMaterial({color:'#52b8df'});
     this.setOutfit(DEFAULT_OUTFIT);
     // Quando um modelo do Blender termina de carregar, refaz o item na mão.
     loadHeldModels();this.offHeldModel=onHeldModel(()=>{this.item=undefined;});
   }
-  material(color){if(!this.materials.has(color))this.materials.set(color,pixelate(new THREE.MeshLambertMaterial({color})));return this.materials.get(color);}
+  material(color){if(!this.materials.has(color))this.materials.set(color,new THREE.MeshLambertMaterial({color}));return this.materials.get(color);}
   /** role: a palette key (recolored by outfits) or a literal color. */
   box(parent,size,pos,role){
     const palette=OUTFITS[DEFAULT_OUTFIT].palette,color=palette[role]||role;

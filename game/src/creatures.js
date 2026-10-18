@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import creatureModels from './assets/creature-models.json' with { type: 'json' };
-import { NEW_VISUAL, pixelate } from './visual.js';
+import { NEW_VISUAL } from './visual.js';
 
 // Bichos e pets modelados no Blender (assets/blender/create_creatures.py). Cada modelo tem
 // um corpo fixo e peças com pivô (leg0..legN, head, tail) que o jogo anima. As geometrias
 // são compartilhadas entre todos os bichos do mesmo tipo.
-const material = pixelate(new THREE.MeshLambertMaterial({ vertexColors: true }));
+const material = new THREE.MeshLambertMaterial({ vertexColors: true });
 // Peças que brilham (olhos, magma, fantasmas): sem luz nem sombra, continuam vivas à noite.
 const glowMaterial = new THREE.MeshBasicMaterial({ vertexColors: true });
 const geometries = new Map();
