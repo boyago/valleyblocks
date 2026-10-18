@@ -169,3 +169,13 @@ test('starting a world in a land builds a saved house next to the portal', async
   assert.equal(w.getBlock(cx + 2, 11, cz + 11), BLOCK.CHEST); assert.equal(w.getBlock(cx, 15, cz + 9), BLOCK.BRICK);
   assert.equal(buildStarterHouse(w, 'nada'), null);
 });
+
+test('a porta da casa inicial fica no nível do chão em todas as terras (pátio de pedra na frente, morro do lote cortado)', async () => {
+  const { buildStarterHouse } = await import('../src/realms.js');
+  const { VoxelWorld } = await import('../src/world.js');
+  for (const seed of ['vale-2026', 'S1234567']) for (const key of Object.keys(REALMS)) {
+    const w = new VoxelWorld(null, seed), house = buildStarterHouse(w, key), [cx, cz] = REALMS[key].center, floor = house.door[1] - 1;
+    for (let k = 1; k <= 3; k++) assert.equal(w.heightAt(cx + .5, cz + 7 - k + .5, 40), floor + 1, `${key}/${seed}: chão a ${k} da porta`);
+    for (let y = floor + 6; y < floor + 30; y++) assert.equal(w.getBlock(cx, y, cz + 9), BLOCK.AIR, `${key}/${seed}: nada sobre o telhado em y=${y}`);
+  }
+});

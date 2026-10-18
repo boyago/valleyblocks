@@ -599,12 +599,21 @@ function decorateNyc(put, world, baseX, baseZ, size) {
 export function buildStarterHouse(world, key) {
   const r = REALMS[key]; if (!r) return null;
   const [cx, cz] = r.center, x0 = cx - 3, z0 = cz + 7, x1 = cx + 3, z1 = cz + 12;
-  let floor = 0; for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) floor = Math.max(floor, world.heightAt(x + .5, z + .5, 40) ?? 10);
-  floor = Math.floor(floor);
+  // O piso fica na altura do chão em frente à porta, para a porta ser sempre acessível;
+  // o terreno do lote é nivelado (cortado por cima, fundação por baixo) e um pátio de
+  // pedra na frente cobre buracos e água.
+  const ground = (x, z) => world.heightAt(x + .5, z + .5, 40);
+  const floor = Math.floor(ground(cx, z0 - 1) ?? ground(cx, z0 - 2) ?? 10);
   const set = (x, y, z, id) => world.setBlock(x, y, z, id);
+  const level = (x, z, top, clearTo) => {
+    for (let y = floor - 1; y >= 4 && (world.getBlock(x, y, z) === BLOCK.AIR || world.getBlock(x, y, z) === BLOCK.WATER || world.getBlock(x, y, z) === BLOCK.LAVA); y--) set(x, y, z, BLOCK.STONE); // fundação
+    set(x, floor, z, top);
+    for (let y = floor + 1; y <= floor + clearTo; y++) if (world.getBlock(x, y, z) !== BLOCK.AIR) set(x, y, z, BLOCK.AIR);
+  };
+  for (let x = cx - 2; x <= cx + 2; x++) for (let z = z0 - 3; z < z0; z++) { const g = ground(x, z); if (g !== floor + 1 || !BLOCKS[world.getBlock(x, floor, z)].solid) level(x, z, BLOCK.STONE, 4); else for (let y = floor + 1; y <= floor + 4; y++) if (world.getBlock(x, y, z) !== BLOCK.AIR) set(x, y, z, BLOCK.AIR); } // pátio: só onde o chão não está no nível
+  let crest = floor + 8; for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) crest = Math.max(crest, Math.ceil(ground(x, z) ?? 0)); // morro por cima do lote some inteiro
   for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) {
-    for (let y = floor - 1; y >= 4 && (world.getBlock(x, y, z) === BLOCK.AIR || world.getBlock(x, y, z) === BLOCK.WATER); y--) set(x, y, z, BLOCK.STONE); // fundação
-    set(x, floor, z, BLOCK.PLANKS);
+    level(x, z, BLOCK.PLANKS, crest - floor);
     for (let y = floor + 1; y <= floor + 4; y++) {
       const wall = x === x0 || x === x1 || z === z0 || z === z1;
       const window = wall && y === floor + 2 && (x === cx - 2 || x === cx + 2 || z === cz + 10);
