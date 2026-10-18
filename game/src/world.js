@@ -20,6 +20,16 @@ const index = (x, y, z) => x + z * SIZE + y * SIZE * SIZE;
 const fract = n => n - Math.floor(n);
 const smooth = t => t * t * (3 - 2 * t);
 const lerp = (a, b, t) => a + (b - a) * t;
+// Enfeites de chão por bioma (tufos, flores, capim seco, taboa): só desenho, sem bloco.
+const TUFT = 36, DRY_TUFT = 72, REED = 73, FLOWER_TILES = [37, 38, 39, 71], DECOR_TILES = [TUFT, DRY_TUFT, REED, ...FLOWER_TILES];
+/** O que nasce sobre a grama em cada bioma: densidade (0 a 1) e sorteio dos enfeites. */
+const GROUND_DECOR = {
+  florido: { density: .85, pick: r => r < .68 ? FLOWER_TILES[Math.floor(r / .17)] : TUFT },
+  pradaria: { density: .14, pick: r => r < .2 ? FLOWER_TILES[Math.floor(r / .05)] : TUFT },
+  pantanal: { density: .4, pick: r => r < .55 ? REED : r < .62 ? 37 : TUFT },
+  cerrado: { density: .35, pick: r => r < .9 ? DRY_TUFT : 39 },
+  mata: { density: .3, pick: () => TUFT },
+};
 const tileSize = 16;
 const atlasColumns = 8;
 const atlasRows = 10;
@@ -93,8 +103,11 @@ export function createAtlas() {
   const colors = BLOCKS.map(block => block.color);
   for (const b of BLOCKS) if (b.id >= 32) colors[tileOf(b.id)] = b.color;
   colors[32]='#7db551';colors[33]='#a78459';colors[34]='#45515b';colors[35]='#78694f';
+  // Enfeites do chão (desenho em X sobre a grama, sem bloco): tufo (36), flores branca (37),
+  // vermelha (38), amarela (39) e lilás (71), capim seco do cerrado (72) e taboa do pantanal (73).
+  for (const t of DECOR_TILES) colors[t] = '#ffffff';
   // Lisos: transparentes, fluidos e luz não recebem a moldura em relevo.
-  const flatTiles = new Set([BLOCK.AIR, BLOCK.GLASS, BLOCK.WATER, BLOCK.LAVA, BLOCK.TORCH, BLOCK.PORTAL, BLOCK.LEAVES, ...REALM_PORTALS.map(tileOf), tileOf(BLOCK.SAKURA)]);
+  const flatTiles = new Set([BLOCK.AIR, BLOCK.GLASS, BLOCK.WATER, BLOCK.LAVA, BLOCK.TORCH, BLOCK.PORTAL, BLOCK.LEAVES, ...DECOR_TILES, ...REALM_PORTALS.map(tileOf), tileOf(BLOCK.SAKURA)]);
   // Chão natural: relevo bem leve para o terreno não parecer piso de azulejo.
   const softTiles = new Set([32, BLOCK.GRASS, BLOCK.DIRT, BLOCK.SAND, BLOCK.SNOW, BLOCK.CLAY, tileOf(BLOCK.DRY_EARTH), BLOCK.ASPHALT, 34]);
   const parse = hex => [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16));
@@ -122,6 +135,21 @@ export function createAtlas() {
         const ox = Math.floor(hash(Math.floor(y / 4), 3, 977) * 4), cx = (x + ox) % 4, cy = y % 4, leaf = hash(Math.floor((x + ox) / 4), Math.floor(y / 4), 991);
         const d = Math.abs(cx - 1.5) + Math.abs(cy - 1.5);
         variance = d > 2.2 ? -26 : leaf > .7 && cx === 1 ? 20 : leaf < .25 ? -12 : 4 + (grain - .5) * 10;
+      }
+      if (tile === TUFT || tile === DRY_TUFT) { // tufo: lâminas de alturas diferentes
+        const blades = [[1, 7], [4, 11], [6, 5], [8, 13], [10, 8], [13, 10], [15, 6]];
+        const blade = blades.find(([bx, h]) => (x === bx || (x === bx + 1 && y < h - 3)) && y < h);
+        alpha = blade ? 255 : 0; variance = 0;
+        rgb = parse(tile === DRY_TUFT ? (blade && y > blade[1] - 4 ? '#e2c86a' : x % 2 ? '#c9a94e' : '#a98d3f') : blade && y > blade[1] - 4 ? '#b9e06a' : x % 2 ? '#86bf52' : '#6ea843');
+      }
+      if (tile === REED) { // taboa: hastes altas com a espiga marrom
+        const stalk = (x === 4 || x === 9 || x === 13) && y < 15, spike = ((x === 4 && y > 9) || (x === 9 && y > 11) || (x === 13 && y > 8)) && y < 15;
+        alpha = stalk ? 255 : 0; variance = 0; rgb = parse(spike ? '#6b4a2b' : y % 5 === 0 ? '#5f9a3e' : '#7fb54c');
+      }
+      if (FLOWER_TILES.includes(tile)) { // florzinha: caule, folhinha e cabeça com miolo
+        const stem = x === 7 && y < 9, leafy = y === 4 && x > 7 && x < 10, head = Math.abs(x - 7) + Math.abs(y - 10) <= 2;
+        alpha = stem || leafy || head ? 255 : 0; variance = 0;
+        rgb = parse(stem || leafy ? '#5c9a3a' : (x === 7 && y === 10) ? (tile === 39 ? '#b8651b' : '#ffd23f') : { 37: '#ffffff', 38: '#e8484f', 39: '#ffd23f', 71: '#b98ee8' }[tile]);
       }
       if (tile === BLOCK.GLASS) {
         const border = x < 1 || x > 14 || y < 1 || y > 14;
@@ -218,7 +246,7 @@ export class VoxelWorld {
     this.seed = String(seed);
     this.seedHash = seedNumber(seed);
     this.televisions=new Set((Array.isArray(options.televisions)?options.televisions:[]).filter(k=>typeof k==='string'&&/^-?\d+,\d+,-?\d+$/.test(k)));
-    this.generatorVersion=[2,3].includes(options.generatorVersion)?options.generatorVersion:1;
+    this.generatorVersion=[2,3,4].includes(options.generatorVersion)?options.generatorVersion:1;
     this.chunks = new Map();
     this.edits = new Map();
     this.editsByChunk = new Map();
@@ -242,6 +270,7 @@ export class VoxelWorld {
     this.realmPortalMaterials=Object.values(REALMS).map(r=>new THREE.MeshBasicMaterial({color:r.color,transparent:true,opacity:.7,side:THREE.DoubleSide,depthWrite:false}));
     this.domesticMaterial = new THREE.MeshLambertMaterial({ vertexColors: true });
     this.opaqueMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true });
+    this.decorMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, alphaTest: .5 });
     this.transparentMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide });
     this.torchMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, emissive: '#f8b34c', emissiveIntensity: .65 });
     this.lavaMaterial = new THREE.MeshBasicMaterial({ map: this.atlas, vertexColors: true });
@@ -292,7 +321,17 @@ export class VoxelWorld {
       const heat=noise(x/160+31,z/160-53,this.seedHash+402);
       const moisture=noise(x/120-61,z/120+29,this.seedHash+913);
       biome=heat<.34?'nevasca':heat>.64&&moisture<.52?'deserto':moisture>.66?'floresta':moisture<.3?'meseta':n>.66?'serra':'pradaria';
-      const target=biome==='nevasca'?14+n*19:biome==='deserto'?8+n*9:biome==='meseta'?10+Math.floor(n*5)*3:biome==='pradaria'?8+n*5:8+n*15;
+      let target=biome==='nevasca'?14+n*19:biome==='deserto'?8+n*9:biome==='meseta'?10+Math.floor(n*5)*3:biome==='pradaria'?8+n*5:8+n*15;
+      if(this.generatorVersion>=4){
+        // Mais biomas (mundos novos): Mata Fechada e Pantanal nas partes úmidas, Campos Floridos
+        // e Cerrado nas pradarias. A "variedade" é um terceiro ruído, para não ficarem em faixas.
+        const variety=noise(x/90+17,z/90+71,this.seedHash+577);
+        if(biome==='floresta'&&heat>.52&&moisture>.74)biome='mata';
+        else if(biome==='floresta'&&n<.45&&heat>.42)biome='pantanal';
+        else if(biome==='pradaria'&&variety>.58)biome='florido';
+        else if((biome==='pradaria'||biome==='serra')&&heat>.56&&moisture<.6&&variety<.42)biome='cerrado';
+        if(biome==='mata')target=8+n*11;else if(biome==='pantanal')target=8;else if(biome==='florido')target=8+n*4;else if(biome==='cerrado')target=9+n*6;
+      }
       height=Math.floor(lerp(height,target,smooth(Math.min(1,(distance-48)/32))));
     }
     // New worlds vary the surrounding lake as well as terrain, biomes and trees.
@@ -304,6 +343,9 @@ export class VoxelWorld {
     let water = false;
     if (lake < 1.22) { height = lake < .65 ? 5 : lake < 1 ? 6 : 7; water = true; biome = 'lago'; }
     else if (lake < 1.75) { height = 8; biome = 'praia'; }
+    // Pantanal: planície alagada, com lagoas rasas e barro nas beiradas.
+    let marsh = 0;
+    if (biome === 'pantanal') { marsh = noise(x / 9 + 5, z / 9 - 3, this.seedHash + 733); if (marsh > .58) { height = 7; water = true; } }
     // The road continues through every generated biome. A broad graded verge
     // blends its level shoulders back into the hills instead of cutting a canyon.
     // Beyond 22 blocks from the road center, lakes and natural terrain are intact.
@@ -312,7 +354,8 @@ export class VoxelWorld {
       const terrainWeight = smooth(Math.max(0, Math.min(1, (roadDistance - 4) / 18)));
       height = Math.round(lerp(8, height, terrainWeight));
     }
-    const surface = ['areal', 'praia', 'lago','deserto'].includes(biome) ? BLOCK.SAND : biome==='nevasca'?BLOCK.SNOW:biome==='meseta'?BLOCK.CLAY:biome === 'serra' && height > 20 ? BLOCK.STONE : BLOCK.GRASS;
+    const surface = ['areal', 'praia', 'lago','deserto'].includes(biome) ? BLOCK.SAND : biome==='nevasca'?BLOCK.SNOW:biome==='meseta'?BLOCK.CLAY:biome === 'serra' && height > 20 ? BLOCK.STONE
+      : biome === 'pantanal' && (water || marsh > .5) ? BLOCK.CLAY : biome === 'cerrado' && detail > .74 ? BLOCK.DRY_EARTH : BLOCK.GRASS;
     return { height, surface, water, biome };
   }
 
@@ -358,12 +401,16 @@ export class VoxelWorld {
         const realm = REALMS[info.biome];
         if (realm && (info.surface !== BLOCK.GRASS || Math.max(Math.abs(x - realm.center[0]), Math.abs(z - realm.center[1])) < 15)) continue; // nas terras: só na grama e fora da clareira da chegada
         if (Math.max(Math.abs(x), Math.abs(z)) < 19 || Math.abs(x - 3.5) < 9 || info.water || ![BLOCK.GRASS,BLOCK.SNOW].includes(info.surface)) continue;
-        const density=info.biome==='pradaria'?.08:info.biome==='floresta'?.9:info.biome==='nevasca'?.32:info.biome==='bosque'?.67:.35;
+        const density={pradaria:.08,floresta:.9,nevasca:.32,bosque:.67,mata:1,pantanal:.12,florido:.04,cerrado:.16}[info.biome]??.35;
         if (hash(gx, gz, this.seedHash + 197) > density) continue;
-        const trunk = 4 + Math.floor(hash(gx, gz, this.seedHash + 29) * 2), top = info.height + trunk;
+        // Mata Fechada: árvores altas de copa larga; Cerrado: arvoretas baixas e retorcidas de copa achatada.
+        const big = info.biome === 'mata', small = info.biome === 'cerrado', reach = big ? 3 : small ? 1 : 2;
+        const trunk = small ? 2 + Math.floor(hash(gx, gz, this.seedHash + 29) * 2) : (big ? 6 : 4) + Math.floor(hash(gx, gz, this.seedHash + 29) * (big ? 3 : 2)), top = info.height + trunk;
         for (let y = info.height + 1; y <= top; y++) put(x, y, z, BLOCK.WOOD);
-        for (let dy = -1; dy <= 2; dy++) for (let dz = -2; dz <= 2; dz++) for (let dx = -2; dx <= 2; dx++) {
-          if (Math.abs(dx) + Math.abs(dz) + Math.max(0, dy) > 4 || (dx === 0 && dz === 0 && dy <= 0)) continue;
+        if (small) put(x + (hash(gx, gz, this.seedHash + 31) > .5 ? 1 : -1), top, z, BLOCK.WOOD); // galho torto
+        for (let dy = -1; dy <= (small ? 1 : 2); dy++) for (let dz = -reach; dz <= reach; dz++) for (let dx = -reach; dx <= reach; dx++) {
+          if (Math.abs(dx) + Math.abs(dz) + Math.max(0, dy) > reach + 2 || (dx === 0 && dz === 0 && dy <= 0)) continue;
+          if (small && dy < 0) continue;
           put(x + dx, top + dy, z + dz, BLOCK.LEAVES);
           if(info.biome==='nevasca'&&dy===2)put(x+dx,top+dy+1,z+dz,BLOCK.SNOW);
         }
@@ -784,8 +831,8 @@ export class VoxelWorld {
 
   _buildMesh(chunk) {
     const { cx, cz, data } = chunk;
-    const WATER_GROUP = 6 + REALM_PORTALS.length;
-    const groups = Array.from({ length: 7 + REALM_PORTALS.length }, (_, i) => i).map(() => ({ positions: [], normals: [], uvs: [], colors: [], indices: [] }));
+    const WATER_GROUP = 6 + REALM_PORTALS.length, DECOR_GROUP = WATER_GROUP + 1;
+    const groups = Array.from({ length: 8 + REALM_PORTALS.length }, (_, i) => i).map(() => ({ positions: [], normals: [], uvs: [], colors: [], indices: [] }));
     const neighborChunks = new Map();
     const peek = (x, y, z) => {
       if (y < 0) return BLOCK.STONE;
@@ -850,6 +897,17 @@ export class VoxelWorld {
         for (const i of [3, 5]) slopeFace(faces[i].corners, faces[i].normal);
         continue;
       }
+      if (id === BLOCK.GRASS && peek(x, y + 1, z) === BLOCK.AIR) {
+        // Tufos, flores, capim e taboa em X sobre a grama, conforme o bioma (só desenho, sem bloco).
+        const wx = cx * SIZE + x, wz = cz * SIZE + z, decor = GROUND_DECOR[this.biomeAt(wx, wz)];
+        const r = hash(wx, wz, 101);
+        if (decor && r < decor.density) {
+          const tile = decor.pick(r / decor.density), h = tile === REED ? 1.05 + hash(wx, wz, 103) * .3 : tile === TUFT || tile === DRY_TUFT ? .5 + hash(wx, wz, 103) * .35 : .75;
+          const ox = .5 + (hash(wx, wz, 105) - .5) * .5, oz = .5 + (hash(wx, wz, 107) - .5) * .5, tint = .9 + hash(wx, wz, 109) * .15;
+          // Cada lâmina é desenhada dos dois lados com a normal para cima: iluminada como o chão, sem lado escuro.
+          for (const [sx, sz] of [[.42, .42], [.42, -.42], [-.42, -.42], [-.42, .42]]) addFace(groups[DECOR_GROUP], x, y + 1, z, [[ox - sx, 0, oz - sz], [ox + sx, 0, oz + sz], [ox + sx, h, oz + sz], [ox - sx, h, oz - sz]], [0, 1, 0], tile, tint);
+        }
+      }
       for (let side = 0; side < faces.length; side++) {
         const face = faces[side], [nx, ny, nz] = face.normal;
         const other = peek(x + nx, y + ny, z + nz);
@@ -883,10 +941,10 @@ export class VoxelWorld {
       geometry.setIndex(group.indices);
       if(i===1||i===WATER_GROUP)geometry.computeVertexNormals();
       geometry.computeBoundingSphere();
-      const mesh = new THREE.Mesh(geometry, [this.opaqueMaterial, this.transparentMaterial, this.torchMaterial, this.lavaMaterial, this.domesticMaterial, this.portalMaterial, ...this.realmPortalMaterials, this.waterMaterial][i]);
+      const mesh = new THREE.Mesh(geometry, [this.opaqueMaterial, this.transparentMaterial, this.torchMaterial, this.lavaMaterial, this.domesticMaterial, this.portalMaterial, ...this.realmPortalMaterials, this.waterMaterial, this.decorMaterial][i]);
       mesh.position.set(cx * SIZE, 0, cz * SIZE);
       mesh.castShadow = i === 0 || i === 4;
-      mesh.receiveShadow = true;
+      mesh.receiveShadow = i !== DECOR_GROUP;
       mesh.name = `chunk:${chunk.key}:${i}`;
       mesh.renderOrder = i === 1 ? 1 : 0;
       this.scene?.add(mesh);
@@ -937,6 +995,6 @@ export class VoxelWorld {
     for (const chunk of this.chunks.values()) this._disposeMeshes(chunk);
     this.chunks.clear(); this.dirty.clear(); this.pending = [];
     this.fluidQueue = []; this.fluidQueued.clear(); this.fluidDeferred.clear(); this.fluidLevels.clear(); this.drops = [];
-    this.atlas.dispose(); this.opaqueMaterial.dispose(); this.transparentMaterial.dispose(); this.torchMaterial.dispose(); this.lavaMaterial.dispose(); this.domesticMaterial.dispose();for(const m of this.realmPortalMaterials)m.dispose();this.waterMaterial.dispose();this.portalMaterial.dispose();
+    this.atlas.dispose(); this.opaqueMaterial.dispose(); this.transparentMaterial.dispose(); this.torchMaterial.dispose(); this.lavaMaterial.dispose(); this.domesticMaterial.dispose();for(const m of this.realmPortalMaterials)m.dispose();this.waterMaterial.dispose();this.portalMaterial.dispose();this.decorMaterial.dispose();
   }
 }

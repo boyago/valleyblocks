@@ -116,7 +116,7 @@ class Game {
   createWorld(save) {
     this.realmFx?.group.removeFromParent();this.realmFx=null;this.fishing?.dispose();this.boats?.dispose();this.landmarks?.dispose();this.skeletons?.dispose();this.trailers?.dispose();this.activeBoat=null;this.landmarks=new Landmarks(this.scene);this.skeletons=new Skeletons(this.scene,()=>this.world);this.slingshot?.dispose();this.pests?.dispose();this.enemies?.dispose();this.wildlife?.dispose();this.world?.dispose();this.entities?.dispose();this.torchLights.forEach(l=>this.scene.remove(l));this.torchLights=[];
     this.seed=save?.seed||newWorldSeed(this.newSeed);this.mode=save?.mode||this.newMode;
-    this.world=new VoxelWorld(this.scene,this.seed,save?.edits||[],save?.fluids||null,{generatorVersion:save?(save.generatorVersion||1):3,dynamics:save?.dynamics,geology:save?.geology||{version:1},underworld:save?.underworld||{version:1},televisions:save?.televisions});
+    this.world=new VoxelWorld(this.scene,this.seed,save?.edits||[],save?.fluids||null,{generatorVersion:save?(save.generatorVersion||1):4,dynamics:save?.dynamics,geology:save?.geology||{version:1},underworld:save?.underworld||{version:1},televisions:save?.televisions});
     this.world.ensureAround(0,0,1);
     if(save&&!save.starterGrillVersion&&!this.world.edits.has('-8,9,-5')&&this.world.getBlock(-8,9,-5)===BLOCK.AIR)this.world.setBlock(-8,9,-5,BLOCK.FORGE);
     if(save&&!save.homeFurnitureVersion)for(const [x,y,z,id] of [[-11,9,0,BLOCK.SOFA],[-10,9,0,BLOCK.SOFA],[-10,9,-4,BLOCK.TV]]){if(!this.world.edits.has(x+','+y+','+z)&&this.world.getBlock(x,y,z)===BLOCK.AIR)this.world.setBlock(x,y,z,id);}

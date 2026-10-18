@@ -249,7 +249,7 @@ export class Wildlife {
       if(this.animals.filter(a=>a.position.distanceToSquared(player)<64*64).length<12)for(let tries=0;tries<3;tries++){
         const angle=this.random()*Math.PI*2,r=18+this.random()*18,x=player.x+Math.cos(angle)*r,z=player.z+Math.sin(angle)*r;
         const p=this.spawnPoint(x,z,player.y+8);if(!p)continue;
-        const b=this.world.biomeAt(x,z),types=REALMS[b]?(REALMS[b].animalsAt?.(x,z)??REALMS[b].animals):['bosque','floresta'].includes(b)?['boar','rabbit']:['chicken','rabbit','boar'];
+        const b=this.world.biomeAt(x,z),types=REALMS[b]?(REALMS[b].animalsAt?.(x,z)??REALMS[b].animals):['bosque','floresta','mata'].includes(b)?['boar','rabbit']:b==='pantanal'?['capivara','capivara','chicken']:b==='florido'?['rabbit','rabbit','chicken']:['chicken','rabbit','boar'];
         this.spawn(types[Math.floor(this.random()*types.length)],p);break;
       }
     }
