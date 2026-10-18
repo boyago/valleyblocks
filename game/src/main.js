@@ -342,6 +342,7 @@ class Game {
           if(data.key==='quality')this.settings.shadows=data.value!=='low';
           this.audio.setVolumes(this.settings.music,this.settings.effects);this.resize();
           try{localStorage.setItem('vale-settings',JSON.stringify(this.settings));}catch{}
+          if(data.key==='newVisual'){this.ui.toast('Trocando o visual…');(this.started?this.save(true):Promise.resolve()).finally(()=>location.reload());break;}
           this.ui.setMenu('settings',this);break;
         }
         case 'pet-action':{
