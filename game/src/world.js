@@ -71,10 +71,8 @@ export function createAtlas() {
   const colors = BLOCKS.map(block => block.color);
   for (const b of BLOCKS) if (b.id >= 32) colors[tileOf(b.id)] = b.color;
   colors[32]='#7db551';colors[33]='#a78459';colors[34]='#45515b';colors[35]='#78694f';
-  // Visual novo: tufos de grama (36) e florzinhas (37 branca, 38 vermelha) com fundo transparente.
-  colors[36]='#8ec852';colors[37]='#ffffff';colors[38]='#e8484f';
   // Lisos: transparentes, fluidos e luz não recebem a moldura em relevo.
-  const flatTiles = new Set([BLOCK.AIR, BLOCK.GLASS, BLOCK.WATER, BLOCK.LAVA, BLOCK.TORCH, BLOCK.PORTAL, BLOCK.LEAVES, 36, 37, 38, ...REALM_PORTALS.map(tileOf), tileOf(BLOCK.SAKURA)]);
+  const flatTiles = new Set([BLOCK.AIR, BLOCK.GLASS, BLOCK.WATER, BLOCK.LAVA, BLOCK.TORCH, BLOCK.PORTAL, BLOCK.LEAVES, ...REALM_PORTALS.map(tileOf), tileOf(BLOCK.SAKURA)]);
   // Chão natural: relevo bem leve para o terreno não parecer piso de azulejo.
   const softTiles = new Set([32, BLOCK.GRASS, BLOCK.DIRT, BLOCK.SAND, BLOCK.SNOW, BLOCK.CLAY, tileOf(BLOCK.DRY_EARTH), BLOCK.ASPHALT, 34]);
   const parse = hex => [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16));
@@ -102,17 +100,6 @@ export function createAtlas() {
         const ox = Math.floor(hash(Math.floor(y / 4), 3, 977) * 4), cx = (x + ox) % 4, cy = y % 4, leaf = hash(Math.floor((x + ox) / 4), Math.floor(y / 4), 991);
         const d = Math.abs(cx - 1.5) + Math.abs(cy - 1.5);
         variance = d > 2.2 ? -26 : leaf > .7 && cx === 1 ? 20 : leaf < .25 ? -12 : 4 + (grain - .5) * 10;
-        if (NEW_VISUAL && d > 2.2 && leaf < .55) alpha = 0; // furinhos entre as folhas: a luz passa
-      }
-      if (tile === 36) { // tufo: lâminas de alturas diferentes
-        const blades = [[1, 7], [4, 11], [6, 5], [8, 13], [10, 8], [13, 10], [15, 6]];
-        const blade = blades.find(([bx, h]) => (x === bx || (x === bx + 1 && y < h - 3)) && y < h);
-        alpha = blade ? 255 : 0; rgb = parse(blade && y > blade[1] - 4 ? '#b9e06a' : x % 2 ? '#86bf52' : '#6ea843'); variance = 0;
-      }
-      if (tile === 37 || tile === 38) { // florzinha: caule, folhinha e cabeça com miolo
-        const stem = x === 7 && y < 9, leafy = y === 4 && x > 7 && x < 10, head = Math.abs(x - 7) + Math.abs(y - 10) <= 2 && !(Math.abs(x - 7) === 2 && Math.abs(y - 10) === 0 && false);
-        alpha = stem || leafy || head ? 255 : 0; variance = 0;
-        rgb = parse(stem || leafy ? '#5c9a3a' : (x === 7 && y === 10) ? '#ffd23f' : tile === 37 ? '#ffffff' : '#e8484f');
       }
       if (tile === BLOCK.GLASS) {
         const border = x < 1 || x > 14 || y < 1 || y > 14;
@@ -232,8 +219,7 @@ export class VoxelWorld {
     this.portalMaterial=new THREE.MeshBasicMaterial({color:0xb7a4ff,transparent:true,opacity:.65,side:THREE.DoubleSide,depthWrite:false});
     this.realmPortalMaterials=Object.values(REALMS).map(r=>new THREE.MeshBasicMaterial({color:r.color,transparent:true,opacity:.7,side:THREE.DoubleSide,depthWrite:false}));
     this.domesticMaterial = new THREE.MeshLambertMaterial({ vertexColors: true });
-    this.opaqueMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, alphaTest: NEW_VISUAL ? .5 : 0 });
-    this.decorMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, alphaTest: .5 });
+    this.opaqueMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true });
     this.transparentMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide });
     this.torchMaterial = new THREE.MeshLambertMaterial({ map: this.atlas, vertexColors: true, emissive: '#f8b34c', emissiveIntensity: .65 });
     this.lavaMaterial = new THREE.MeshBasicMaterial({ map: this.atlas, vertexColors: true });
@@ -775,8 +761,8 @@ export class VoxelWorld {
 
   _buildMesh(chunk) {
     const { cx, cz, data } = chunk;
-    const WATER_GROUP = 6 + REALM_PORTALS.length, DECOR_GROUP = WATER_GROUP + 1;
-    const groups = Array.from({ length: 8 + REALM_PORTALS.length }, (_, i) => i).map(() => ({ positions: [], normals: [], uvs: [], colors: [], indices: [] }));
+    const WATER_GROUP = 6 + REALM_PORTALS.length;
+    const groups = Array.from({ length: 7 + REALM_PORTALS.length }, (_, i) => i).map(() => ({ positions: [], normals: [], uvs: [], colors: [], indices: [] }));
     const neighborChunks = new Map();
     const peek = (x, y, z) => {
       if (y < 0) return BLOCK.STONE;
@@ -841,16 +827,6 @@ export class VoxelWorld {
         for (const i of [3, 5]) slopeFace(faces[i].corners, faces[i].normal);
         continue;
       }
-      if (NEW_VISUAL && id === BLOCK.GRASS && peek(x, y + 1, z) === BLOCK.AIR) {
-        // Tufos e flores em X sobre a grama (só desenho, sem bloco): como nas artes.
-        const wx = cx * SIZE + x, wz = cz * SIZE + z, r = hash(wx, wz, 101);
-        if (r < .55) {
-          const tile = r < .035 ? 37 : r < .07 ? 38 : 36, h = tile === 36 ? .55 + hash(wx, wz, 103) * .35 : .75;
-          const ox = .5 + (hash(wx, wz, 105) - .5) * .5, oz = .5 + (hash(wx, wz, 107) - .5) * .5, tint = .88 + hash(wx, wz, 109) * .2;
-          // Cada lâmina é desenhada dos dois lados com a normal para cima: iluminada como o chão, sem lado escuro.
-          for (const [sx, sz] of [[.42, .42], [.42, -.42], [-.42, -.42], [-.42, .42]]) addFace(groups[DECOR_GROUP], x, y + 1, z, [[ox - sx, 0, oz - sz], [ox + sx, 0, oz + sz], [ox + sx, h, oz + sz], [ox - sx, h, oz - sz]], [0, 1, 0], tile, tint);
-        }
-      }
       for (let side = 0; side < faces.length; side++) {
         const face = faces[side], [nx, ny, nz] = face.normal;
         const other = peek(x + nx, y + ny, z + nz);
@@ -860,8 +836,7 @@ export class VoxelWorld {
           }
           if (id === BLOCK.LAVA && other === BLOCK.LAVA) continue;
           if (id === BLOCK.GLASS && other === BLOCK.GLASS) continue;
-          // Visual novo: folhas têm furinhos, então as faces entre folhas também aparecem.
-          if (BLOCKS[other].solid && !BLOCKS[other].transparent && !(NEW_VISUAL && (id === BLOCK.LEAVES || id === BLOCK.SAKURA) && other === id)) continue;
+          if (BLOCKS[other].solid && !BLOCKS[other].transparent) continue;
         }
         let tile = tileOf(id);
         if (id === BLOCK.GRASS) tile = side === 2 ? 32 : side === 3 ? BLOCK.DIRT : BLOCK.GRASS;
@@ -885,10 +860,9 @@ export class VoxelWorld {
       geometry.setIndex(group.indices);
       if(i===1||i===WATER_GROUP)geometry.computeVertexNormals();
       geometry.computeBoundingSphere();
-      const mesh = new THREE.Mesh(geometry, [this.opaqueMaterial, this.transparentMaterial, this.torchMaterial, this.lavaMaterial, this.domesticMaterial, this.portalMaterial, ...this.realmPortalMaterials, this.waterMaterial, this.decorMaterial][i]);
+      const mesh = new THREE.Mesh(geometry, [this.opaqueMaterial, this.transparentMaterial, this.torchMaterial, this.lavaMaterial, this.domesticMaterial, this.portalMaterial, ...this.realmPortalMaterials, this.waterMaterial][i]);
       mesh.position.set(cx * SIZE, 0, cz * SIZE);
       mesh.castShadow = i === 0 || i === 4;
-      if (i === DECOR_GROUP) { mesh.castShadow = false; mesh.receiveShadow = false; }
       mesh.receiveShadow = true;
       mesh.name = `chunk:${chunk.key}:${i}`;
       mesh.renderOrder = i === 1 ? 1 : 0;
@@ -940,6 +914,6 @@ export class VoxelWorld {
     for (const chunk of this.chunks.values()) this._disposeMeshes(chunk);
     this.chunks.clear(); this.dirty.clear(); this.pending = [];
     this.fluidQueue = []; this.fluidQueued.clear(); this.fluidDeferred.clear(); this.fluidLevels.clear(); this.drops = [];
-    this.atlas.dispose(); this.opaqueMaterial.dispose(); this.transparentMaterial.dispose(); this.torchMaterial.dispose(); this.lavaMaterial.dispose(); this.domesticMaterial.dispose();for(const m of this.realmPortalMaterials)m.dispose();this.waterMaterial.dispose();this.portalMaterial.dispose();this.decorMaterial.dispose();
+    this.atlas.dispose(); this.opaqueMaterial.dispose(); this.transparentMaterial.dispose(); this.torchMaterial.dispose(); this.lavaMaterial.dispose(); this.domesticMaterial.dispose();for(const m of this.realmPortalMaterials)m.dispose();this.waterMaterial.dispose();this.portalMaterial.dispose();
   }
 }
