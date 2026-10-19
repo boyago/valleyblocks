@@ -616,6 +616,7 @@ export function buildStarterHouseAt(world, cx, cz) {
     for (let y = floor + 1; y <= floor + clearTo; y++) if (world.getBlock(x, y, z) !== BLOCK.AIR) set(x, y, z, BLOCK.AIR);
   };
   for (let x = cx - 2; x <= cx + 2; x++) for (let z = z0 - 3; z < z0; z++) { const g = ground(x, z); if (g !== floor + 1 || !BLOCKS[world.getBlock(x, floor, z)].solid) level(x, z, BLOCK.STONE, 4); else for (let y = floor + 1; y <= floor + 4; y++) if (world.getBlock(x, y, z) !== BLOCK.AIR) set(x, y, z, BLOCK.AIR); } // pátio: só onde o chão não está no nível
+  for (let x = cx + 5; x <= cx + 9; x++) for (let z = z0 - 3; z <= z0 + 4; z++) level(x, z, BLOCK.STONE, 4); // garagem: piso de pedra nivelado ao lado da casa
   let crest = floor + 8; for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) crest = Math.max(crest, Math.ceil(ground(x, z) ?? 0)); // morro por cima do lote some inteiro
   for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) {
     level(x, z, BLOCK.PLANKS, crest - floor);

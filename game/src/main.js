@@ -45,6 +45,10 @@ const canvas=document.querySelector('#world');
 const NATIVE_APP=typeof window.Capacitor?.isNativePlatform==='function'&&window.Capacitor.isNativePlatform();
 const TOUCH=touchPreferred({native:NATIVE_APP});
 const account=createAccount({bridge,native:NATIVE_APP});
+// Em desenvolvimento (localhost) tudo fica liberado; fora do portal e no app, a versão completa vem da conta.
+const DEV_HOST=/^(localhost|127.0.0.1|[::1])$/.test(location.hostname);
+const fullVersionOffer=()=>DEV_HOST||fullAccess||account.state.unlimited?null:FULL_VERSION;
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void account.refresh();});
 const DEFAULT_SETTINGS={quality:'medium',shadows:true,fog:true,music:.3,effects:.65,sensitivity:1,showFps:false,outfit:'explorer'};
 // Celular: começa leve (3 × 3 regiões, sem sombras). O jogador pode subir em Som e imagem.
 const TOUCH_DEFAULTS={quality:'low',shadows:false};
@@ -99,7 +103,7 @@ class Game {
     this.chests={};this.doors={};this.goals={};this.autoSave=0;this.torchTimer=0;this.torchLights=[];
     this.sky=new Sky(this.scene);this.particles=new Particles(this.scene);
     this.avatar=new ExplorerAvatar(this.scene,this.camera);
-    this.ownedPacks=ownedPacks;this.fullOffer=!bridge.standalone&&!fullAccess?FULL_VERSION:null;this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);
+    this.ownedPacks=ownedPacks;this.fullOffer=fullVersionOffer();this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);
     this.selection=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.012,1.012,1.012)),new THREE.LineBasicMaterial({color:0xfff4c7,transparent:true,opacity:.9}));
     this.selection.visible=false;this.scene.add(this.selection);
     this.ui=new UI(document.querySelector('#app'),(action,data,button)=>this.action(action,data,button),{touch:TOUCH});
@@ -107,7 +111,7 @@ class Game {
     this.coopAvailable=coopAvailable&&!bridge.standalone;this.coop=new Coop(this);
     this.account=account;account.onChange(s=>{
       // No app as roupas compradas vêm da conta; no portal, o site já manda no 'start'.
-      if(s.mode==='app'){this.ownedPacks=s.outfits.filter(id=>OUTFIT_PACKS[id]);this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);}
+      if(s.mode==='app'||s.mode==='web'){this.ownedPacks=s.outfits.filter(id=>OUTFIT_PACKS[id]);this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);this.fullOffer=fullVersionOffer();}
       if(['landing','login','character'].includes(this.ui.menu))this.ui.setMenu(this.ui.menu,this);
     });
     this.landingBoot=true;this.createWorld(null);this.landingBoot=false;this.coop.bindWorld(this.world);
@@ -234,6 +238,8 @@ class Game {
       const spot=this.world.findBiome(biome);
       if(spot){this.world.ensureAround(spot.x,spot.z,2);const house=buildStarterHouseAt(this.world,spot.x,spot.z);
         if(house){this.player.position.set(...house.door);this.player.velocity.set(0,0,0);this.player.yaw=Math.PI;}
+        // Um utilitário ao lado da casa, como no vale, para explorar o bioma (dunas, campos…).
+        {const at=new THREE.Vector3(spot.x+7.5,house.door[1],spot.z+7.5);const placement=this.entities.findVehiclePlacement('pickup',at,Math.PI,this.player.box());if(placement)this.entities.spawnVehicle('pickup',placement);else console.warn('sem lugar para o utilitário na casa do bioma');}
         this.updateCamera(1);this.resume();this.ui.toast(`Sua casa em ${VALLEY_STARTS[biome]} está pronta! O vale fica a ${Math.round(Math.hypot(spot.x,spot.z))} blocos daqui.`);return;}
       this.ui.toast(`${VALLEY_STARTS[biome]} não apareceu perto neste mundo; você começa no vale.`);
     }
@@ -295,6 +301,8 @@ class Game {
         }
         case 'account-logout':void account.logout().then(()=>this.ui.toast('Você saiu da conta.'));break;
         case 'account-signup':window.open(account.signupUrl,'_blank','noopener');break;
+        case 'account-browser':window.open(account.loginUrl,'_blank','noopener');this.ui.toast('Entre no site e depois toque em Atualizar conta.');break;
+        case 'account-refresh':await account.refresh();this.ui.toast(account.state.username?`Conta ${account.state.username} atualizada.`:'Nenhuma conta conectada neste aparelho: entre com usuário e senha.');break;
         case 'close':if(this.started)this.resume();else this.menu('landing');break;
         // Ações dos controles de toque (o aviso de contexto vira botão; a mochila, a câmera e o voo têm botões próprios).
         case 'context':if(!this.running)break;if(data.key==='R')this.interactPet();else this.interact();break;
@@ -346,12 +354,12 @@ class Game {
           this.ui.setMenu('quests',this);break;
         }
         case 'buy-full':{
-          if(bridge.standalone){this.ui.toast('A compra fica disponível no portal LABSGames.');break;}
+          if(account.state.mode!=='portal'){window.open(account.purchaseUrl(FULL_VERSION.product),'_blank','noopener');this.ui.toast('Loja aberta no navegador. Ao voltar, entre na conta (ou toque em Atualizar conta) para liberar.');break;}
           this.ui.toast('Abrindo o pagamento no portal…');bridge.purchase(FULL_VERSION.product);break;
         }
         case 'buy-pack':{
           const pack=OUTFIT_PACKS[data.pack];if(!pack?.product)break;
-          if(bridge.standalone){this.ui.toast('A compra fica disponível no portal LABSGames.');break;}
+          if(account.state.mode!=='portal'){window.open(account.purchaseUrl(pack.product),'_blank','noopener');this.ui.toast('Loja aberta no navegador. Ao voltar, entre na conta (ou toque em Atualizar conta) para liberar.');break;}
           this.ui.toast('Abrindo o pagamento no portal…');bridge.purchase(pack.product);break;
         }
         case 'setting':{
@@ -494,7 +502,7 @@ class Game {
     if(action.kind==='pet'){this.focusPet=action.entity;this.menu('pet');return;}
     if(action.kind==='trader'){this.focusTrader=action.entity;action.entity.yaw=Math.atan2(this.player.position.x-action.entity.position.x,this.player.position.z-action.entity.position.z);action.entity.goal=null;this.audio.play('inventory');this.menu('trade');return;}
     if(action.kind==='door'){this.toggleDoor(action.door);return;}
-    if(PORTAL_BLOCKS.has(action.hit?.id)){const result=this.realms.travel(action.hit.id,this.player,this.entities,this.world);this.ui.toast(result.message);if(result.ok){this.resetInput();this.updateCamera(1);this.audio.play('craft');if(result.realm)this.ui.arrival(result.realm);}return;}
+    if(PORTAL_BLOCKS.has(action.hit?.id)){if(this.fullOffer){this.ui.toast('As outras terras (cidades e países) fazem parte da versão completa.');return;}const result=this.realms.travel(action.hit.id,this.player,this.entities,this.world);this.ui.toast(result.message);if(result.ok){this.resetInput();this.updateCamera(1);this.audio.play('craft');if(result.realm)this.ui.arrival(result.realm);}return;}
     if(action.hit?.id===BLOCK.PORTAL){const result=this.world.underworld.travel(this.player,this.entities);this.ui.toast(result.message);if(result.ok){this.resetInput();this.updateCamera(1);this.audio.play('door');}return;}
     if(action.hit?.id===BLOCK.WOOD){const result=this.resin.collect(action.hit,this.inventory);this.ui.toast(result.message);if(result.ok)this.audio.play('collect');return;}
     if(action.hit?.id===BLOCK.SOFA){this.focusSofa=action.hit;this.menu('sofa');return;}

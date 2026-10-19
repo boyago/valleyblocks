@@ -24,7 +24,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const TUFT = 36, DRY_TUFT = 72, REED = 73, FLOWER_TILES = [37, 38, 39, 71], DECOR_TILES = [TUFT, DRY_TUFT, REED, ...FLOWER_TILES];
 /** O que nasce sobre a grama em cada bioma: densidade (0 a 1) e sorteio dos enfeites. */
 /** Biomas do vale em que um mundo novo pode começar (nome mostrado na tela inicial e no HUD). */
-export const VALLEY_STARTS = Object.freeze({ florido: 'Campos Floridos', mata: 'Mata Fechada', pantanal: 'Pantanal', cerrado: 'Cerrado', floresta: 'Floresta Densa', deserto: 'Deserto das Dunas', nevasca: 'Altos Nevados', meseta: 'Mesetas de Argila' });
+export const VALLEY_STARTS = Object.freeze({ florido: 'Holambra', mata: 'Amazônia', pantanal: 'Pantanal', cerrado: 'Chapada dos Veadeiros', floresta: 'Mata Atlântica', deserto: 'Lençóis Maranhenses', nevasca: 'Serra Catarinense', meseta: 'Chapada Diamantina' });
 const GROUND_DECOR = {
   florido: { density: .85, pick: r => r < .68 ? FLOWER_TILES[Math.floor(r / .17)] : TUFT },
   pradaria: { density: .14, pick: r => r < .2 ? FLOWER_TILES[Math.floor(r / .05)] : TUFT },
@@ -348,6 +348,8 @@ export class VoxelWorld {
     // Pantanal: planície alagada, com lagoas rasas e barro nas beiradas.
     let marsh = 0;
     if (biome === 'pantanal') { marsh = noise(x / 9 + 5, z / 9 - 3, this.seedHash + 733); if (marsh > .58) { height = 7; water = true; } }
+    // Lençóis Maranhenses: lagoas de água doce entre as dunas (mundos novos).
+    if (biome === 'deserto' && this.generatorVersion >= 4 && distance > 60) { const lagoon = noise(x / 13 - 7, z / 13 + 9, this.seedHash + 811); if (lagoon > .6) { height = lagoon > .72 ? 6 : 7; water = true; } }
     // The road continues through every generated biome. A broad graded verge
     // blends its level shoulders back into the hills instead of cutting a canyon.
     // Beyond 22 blocks from the road center, lakes and natural terrain are intact.
