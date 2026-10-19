@@ -47,6 +47,7 @@ const TOUCH=touchPreferred({native:NATIVE_APP});
 const account=createAccount({bridge,native:NATIVE_APP});
 // Em desenvolvimento (localhost) tudo fica liberado; fora do portal e no app, a versão completa vem da conta.
 const DEV_HOST=/^(localhost|127.0.0.1|[::1])$/.test(location.hostname);
+const randomStart=()=>{const keys=['',...Object.keys(VALLEY_STARTS).map(k=>'bioma:'+k)];return keys[Math.floor(Math.random()*keys.length)];};
 const fullVersionOffer=()=>DEV_HOST||fullAccess||account.state.unlimited?null:FULL_VERSION;
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void account.refresh();});
 const DEFAULT_SETTINGS={quality:'medium',shadows:true,fog:true,music:.3,effects:.65,sensitivity:1,showFps:false,outfit:'explorer'};
@@ -110,8 +111,8 @@ class Game {
     this.touch=TOUCH?new TouchControls(this,document.querySelector('#app')):null;
     this.coopAvailable=coopAvailable&&!bridge.standalone;this.coop=new Coop(this);
     this.account=account;account.onChange(s=>{
-      // No app as roupas compradas vêm da conta; no portal, o site já manda no 'start'.
-      if(s.mode==='app'||s.mode==='web'){this.ownedPacks=s.outfits.filter(id=>OUTFIT_PACKS[id]);this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);this.fullOffer=fullVersionOffer();}
+      // Roupas compradas e versão completa vêm da conta (app/web: login no jogo; portal: mensagem 'account' do site, que pode chegar depois do 'start').
+      if(s.username||s.mode==='app'||s.mode==='web'){this.ownedPacks=s.outfits.filter(id=>OUTFIT_PACKS[id]);this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);this.fullOffer=fullVersionOffer();}
       if(['landing','login','character'].includes(this.ui.menu))this.ui.setMenu(this.ui.menu,this);
     });
     this.landingBoot=true;this.createWorld(null);this.landingBoot=false;this.coop.bindWorld(this.world);
@@ -230,9 +231,10 @@ class Game {
     return true;
   }
   start(save=null){this.createWorld(save);this.coop?.bindWorld(this.world);this.started=true;
-    const choice=this.startRealmChoice;this.startRealmChoice='';
+    // Grátis: mundo e lugar sorteados entre o vale e os biomas (as outras terras são da versão completa). Completa: escolhe na tela inicial.
+    const choice=save?'':this.fullOffer?randomStart():this.startRealmChoice;this.startRealmChoice='';
     const realm=!save&&!this.fullOffer&&REALMS[choice];
-    const biome=!save&&!this.fullOffer&&choice.startsWith('bioma:')&&VALLEY_STARTS[choice.slice(6)]?choice.slice(6):null;
+    const biome=!save&&choice.startsWith('bioma:')&&VALLEY_STARTS[choice.slice(6)]?choice.slice(6):null;
     if(biome){
       // Começar num bioma do vale: casa pronta no ponto mais próximo onde ele domina.
       const spot=this.world.findBiome(biome);
@@ -259,7 +261,7 @@ class Game {
   atWorkbench(){const p=this.player.position;for(let x=Math.floor(p.x)-4;x<=p.x+4;x++)for(let z=Math.floor(p.z)-4;z<=p.z+4;z++)for(let y=Math.floor(p.y)-1;y<=p.y+2;y++)if(this.world.getBlock(x,y,z)===BLOCK.WORKBENCH&&Math.hypot(x+.5-p.x,y-p.y,z+.5-p.z)<4.5)return true;return false;}
   async action(action,data={},button) {
     if(this.importingSave)return;
-    const seedInput=document.querySelector('#seed-input');if(seedInput)this.newSeed=seedInput.value.trim();
+    const seedInput=document.querySelector('#seed-input');this.newSeed=seedInput&&!this.fullOffer?seedInput.value.trim():'';
     try {
       switch(action) {
         case 'choose-mode':this.newMode=data.mode;this.ui.setMenu('landing',this);break;

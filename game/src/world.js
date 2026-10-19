@@ -366,14 +366,19 @@ export class VoxelWorld {
   biomeAt(x, z) { return this._column(x, z).biome; }
 
   /** Ponto mais próximo do centro onde um bioma domina (para começar o mundo nele). */
-  findBiome(name, maxRadius = 440) {
-    let best = null;
+  /** Ponto de início num bioma: o trecho mais 'puro' do bioma a pelo menos minDistance da casa do vale
+   *  (para não começar a poucos blocos do mundo tradicional); só cai para mais perto se não houver outro. */
+  findBiome(name, maxRadius = 440, minDistance = 160) {
+    let best = null, near = null;
     for (let x = -maxRadius; x <= maxRadius; x += 4) for (let z = -maxRadius; z <= maxRadius; z += 4) {
-      if (this.biomeAt(x, z) !== name) continue;
+      if (Math.abs(x - 3.5) < 32 || this.biomeAt(x, z) !== name) continue; // fora da estrada do vale (x 2..5) e do seu acostamento
       let n = 0; for (let a = -20; a <= 20; a += 8) for (let c = -20; c <= 20; c += 8) if (this.biomeAt(x + a, z + c) === name) n++;
-      const d = Math.hypot(x, z); if (!best || n > best.n || (n === best.n && d < best.d)) best = { x, z, n, d };
+      const d = Math.hypot(x, z), spot = { x, z, n, d };
+      if (d >= minDistance) { if (!best || n > best.n || (n === best.n && d < best.d)) best = spot; }
+      else if (!near || n > near.n || (n === near.n && d > near.d)) near = spot;
     }
-    return best && best.n >= 20 ? { x: best.x, z: best.z } : best ? { x: best.x, z: best.z } : null;
+    const pick = best || near;
+    return pick ? { x: pick.x, z: pick.z } : null;
   }
 
   _generate(cx, cz) {
