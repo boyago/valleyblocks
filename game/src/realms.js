@@ -381,6 +381,7 @@ function decorateEua(put, world, baseX, baseZ, size) {
 // Rio Paraná corre no eixo z a oeste; o Iguaçu vem do leste e deságua nele.
 const PARANA_X = -41, IGUACU_Z = dx => 30 + Math.round(Math.sin(dx / 20) * 4), BRIDGE_Z = -20;
 const fallsX = dz => 78 + Math.round(8 * Math.cos((dz - 30) / 9)); // ferradura das Cataratas
+const FALLS_HALF = 24; // meia largura da ferradura das Cataratas (em blocos, ao longo do rio)
 const triZone = (dx, dz) => dx < PARANA_X - 8 ? 'py' : dz > IGUACU_Z(dx) + 6 ? 'ar' : 'br';
 const city = (dx, dz) => {
   const zone = triZone(dx, dz);
@@ -398,7 +399,9 @@ function triColumn(x, z, seed) {
   if (dx > PARANA_X && iguacu < 6) {
     if (dx > fx) { height = 17; surface = BLOCK.SAND; } // leito do rio acima da queda (água posta na decoração)
     else { height = 4; water = true; }
-  } else if (dx > PARANA_X && iguacu < 8 && dx <= fx) height = 9;
+  } else if (dx > fx && dx <= fx + 9 && iguacu < FALLS_HALF) { height = 17; surface = BLOCK.SAND; } // a borda larga da ferradura
+  else if (dx <= fx && dx >= fx - 14 && iguacu < FALLS_HALF) { height = 4; water = true; } // poço embaixo das quedas
+  else if (dx > PARANA_X && iguacu < 8 && dx <= fx) height = 9;
   if (city(dx, dz) && !water) { height = 10; surface = BLOCK.STONE; }
   if (rim(r, dx, dz)) { height = Math.max(height, rimHeight(r, dx, dz, n, 26)); surface = BLOCK.GRASS; water = false; }
   const near = Math.max(Math.abs(dx), Math.abs(dz)); height = flatten(height, dx, dz); if (near <= 12) water = false;
@@ -430,8 +433,22 @@ function decorateTriplice(put, world, baseX, baseZ, size) {
     const dx = x - cx, dz = z - cz, info = realmColumn(x, z, seed); if (!info) continue;
     // Rio Iguaçu acima da queda e a cortina de água das Cataratas.
     const fx = fallsX(dz);
-    if (dx > fx && dx > PARANA_X && Math.abs(dz - IGUACU_Z(dx)) < 6 && !rim(r, dx, dz)) for (let y = 18; y <= 20; y++) put(x, y, z, BLOCK.WATER);
-    if (dx === fx && Math.abs(dz - IGUACU_Z(dx)) < 14 && !rim(r, dx, dz)) for (let y = 9; y <= 20; y++) put(x, y, z, BLOCK.WATER);
+    const across = Math.abs(dz - IGUACU_Z(dx));
+    if (dx > fx && dx > PARANA_X && (across < 6 || (dx <= fx + 9 && across < FALLS_HALF)) && !rim(r, dx, dz)) for (let y = 18; y <= 20; y++) put(x, y, z, BLOCK.WATER);
+    // Várias quedas lado a lado, separadas por paredões de rocha com mato no topo (como as 275 quedas do Iguaçu).
+    if (dx === fx && across < FALLS_HALF && !rim(r, dx, dz)) {
+      const pillar = across > 5 && ((dz % 7) + 7) % 7 === 0;
+      for (let y = 5; y <= 20; y++) put(x, y, z, pillar ? BLOCK.STONE : BLOCK.WATER);
+      if (pillar) { put(x, 21, z, BLOCK.GRASS); put(x, 22, z, BLOCK.LEAVES); }
+    }
+    // Passarela de madeira até a Garganta do Diabo, saindo da margem argentina sobre o poço.
+    const walkZ = IGUACU_Z(dx) + 3;
+    if (dx >= fx - 22 && dx <= fx - 3 && Math.abs(dz - walkZ) <= 1 && !rim(r, dx, dz)) {
+      put(x, 9, z, BLOCK.PLANKS);
+      if (dz !== walkZ) put(x, 10, z, BLOCK.WOOD);
+      if ((dx - fx) % 4 === 0 && dz !== walkZ) for (let y = 1; y < 9; y++) put(x, y, z, BLOCK.WOOD);
+    }
+    if (dx === fx - 3 && Math.abs(dz - walkZ) <= 2 && !rim(r, dx, dz)) { put(x, 9, z, BLOCK.PLANKS); put(x, 10, z, BLOCK.WOOD); }
     // Ruas da cidade (asfalto a cada 12 blocos).
     if (city(dx, dz) && (((dx % 12) + 12) % 12 < 2 || ((dz % 12) + 12) % 12 < 2)) put(x, 10, z, BLOCK.ASPHALT);
     // Ponte da Amizade: tabuleiro de asfalto com guarda-corpo e pilares.
