@@ -26,7 +26,8 @@ import { Fishing } from './fishing.js';
 import { Boats, Trailers } from './watercraft.js';
 import { Landmarks } from './landmarks.js';
 import { Skeletons } from './skeletons.js';
-import { Realms, activatePortal, realmAt, PORTAL_BLOCKS, REALMS, buildStarterHouse } from './realms.js';
+import { Realms, activatePortal, realmAt, PORTAL_BLOCKS, REALMS, buildStarterHouse, buildStarterHouseAt } from './realms.js';
+import { VALLEY_STARTS } from './world.js';
 import { OUTFITS, OUTFIT_PACKS, resolveOutfit } from './outfits.js';
 import { useBucket, heatMaterial } from './interactions.js';
 import { rampFacingFromYaw } from './ramps.js';
@@ -221,7 +222,17 @@ class Game {
     return true;
   }
   start(save=null){this.createWorld(save);this.coop?.bindWorld(this.world);this.started=true;
-    const realm=!save&&!this.fullOffer&&REALMS[this.startRealmChoice];this.startRealmChoice='';
+    const choice=this.startRealmChoice;this.startRealmChoice='';
+    const realm=!save&&!this.fullOffer&&REALMS[choice];
+    const biome=!save&&!this.fullOffer&&choice.startsWith('bioma:')&&VALLEY_STARTS[choice.slice(6)]?choice.slice(6):null;
+    if(biome){
+      // Começar num bioma do vale: casa pronta no ponto mais próximo onde ele domina.
+      const spot=this.world.findBiome(biome);
+      if(spot){this.world.ensureAround(spot.x,spot.z,2);const house=buildStarterHouseAt(this.world,spot.x,spot.z);
+        if(house){this.player.position.set(...house.door);this.player.velocity.set(0,0,0);this.player.yaw=Math.PI;}
+        this.updateCamera(1);this.resume();this.ui.toast(`Sua casa em ${VALLEY_STARTS[biome]} está pronta! O vale fica a ${Math.round(Math.hypot(spot.x,spot.z))} blocos daqui.`);return;}
+      this.ui.toast(`${VALLEY_STARTS[biome]} não apareceu perto neste mundo; você começa no vale.`);
+    }
     if(realm){
       const r=this.realms.travel(realm.portal,this.player,this.entities,this.world);
       if(r.ok){

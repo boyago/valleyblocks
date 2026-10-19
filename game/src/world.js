@@ -23,6 +23,8 @@ const lerp = (a, b, t) => a + (b - a) * t;
 // Enfeites de chão por bioma (tufos, flores, capim seco, taboa): só desenho, sem bloco.
 const TUFT = 36, DRY_TUFT = 72, REED = 73, FLOWER_TILES = [37, 38, 39, 71], DECOR_TILES = [TUFT, DRY_TUFT, REED, ...FLOWER_TILES];
 /** O que nasce sobre a grama em cada bioma: densidade (0 a 1) e sorteio dos enfeites. */
+/** Biomas do vale em que um mundo novo pode começar (nome mostrado na tela inicial e no HUD). */
+export const VALLEY_STARTS = Object.freeze({ florido: 'Campos Floridos', mata: 'Mata Fechada', pantanal: 'Pantanal', cerrado: 'Cerrado', floresta: 'Floresta Densa', deserto: 'Deserto das Dunas', nevasca: 'Altos Nevados', meseta: 'Mesetas de Argila' });
 const GROUND_DECOR = {
   florido: { density: .85, pick: r => r < .68 ? FLOWER_TILES[Math.floor(r / .17)] : TUFT },
   pradaria: { density: .14, pick: r => r < .2 ? FLOWER_TILES[Math.floor(r / .05)] : TUFT },
@@ -360,6 +362,17 @@ export class VoxelWorld {
   }
 
   biomeAt(x, z) { return this._column(x, z).biome; }
+
+  /** Ponto mais próximo do centro onde um bioma domina (para começar o mundo nele). */
+  findBiome(name, maxRadius = 440) {
+    let best = null;
+    for (let x = -maxRadius; x <= maxRadius; x += 4) for (let z = -maxRadius; z <= maxRadius; z += 4) {
+      if (this.biomeAt(x, z) !== name) continue;
+      let n = 0; for (let a = -20; a <= 20; a += 8) for (let c = -20; c <= 20; c += 8) if (this.biomeAt(x + a, z + c) === name) n++;
+      const d = Math.hypot(x, z); if (!best || n > best.n || (n === best.n && d < best.d)) best = { x, z, n, d };
+    }
+    return best && best.n >= 20 ? { x: best.x, z: best.z } : best ? { x: best.x, z: best.z } : null;
+  }
 
   _generate(cx, cz) {
     const key = keyFor(cx, cz);

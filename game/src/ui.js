@@ -5,6 +5,7 @@ import { restEligibility } from './furniture.js';
 import { ITEMS, RECIPES, INVENTORY_SLOTS } from './inventory.js';
 import { HEAT_RECIPES } from './interactions.js';
 import { REALMS } from './realms.js';
+import { VALLEY_STARTS } from './world.js';
 import * as THREE from 'three';
 import { BLOCKS } from './blocks.js';
 import { blockIcon, modelIcon, avatarIcon } from './icon-renderer.js';
@@ -236,10 +237,10 @@ export class UI {
     document.body.appendChild(el);this.arrivalEl=el;requestAnimationFrame(()=>el.classList.add('visible'));
     this.arrivalTimer=setTimeout(()=>{el.classList.remove('visible');setTimeout(()=>el.remove(),600);},5000);
   }
-  /** Versão completa: escolher em que terra o mundo novo começa. Grátis vê a opção travada. */
+  /** Versão completa: escolher em que terra ou bioma o mundo novo começa. Grátis vê a opção travada. */
   startRealm(game){
     const full=!game.fullOffer,value=game.startRealmChoice||'';
-    const options=['<option value="">Vale (casa inicial)</option>',...Object.entries(REALMS).map(([k,r])=>`<option value="${k}" ${value===k?'selected':''}>${esc(r.name)}</option>`)].join('');
+    const options=['<option value="">Vale (casa inicial)</option>','<optgroup label="Biomas do vale">',...Object.entries(VALLEY_STARTS).map(([k,name])=>`<option value="bioma:${k}" ${value==='bioma:'+k?'selected':''}>${esc(name)}</option>`),'</optgroup>','<optgroup label="Outras terras">',...Object.entries(REALMS).map(([k,r])=>`<option value="${k}" ${value===k?'selected':''}>${esc(r.name)}</option>`),'</optgroup>'].join('');
     return `<label class="seed-label realm-label">ONDE COMEÇAR${full?'':' · VERSÃO COMPLETA'}<select id="start-realm" ${full?'':'disabled'} aria-label="Terra onde o mundo novo começa">${options}</select></label>`;
   }
   toast(message){this.el.toast.textContent=message;this.el.toast.classList.add('visible');clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>this.el.toast.classList.remove('visible'),3500);}

@@ -179,3 +179,16 @@ test('a porta da casa inicial fica no nível do chão em todas as terras (pátio
     for (let y = floor + 6; y < floor + 30; y++) assert.equal(w.getBlock(cx, y, cz + 9), BLOCK.AIR, `${key}/${seed}: nada sobre o telhado em y=${y}`);
   }
 });
+
+test('começar num bioma do vale: findBiome acha o bioma e a casa fica no nível do chão ali', async () => {
+  const { buildStarterHouseAt } = await import('../src/realms.js');
+  const { VoxelWorld, VALLEY_STARTS } = await import('../src/world.js');
+  const w = new VoxelWorld(null, 'vale-2026', [], null, { generatorVersion: 4 });
+  for (const key of Object.keys(VALLEY_STARTS)) {
+    const spot = w.findBiome(key); assert.ok(spot, `${key}: nenhum ponto`);
+    assert.equal(w.biomeAt(spot.x, spot.z), key);
+  }
+  const spot = w.findBiome('florido'), house = buildStarterHouseAt(w, spot.x, spot.z), floor = house.door[1] - 1;
+  assert.equal(w.getBlock(spot.x, floor + 1, spot.z + 7), BLOCK.DOOR);
+  for (let k = 1; k <= 3; k++) assert.equal(w.heightAt(spot.x + .5, spot.z + 7 - k + .5, 40), floor + 1);
+});

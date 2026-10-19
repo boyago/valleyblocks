@@ -598,7 +598,12 @@ function decorateNyc(put, world, baseX, baseZ, size) {
  *  porta voltada para o portal, baú, bancada e tochas. Usa world.setBlock (fica salva). */
 export function buildStarterHouse(world, key) {
   const r = REALMS[key]; if (!r) return null;
-  const [cx, cz] = r.center, x0 = cx - 3, z0 = cz + 7, x1 = cx + 3, z1 = cz + 12;
+  return buildStarterHouseAt(world, r.center[0], r.center[1]);
+}
+
+/** A mesma casa inicial em qualquer ponto do vale (começar num bioma escolhido). */
+export function buildStarterHouseAt(world, cx, cz) {
+  const x0 = cx - 3, z0 = cz + 7, x1 = cx + 3, z1 = cz + 12;
   // O piso fica na altura do chão em frente à porta, para a porta ser sempre acessível;
   // o terreno do lote é nivelado (cortado por cima, fundação por baixo) e um pátio de
   // pedra na frente cobre buracos e água.
