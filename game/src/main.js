@@ -13,6 +13,7 @@ import { BLOCK, BLOCKS } from './blocks.js';
 import { Player } from './player.js';
 import { EntitySystem } from './entities.js';
 import { Inventory, ITEMS, craft, transferItems } from './inventory.js';
+import { ARMOR, isArmor, SLOT_NAMES } from './armor.js';
 import { GameAudio } from './audio.js';
 import { saveGame, loadGame } from './save.js';
 import { createRemoteSaves } from './remote-save.js';
@@ -124,6 +125,9 @@ class Game {
     this.focusSofa=null;this.restRemaining=0;this.whistleCooldown=0;
     this.player=new Player(this.world,save?.player);
     this.inventory=new Inventory(this.mode,save?.inventory);
+    // A armadura vestida absorve parte do dano dos inimigos e gasta a cada golpe (1 ponto por 8 de dano).
+    {const game=this;let pending=0;this.player.armor={get protection(){return game.inventory.protection;},hit(amount){pending+=amount/8;const n=Math.floor(pending);if(!n)return;pending-=n;const broken=game.inventory.wearArmor(n);if(broken.length){game.ui.toast(`${broken.join(' e ')} quebrou!`);game.audio.play('hunt-hit',game.player.position);game.avatar?.setArmor(game.inventory.equipment);}}};}
+    this.avatar.setArmor(this.inventory.equipment);
     this.entities=new EntitySystem(this.scene,this.world,this.audio,save?.entities||null);
     this.wildlife=new Wildlife(this.entities,save?.wildlife);
     this.realms=new Realms(save?.realms);
@@ -303,7 +307,9 @@ class Game {
         case 'save':await this.save(true);break;
         case 'save-exit':if(this.coop?.guest){this.coop.leave();break;}if(this.coop?.active)this.coop.leave();if(await this.save(true)){this.started=false;this.activeVehicle=null;this.menu('landing');this.landingKey='vale';this.landingCamera(0);}break;
         case 'slot':this.inventory.select(Number(data.slot));break;
-        case 'equip':if(this.inventory.has(data.item)){this.inventory.hotbar[this.inventory.selected]=ITEMS[data.item].id;this.audio.play('inventory');this.ui.setMenu('inventory',this);this.ui.toast(`${ITEMS[data.item].name} no espaço ${this.inventory.selected+1}.`);}break;
+        case 'wear':if(this.inventory.equip(data.item)){this.avatar.setArmor(this.inventory.equipment);this.audio.play('inventory');this.ui.setMenu('inventory',this);this.ui.toast(`${ITEMS[data.item].name} vestido. Proteção: ${Math.round(this.inventory.protection*100)}%.`);}break;
+        case 'unwear':if(this.inventory.unequip(data.slot)){this.avatar.setArmor(this.inventory.equipment);this.audio.play('inventory');this.ui.setMenu('inventory',this);}break;
+        case 'equip':if(isArmor(data.item)){this.action('wear',data);break;}if(this.inventory.has(data.item)){this.inventory.hotbar[this.inventory.selected]=ITEMS[data.item].id;this.audio.play('inventory');this.ui.setMenu('inventory',this);this.ui.toast(`${ITEMS[data.item].name} no espaço ${this.inventory.selected+1}.`);}break;
         case 'catalog-add':if(this.mode==='creative'&&ITEMS[data.item]&&this.inventory.add(ITEMS[data.item].id)){this.inventory.hotbar[this.inventory.selected]=ITEMS[data.item].id;this.audio.play('inventory');this.ui.setMenu('inventory',this);this.ui.toast(`${ITEMS[data.item].name} adicionado à mochila.`);}break;
         case 'hotbar-pick':this.inventory.select(Number(data.slot));this.ui.setMenu('inventory',this);break;
         case 'hotbar-drop':{

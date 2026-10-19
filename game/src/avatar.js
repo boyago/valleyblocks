@@ -7,6 +7,7 @@ import { NEW_VISUAL } from './visual.js';
 
 import { OUTFITS, DEFAULT_OUTFIT } from './outfits.js';
 import outfitModels from './assets/outfit-models.json' with { type: 'json' };
+import { ARMOR, ARMOR_MATERIALS } from './armor.js';
 
 /** Original field explorer: short jacket, amber scarf, cap and survey backpack. Outfits recolor tagged parts and add a Blender-made head accessory. */
 export class ExplorerAvatar {
@@ -53,6 +54,15 @@ export class ExplorerAvatar {
     this.box(this.hand,[.18,.3,.21],[0,-.16,.15],'sleeve');
     if(NEW_VISUAL){this.box(this.hand,[.21,.05,.24],[0,-.03,.15],'strap');this.box(this.hand,[.16,.2,.19],[0,.04,.03],'hand');this.box(this.hand,[.07,.12,.08],[-.1,.08,-.04],'hand');}
     else this.box(this.hand,[.15,.2,.18],[0,.02,.03],'hand');
+    // Armadura: peças por cima da roupa (capacete, peitoral com ombreiras, calça e botas),
+    // escondidas até vestir; a cor vem do material (couro, ferro, diamante) e a borda escura do acabamento.
+    const armor=(parent,size,pos,slot,trim=false)=>{const m=this.box(parent,size,pos,'#888');m.visible=false;this.armorParts[slot].push({mesh:m,trim});};
+    this.armorParts={head:[],chest:[],legs:[],feet:[]};
+    armor(this.head,[.45,.24,.41],[0,.13,0],'head');armor(this.head,[.47,.09,.43],[0,-.01,0],'head',true);armor(this.head,[.12,.07,.44],[0,.27,0],'head',true);
+    armor(this.body,[.55,.6,.35],[0,1.04,0],'chest');armor(this.body,[.57,.08,.37],[0,.82,0],'chest',true);armor(this.body,[.2,.2,.04],[0,1.1,-.19],'chest',true);
+    for(const arm of this.arms)armor(arm,[.24,.11,.27],[0,.0,0],'chest',true);
+    for(const leg of this.legs){armor(leg,[.25,.48,.28],[0,-.27,0],'legs');armor(leg,[.26,.06,.29],[0,-.49,0],'legs',true);armor(leg,[.27,.22,.37],[0,-.66,-.04],'feet');armor(leg,[.28,.05,.38],[0,-.59,-.04],'feet',true);}
+    armor(this.hand,[.21,.13,.24],[0,-.2,.15],'chest',true);
     this.held=null;this.heldWorld=null;this.item=null;this.swing=0;
     this.domesticGeometries={bucket:domesticGeometry('bucket'),grill:domesticGeometry('grill')};
     this.domesticMaterial=new THREE.MeshLambertMaterial({vertexColors:true});
@@ -82,6 +92,13 @@ export class ExplorerAvatar {
         geometry.computeBoundingSphere();this.accessoryGeometries.set(outfit.accessory,geometry);
       }
       this.accessory=new THREE.Mesh(this.accessoryGeometries.get(outfit.accessory),this.domesticMaterial);this.accessory.castShadow=true;this.accessory.name='accessory:'+outfit.accessory;this.head.add(this.accessory);
+    }
+  }
+  /** Mostra as peças vestidas ({ head, chest, legs, feet } com ids de armadura) nas cores do material. */
+  setArmor(equipment){
+    for(const slot of Object.keys(this.armorParts)){
+      const piece=ARMOR[equipment?.[slot]],material=piece&&ARMOR_MATERIALS[piece.material];
+      for(const part of this.armorParts[slot]){part.mesh.visible=!!piece;if(material)part.mesh.material=this.material(part.trim?material.trim:material.color);}
     }
   }
   /** Modelos na mão, em voxels pequenos: cabo com veio, amarração, metal com brilho e sombra. */

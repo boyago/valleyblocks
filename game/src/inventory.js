@@ -1,5 +1,6 @@
 import { BLOCKS } from './blocks.js';
 import { TOOLS, DURABILITY } from './tools.js';
+import { ARMOR, ARMOR_RECIPES, ARMOR_SLOTS, isArmor, protection } from './armor.js';
 /** Item IDs remain stable across saved worlds. */
 export const ITEMS = Object.freeze(Object.fromEntries([
   [1, 'Grama', '#7aab4b', 'Um chão verde para o seu jardim.'],
@@ -49,6 +50,8 @@ export const ITEMS = Object.freeze(Object.fromEntries([
   ['raw_rabbit', 'Carne de coelho crua', '#cfad96', 'Carne de coelho. Prepare na churrasqueira.'],
   ['cooked_rabbit', 'Coelho assado', '#a97145', 'Recupera 34 de saciedade. Botão direito para comer.'],
   ['raw_boar', 'Carne de javali crua', '#ce9788', 'Carne de javali. Prepare na churrasqueira.'],
+  ['leather', 'Couro', '#8a5a2b', 'Pele curtida de javali. Base das armaduras de couro, na bancada.'],
+  ...Object.values(ARMOR).map(a=>[a.id,a.name,a.color,a.description]),
   ['cooked_boar', 'Javali assado', '#9f623e', 'Recupera 40 de saciedade. Botão direito para comer.'],
   ['wooden_sword', 'Espada de madeira', '#c39761', 'Golpe de 14. A primeira arma de quem explora à noite.'],
   ['iron_sword', 'Espada de ferro', '#d7e1ec', 'Golpe de 24. Feita com lingotes de ferro.'],
@@ -84,7 +87,9 @@ export class Inventory {
     this.hotbar = [...DEFAULT_HOTBAR];
     this.selected = 0;
     this.wear = {};
+    this.equipment = Object.fromEntries(ARMOR_SLOTS.map(slot => [slot, null]));
     if (saved && typeof saved === 'object') {
+      for (const slot of ARMOR_SLOTS) { const id = saved.equipment?.[slot]; if (isArmor(id) && ARMOR[id].slot === slot) this.equipment[slot] = id; }
       for (const [id, used] of Object.entries(saved.wear || {})) if (DURABILITY[id] && Number.isInteger(used) && used > 0 && used < DURABILITY[id]) this.wear[id] = used;
       for (const [id, count] of Object.entries(saved.counts || {})) {
         if (validItem(id) && positiveInteger(count)) this.counts[id] = count;
@@ -137,6 +142,30 @@ export class Inventory {
     delete this.wear[id]; this.remove(id);
     return { broke: true, name: ITEMS[id].name };
   }
+  /** Veste uma peça da mochila; a que estava no lugar volta para a mochila. */
+  equip(id) {
+    if (!isArmor(id) || !this.has(id)) return false;
+    const slot = ARMOR[id].slot, previous = this.equipment[slot];
+    this.remove(id); if (previous) this.add(previous);
+    this.equipment[slot] = id; return true;
+  }
+  unequip(slot) {
+    const id = this.equipment[slot]; if (!id) return false;
+    this.equipment[slot] = null; this.add(id); return true;
+  }
+  /** Proteção total do que está vestido (0 a 0,8). */
+  get protection() { return protection(this.equipment); }
+  /** Cada golpe recebido gasta todas as peças vestidas; devolve as que quebraram. */
+  wearArmor(amount = 1) {
+    const broken = [];
+    if (this.mode === 'creative') return broken;
+    for (const slot of ARMOR_SLOTS) {
+      const id = this.equipment[slot]; if (!id) continue;
+      const used = (this.wear[id] || 0) + amount;
+      if (used < DURABILITY[id]) this.wear[id] = used; else { delete this.wear[id]; this.equipment[slot] = null; broken.push(ITEMS[id].name); }
+    }
+    return broken;
+  }
   /** 0 a 1: quanto ainda resta da ferramenta (1 = nova). */
   condition(id) { const max = DURABILITY[id]; return max ? 1 - (this.wear[id] || 0) / max : 1; }
 
@@ -166,7 +195,7 @@ export class Inventory {
   }
 
   serialize() {
-    return { version: 2, mode: this.mode, counts: { ...this.counts }, hotbar: [...this.hotbar], selected: this.selected, wear: { ...this.wear } };
+    return { version: 2, mode: this.mode, counts: { ...this.counts }, hotbar: [...this.hotbar], selected: this.selected, wear: { ...this.wear }, equipment: { ...this.equipment } };
   }
 }
 
@@ -224,6 +253,7 @@ export const RECIPES = Object.freeze([
   { id: 'engine', name: 'Motor', ingredients: { 10: 8, 3: 4 }, output: { id: 'engine', count: 1 }, station: true },
   { id: 'car', name: 'Carro compacto', ingredients: { wheel: 4, frame: 1, engine: 1, 7: 2 }, output: { id: 'car', count: 1 }, station: true },
   { id: 'utility', name: 'Veículo utilitário', ingredients: { wheel: 4, frame: 2, engine: 1, 7: 3, 16: 1 }, output: { id: 'utility', count: 1 }, station: true },
+  ...ARMOR_RECIPES,
 ].map(recipe => Object.freeze({ ...recipe, ingredients: Object.freeze(recipe.ingredients), output: Object.freeze(recipe.output) })));
 
 export function craft(recipeId, inventory, atWorkbench = false) {

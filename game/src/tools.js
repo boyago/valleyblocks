@@ -1,4 +1,5 @@
 import { BLOCK } from './blocks.js';
+import { ARMOR_DURABILITY } from './armor.js';
 
 // Keep legacy IDs: existing pickaxes and axes become the stone tier.
 export const TOOLS = Object.freeze(Object.fromEntries([
@@ -50,4 +51,5 @@ export const DURABILITY = Object.freeze({
   wooden_axe: 60, axe: 130, iron_axe: 250, diamond_axe: 1560, shovel: 250,
   wooden_sword: 60, iron_sword: 250, diamond_sword: 1560, reaper_scythe: 400,
   slingshot: 200, bow: 380, rifle: 500, fishing_rod: 64,
+  ...ARMOR_DURABILITY,
 });

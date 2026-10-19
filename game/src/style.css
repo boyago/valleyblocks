@@ -136,3 +136,5 @@
 .inventory-empty{margin:6px 0;font-size:13px;opacity:.7}.inventory-item[hidden]{display:none}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media(max-width:650px){.hotbar-picker{gap:3px}.pick-slot{height:40px;border-radius:8px}}
+
+.equipment{display:flex;align-items:center;gap:12px;margin:0 0 10px}.equipment-slots{display:grid;grid-template-columns:repeat(4,52px);gap:5px}.pick-slot.worn{border-color:#9fb58a;background:#eef4e2}.pick-slot.empty{opacity:.55;border-style:dashed}.pick-slot.worn i,.pick-slot.empty i{font-size:7px;letter-spacing:.3px}.equipment-note{font-size:10px;color:#6c7a60;line-height:1.5}

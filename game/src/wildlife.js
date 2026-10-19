@@ -29,10 +29,10 @@ export const SPECIES=Object.freeze({
   onca:{name:'Onça-pintada',health:70,speed:2.2,drop:null,count:0,radius:.45,height:1.05,scenery:true},
   capivara:{name:'Capivara',health:30,speed:1.9,drop:'raw_capivara',count:2,radius:.4,height:.8},
   calango:{name:'Calango',health:10,speed:3.2,drop:'raw_calango',count:1,radius:.25,height:.35},
-  boar:{name:'Javali',health:48,speed:2.1,drop:'raw_boar',count:3,radius:.45,height:1.1},
+  boar:{name:'Javali',health:48,speed:2.1,drop:'raw_boar',count:3,extra:{item:'leather',count:2},radius:.45,height:1.1},
 });
 const goodPosition=p=>Array.isArray(p)&&p.length===3&&p.every(n=>Number.isFinite(n)&&Math.abs(n)<1000000);
-const rawItems=new Set(Object.values(SPECIES).map(s=>s.drop).filter(Boolean));
+const rawItems=new Set(Object.values(SPECIES).flatMap(s=>[s.drop,s.extra?.item]).filter(Boolean));
 
 /** Small, bounded population; dogs use the existing collision-aware pet routes. */
 export class Wildlife {
@@ -196,7 +196,7 @@ export class Wildlife {
     if(!this.animals.includes(animal)||SPECIES[animal.type].scenery||!Number.isFinite(damage)||damage<=0||this.drops.length>=64)return false;
     animal.health-=damage;animal.panic=5;animal.goal=animal.position.clone().add(animal.position.clone().sub(source).setY(0).normalize().multiplyScalar(7));
     if(animal.health>0)return true;
-    const s=SPECIES[animal.type];this.addDrop(s.drop,s.count,animal.position);
+    const s=SPECIES[animal.type];this.addDrop(s.drop,s.count,animal.position);if(s.extra)this.addDrop(s.extra.item,s.extra.count,animal.position.clone().add(new THREE.Vector3(.4,0,.3)));
     animal.mesh.removeFromParent();this.animals.splice(this.animals.indexOf(animal),1);return true;
   }
   command(pet){

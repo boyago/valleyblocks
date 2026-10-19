@@ -218,7 +218,8 @@ export class EnemySystem {
     const a=this.acid.filter(a=>a.position.distanceTo(position)<reach).sort((x,y)=>x.position.distanceTo(position)-y.position.distanceTo(position))[0];
     if(!a)return false;a.mesh.removeFromParent();this.acid.splice(this.acid.indexOf(a),1);return true;
   }
-  hurt(player,amount,mode){if(mode==='survival')player.health=Math.max(0,player.health-amount);}
+  /** Dano ao jogador; a armadura vestida (player.armor) absorve parte e se desgasta. */
+  hurt(player,amount,mode){if(mode!=='survival')return;const armor=player.armor;const taken=armor?amount*(1-armor.protection):amount;player.health=Math.max(0,player.health-taken);armor?.hit?.(amount);}
   explode(e,player,mode){
     if(e.position.distanceTo(player.position)<3.3&&this.clearLine(raised(e.position),raised(player.position)))this.hurt(player,26,mode);
     this.addAcid(e.position);this.onEvent?.('O Espectro do Lodo explodiu! Afaste-se da meleca verde.');
