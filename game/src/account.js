@@ -27,7 +27,9 @@ export function createAccount({ bridge, native, fetch: request = (...a) => fetch
     if (body) headers['Content-Type'] = 'application/json';
     if (token) headers.Authorization = `Bearer ${token}`;
     const response = await request(`${API}/api/app/${path}`, { method, headers, body: body && JSON.stringify(body), cache: 'no-store' });
-    const data = await response.json().catch(() => ({}));
+    const data = await response.json().catch(() => null);
+    // Resposta que não é JSON (página de erro, site em atualização): mensagem clara em vez do erro de leitura.
+    if (!data) throw new Error(response.ok || response.status === 404 ? 'O login pelo jogo ainda não está disponível no servidor. Tente pelo navegador.' : 'Não foi possível falar com o servidor. Tente de novo em instantes.');
     if (!response.ok) throw new Error(data.error || 'Não foi possível falar com o servidor.');
     return data;
   };
