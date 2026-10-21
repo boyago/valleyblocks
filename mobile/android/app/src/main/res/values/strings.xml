@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">ValleyBlocks</string>
     <string name="title_activity_main">ValleyBlocks</string>
-    <string name="package_name">cloud.labsgames.valleyblocks</string>
-    <string name="custom_url_scheme">cloud.labsgames.valleyblocks</string>
+    <string name="package_name">com.alexandreboyago.valleyblocks</string>
+    <string name="custom_url_scheme">com.alexandreboyago.valleyblocks</string>
 </resources>

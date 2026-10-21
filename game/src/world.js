@@ -33,6 +33,7 @@ const GROUND_DECOR = {
   mata: { density: .3, pick: () => TUFT },
 };
 const tileSize = 16;
+const CHEST_LID = 74; // tampa do baú (topo e fundo); as laterais ficam com a fechadura
 const atlasColumns = 8;
 const atlasRows = 10;
 const fluidNeighbors = [[0, -1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, 1, 0]];
@@ -104,7 +105,7 @@ export function createAtlas() {
   const pixels = new Uint8Array(width * height * 4);
   const colors = BLOCKS.map(block => block.color);
   for (const b of BLOCKS) if (b.id >= 32) colors[tileOf(b.id)] = b.color;
-  colors[32]='#7db551';colors[33]='#a78459';colors[34]='#45515b';colors[35]='#78694f';
+  colors[32]='#7db551';colors[33]='#a78459';colors[34]='#45515b';colors[35]='#78694f';colors[CHEST_LID]='#b0884d';
   // Enfeites do chão (desenho em X sobre a grama, sem bloco): tufo (36), flores branca (37),
   // vermelha (38), amarela (39) e lilás (71), capim seco do cerrado (72) e taboa do pantanal (73).
   for (const t of DECOR_TILES) colors[t] = '#ffffff';
@@ -188,6 +189,10 @@ export function createAtlas() {
         if ((x === 12 && y === 3) || (x === 2 && y === 10)) { rgb = parse(x === 12 ? '#ffe680' : '#ffffff'); variance = 0; }
       }
       if (tile === 34) { rgb = parse(x > 5 && x < 10 ? '#efd48b' : '#45515b'); }
+      if (tile === CHEST_LID) { // tábuas da tampa com moldura escura
+        if (x < 2 || x > 13 || y < 2 || y > 13) rgb = parse('#584f43');
+        else variance = x % 4 === 1 ? -30 : (grain - .5) * 12;
+      }
       if (tile === 35) { if (x < 2 || x > 13 || y < 2 || y > 13) rgb = parse('#4f493b'); }
       if (tile === tileOf(BLOCK.DRY_EARTH)) { const crack=(x===Math.floor(4+Math.sin(y*.9)*2)&&y<11)||(y===Math.floor(9+Math.sin(x*.7)*1.5)&&x>3&&x<14)||(x===12&&y>10); variance = crack ? -42 : random * 22 - 11; }
       if (tile === tileOf(BLOCK.CACTUS)) { variance = x % 4 === 0 ? -26 : x % 4 === 2 ? 10 : 0; if ((x * 3 + y * 5) % 11 === 0) rgb = parse('#f1e7b2'); }
@@ -943,6 +948,7 @@ export class VoxelWorld {
         if (id === BLOCK.GRASS) tile = side === 2 ? 32 : side === 3 ? BLOCK.DIRT : BLOCK.GRASS;
         if (id === BLOCK.WOOD && (side === 2 || side === 3)) tile = 33;
         if (id === BLOCK.WORKBENCH && side === 2) tile = 35;
+        if (id === BLOCK.CHEST && (side === 2 || side === 3)) tile = CHEST_LID;
         if (id === BLOCK.ASPHALT && side === 2 && cx * SIZE + x === 3 && ((cz * SIZE + z) % 8 + 8) % 8 < 4) tile = 34;
         const scale = id === BLOCK.TORCH ? [.4, 0, .4, .2, .8, .2] : null;
         const corners=isFluid(id)?face.corners.map(([a,b,c])=>[a,b?this.waterCornerHeight(cx*SIZE+x+a,y,cz*SIZE+z+c,id):0,c]):face.corners;

@@ -109,7 +109,8 @@ class Game {
     this.selection.visible=false;this.scene.add(this.selection);
     this.ui=new UI(document.querySelector('#app'),(action,data,button)=>this.action(action,data,button),{touch:TOUCH});
     this.touch=TOUCH?new TouchControls(this,document.querySelector('#app')):null;
-    this.coopAvailable=coopAvailable&&!bridge.standalone;this.coop=new Coop(this);
+    // Play Store: sem compras dentro do app até o Play Billing entrar (regra de pagamentos do Google).
+    this.storeHidden=NATIVE_APP;this.coopAvailable=coopAvailable&&!bridge.standalone;this.coop=new Coop(this);
     this.account=account;account.onChange(s=>{
       // Roupas compradas e versão completa vêm da conta (app/web: login no jogo; portal: mensagem 'account' do site, que pode chegar depois do 'start').
       if(s.username||s.mode==='app'||s.mode==='web'){this.ownedPacks=s.outfits.filter(id=>OUTFIT_PACKS[id]);this.settings.outfit=resolveOutfit(this.settings.outfit,this.ownedPacks);this.avatar.setOutfit(this.settings.outfit);this.fullOffer=fullVersionOffer();}
@@ -302,7 +303,8 @@ class Game {
           void account.login(user,pass).then(r=>{if(r.ok&&account.state.username){this.ui.toast(`Olá, ${account.state.username}!`);this.menu(this.started?'pause':'landing');}});break;
         }
         case 'account-logout':void account.logout().then(()=>this.ui.toast('Você saiu da conta.'));break;
-        case 'account-signup':window.open(account.signupUrl,'_blank','noopener');break;
+        case 'account-delete':window.open(account.deleteUrl,'_blank','noopener');break;
+          case 'account-signup':window.open(account.signupUrl,'_blank','noopener');break;
         case 'account-browser':window.open(account.loginUrl,'_blank','noopener');this.ui.toast('Entre no site e depois toque em Atualizar conta.');break;
         case 'account-refresh':await account.refresh();this.ui.toast(account.state.username?`Conta ${account.state.username} atualizada.`:'Nenhuma conta conectada neste aparelho: entre com usuário e senha.');break;
         case 'close':if(this.started)this.resume();else this.menu('landing');break;

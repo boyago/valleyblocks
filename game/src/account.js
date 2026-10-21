@@ -67,6 +67,7 @@ export function createAccount({ bridge, native, fetch: request = (...a) => fetch
     },
     /** Depois de comprar ou entrar no navegador: confere a conta de novo (roupas e versão completa). */
     async refresh() { if (!own() || !token || state.busy) return; try { const data = await call('me'); apply(data.account); emit(); } catch { /* sem internet: fica como está */ } },
+    deleteUrl: `${API}/conta/excluir`,
     signupUrl: `${API}/conta/criar`,
     loginUrl: `${API}/conta/entrar`,
     purchaseUrl: product => `${API}/comprar/${encodeURIComponent(String(product).slice(0, 64))}`,

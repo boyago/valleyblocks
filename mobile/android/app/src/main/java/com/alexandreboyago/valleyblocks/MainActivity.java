@@ -1,4 +1,4 @@
-package cloud.labsgames.valleyblocks;
+package com.alexandreboyago.valleyblocks;
 
 import com.getcapacitor.BridgeActivity;
 

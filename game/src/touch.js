@@ -1,3 +1,4 @@
+import { BLOCK } from './blocks.js';
 // Controles de toque do ValleyBlocks (celular e tablet, app Capacitor ou navegador).
 //
 // Esquema: joystick flutuante na metade esquerda (andar, dirigir, navegar);
@@ -56,6 +57,8 @@ const GLYPHS = {
   horn: svg('<path d="M4 10v4h3l6 4V6L7 10H4Zm12-2a5 5 0 0 1 0 8m2.5-10.5a8.5 8.5 0 0 1 0 13"/>'),
   pause: svg('<path d="M8 5v14M16 5v14"/>'),
 };
+
+const USABLE = new Set([BLOCK.CHEST, BLOCK.WORKBENCH, BLOCK.FORGE, BLOCK.DOOR, BLOCK.SOFA, BLOCK.TV]);
 
 export class TouchControls {
   constructor(game, root) {
@@ -212,6 +215,9 @@ export class TouchControls {
     const g = this.game, item = g.inventory?.selectedItem;
     // Estilingue, arco e espingarda disparam no toque curto: colocar não faz sentido com eles.
     if (g.isRanged?.(item)) { g.primaryDown(); g.primaryUp(); return; }
+    // Tocar no baú, bancada, forja, porta, sofá ou TV usa o bloco (como o E) em vez de colocar outro encostado.
+    const hit = g.target;
+    if (hit && hit.distance <= 5 && USABLE.has(hit.id)) { g.interact(); return; }
     g.place();
   }
 

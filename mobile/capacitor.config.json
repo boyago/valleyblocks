@@ -1,5 +1,5 @@
 {
-  "appId": "cloud.labsgames.valleyblocks",
+  "appId": "com.alexandreboyago.valleyblocks",
   "appName": "ValleyBlocks",
   "webDir": "../game/dist",
   "server": { "androidScheme": "https" },
