@@ -51,8 +51,12 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::Faltam os secrets ANDROID_KEYSTORE_* do repositório"; exit 1; fi
+          # Tolera secrets colados com espaço, quebra de linha ou com o prefixo do keystore.properties.
+          clean() { printf %s "$1" | tr -d '\r\n' | sed -E 's/^[[:space:]]*(storePassword|keyPassword|keyAlias)=//; s/^[[:space:]]+//; s/[[:space:]]+$//'; }
+          KEYSTORE_PASSWORD=$(clean "$KEYSTORE_PASSWORD"); KEY_ALIAS=$(clean "$KEY_ALIAS"); KEY_PASSWORD=$(clean "$KEY_PASSWORD")
+          echo "Tamanhos: senha do arquivo ${#KEYSTORE_PASSWORD}, alias ${#KEY_ALIAS}, senha da chave ${#KEY_PASSWORD} caracteres"
           mkdir -p keystore
-          echo "$KEYSTORE_BASE64" | base64 -d > keystore/valleyblocks-upload.jks
+          printf %s "$KEYSTORE_BASE64" | tr -d ' \r\n' | base64 -d > keystore/valleyblocks-upload.jks
           printf 'storeFile=keystore/valleyblocks-upload.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore.properties
 
       - name: Compilar App Bundle assinado
